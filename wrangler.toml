@@ -1,19 +1,19 @@
 name = "correos-de-gmail"
 
-main = ".open-next/worker.js"
+main = "src/index.js"
 
-compatibility_date = "2026-09-24"
+compatibility_date = "2026-09-25"
 
 compatibility_flags = ["nodejs_compat"]
 
 [assets]
-directory = ".open-next/assets"
+directory = "./public"
 binding = "ASSETS"
-
-[observability]
-enabled = true
 
 [[d1_databases]]
 binding = "DB"
 database_name = "gmail-db"
 database_id = "8b16ac40-600f-45c5-9b3e-4a2cdff646a6"
+
+[observability]
+enabled = true
