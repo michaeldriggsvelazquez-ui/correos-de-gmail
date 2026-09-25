@@ -1,0 +1,1753 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    >
+
+    <title>GmailAccounts — Chat</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --bg: #070707;
+            --panel: #101010;
+            --panel-2: #151515;
+            --panel-3: #1b1b1b;
+            --border: #252525;
+            --text: #f5f5f5;
+            --muted: #858585;
+            --soft: #bdbdbd;
+            --accent: #ffffff;
+            --danger: #ff5c5c;
+            --success: #66e39a;
+        }
+
+        html,
+        body {
+            width: 100%;
+            min-height: 100%;
+            background: var(--bg);
+            color: var(--text);
+            font-family:
+                Inter,
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        button,
+        input {
+            font: inherit;
+        }
+
+        button {
+            border: none;
+            cursor: pointer;
+        }
+
+        /* =========================
+           APP
+        ========================= */
+
+        .app {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background:
+                radial-gradient(
+                    circle at 50% -20%,
+                    #191919 0%,
+                    #0b0b0b 40%,
+                    #070707 75%
+                );
+        }
+
+        /* =========================
+           HEADER
+        ========================= */
+
+        .header {
+            height: 72px;
+            min-height: 72px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 18px;
+            border-bottom: 1px solid var(--border);
+            background: rgba(8, 8, 8, 0.92);
+            backdrop-filter: blur(18px);
+            position: relative;
+            z-index: 10;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 0;
+        }
+
+        .avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: #202020;
+            border: 1px solid #303030;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 17px;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .header-info {
+            min-width: 0;
+        }
+
+        .header-title {
+            font-size: 15px;
+            font-weight: 700;
+            letter-spacing: -0.2px;
+        }
+
+        .header-status {
+            margin-top: 3px;
+            color: var(--success);
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+
+        .icon-button {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: transparent;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            transition: background 0.2s ease;
+        }
+
+        .icon-button:active {
+            background: #1c1c1c;
+        }
+
+        /* =========================
+           CHAT
+        ========================= */
+
+        .chat {
+            flex: 1;
+            min-height: 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .messages {
+            width: 100%;
+            height: 100%;
+            overflow-y: auto;
+            padding: 22px 16px 125px;
+            scroll-behavior: smooth;
+        }
+
+        .messages::-webkit-scrollbar {
+            width: 3px;
+        }
+
+        .messages::-webkit-scrollbar-thumb {
+            background: #292929;
+            border-radius: 20px;
+        }
+
+        .day-label {
+            width: max-content;
+            margin: 0 auto 20px;
+            padding: 6px 11px;
+            border-radius: 20px;
+            background: #151515;
+            color: #777;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .message-row {
+            width: 100%;
+            display: flex;
+            margin-bottom: 12px;
+        }
+
+        .message-row.system {
+            justify-content: flex-start;
+        }
+
+        .message-row.user {
+            justify-content: flex-end;
+        }
+
+        .message {
+            max-width: min(82%, 420px);
+            padding: 12px 14px;
+            border-radius: 17px;
+            font-size: 14px;
+            line-height: 1.5;
+            white-space: pre-line;
+            animation: messageIn 0.22s ease;
+        }
+
+        .message.system {
+            background: var(--panel-2);
+            border: 1px solid var(--border);
+            border-bottom-left-radius: 6px;
+            color: #ededed;
+        }
+
+        .message.user {
+            background: #f0f0f0;
+            color: #080808;
+            border-bottom-right-radius: 6px;
+        }
+
+        .message-time {
+            display: block;
+            margin-top: 5px;
+            font-size: 9px;
+            opacity: 0.45;
+            text-align: right;
+        }
+
+        @keyframes messageIn {
+            from {
+                opacity: 0;
+                transform: translateY(7px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* =========================
+           BOTTOM AREA
+        ========================= */
+
+        .bottom {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            padding: 12px 14px 18px;
+            background:
+                linear-gradient(
+                    to top,
+                    #070707 70%,
+                    rgba(7, 7, 7, 0)
+                );
+            z-index: 5;
+        }
+
+        .start-area {
+            display: flex;
+            justify-content: center;
+        }
+
+        .start-button {
+            width: 100%;
+            max-width: 440px;
+            height: 52px;
+            border-radius: 16px;
+            background: #f1f1f1;
+            color: #080808;
+            font-size: 13px;
+            font-weight: 800;
+            letter-spacing: 1.4px;
+            transition:
+                transform 0.15s ease,
+                background 0.2s ease;
+        }
+
+        .start-button:active {
+            transform: scale(0.98);
+            background: #dcdcdc;
+        }
+
+        .composer {
+            display: none;
+            align-items: center;
+            gap: 8px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .composer.visible {
+            display: flex;
+            animation: composerIn 0.25s ease;
+        }
+
+        @keyframes composerIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .input-wrapper {
+            flex: 1;
+            min-width: 0;
+            height: 52px;
+            border-radius: 17px;
+            border: 1px solid var(--border);
+            background: #111;
+            display: flex;
+            align-items: center;
+            padding: 0 15px;
+        }
+
+        .message-input {
+            width: 100%;
+            border: none;
+            outline: none;
+            background: transparent;
+            color: #fff;
+            font-size: 14px;
+        }
+
+        .message-input::placeholder {
+            color: #626262;
+        }
+
+        .send-button {
+            width: 52px;
+            height: 52px;
+            border-radius: 17px;
+            background: #f1f1f1;
+            color: #080808;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .send-button:disabled {
+            opacity: 0.35;
+            cursor: default;
+        }
+
+        /* =========================
+           SIDE / MENU PANEL
+        ========================= */
+
+        .overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.65);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s ease;
+            z-index: 20;
+        }
+
+        .overlay.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .side-panel {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: min(88vw, 360px);
+            height: 100vh;
+            background: #0c0c0c;
+            border-right: 1px solid var(--border);
+            transform: translateX(-100%);
+            transition: transform 0.28s ease;
+            z-index: 30;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .side-panel.open {
+            transform: translateX(0);
+        }
+
+        .side-header {
+            padding: 25px 20px 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .side-profile {
+            display: flex;
+            align-items: center;
+            gap: 13px;
+        }
+
+        .side-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: #1c1c1c;
+            border: 1px solid #303030;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+        }
+
+        .side-user {
+            min-width: 0;
+        }
+
+        .side-user-name {
+            font-size: 15px;
+            font-weight: 700;
+        }
+
+        .side-user-status {
+            color: var(--muted);
+            font-size: 11px;
+            margin-top: 4px;
+        }
+
+        .close-menu {
+            position: absolute;
+            top: 17px;
+            right: 15px;
+            width: 38px;
+            height: 38px;
+            border-radius: 11px;
+            background: #161616;
+            color: #aaa;
+            font-size: 17px;
+        }
+
+        .menu-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 14px 10px;
+        }
+
+        .menu-section {
+            margin: 12px 10px 7px;
+            color: #555;
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+        }
+
+        .menu-item {
+            width: 100%;
+            min-height: 52px;
+            display: flex;
+            align-items: center;
+            gap: 13px;
+            padding: 0 13px;
+            margin-bottom: 4px;
+            border-radius: 13px;
+            background: transparent;
+            color: #ddd;
+            text-align: left;
+            transition: background 0.18s ease;
+        }
+
+        .menu-item:active {
+            background: #191919;
+        }
+
+        .menu-icon {
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            background: #171717;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .menu-text {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .menu-title {
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .menu-description {
+            color: #666;
+            font-size: 10px;
+        }
+
+        .logout {
+            color: var(--danger);
+        }
+
+        .side-footer {
+            padding: 15px 20px 20px;
+            border-top: 1px solid var(--border);
+            color: #4e4e4e;
+            font-size: 9px;
+            text-align: center;
+            letter-spacing: 0.4px;
+        }
+
+        /* =========================
+           INTERNAL VIEW
+        ========================= */
+
+        .view-layer {
+            position: fixed;
+            inset: 0;
+            background: #080808;
+            z-index: 40;
+            transform: translateX(100%);
+            transition: transform 0.28s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .view-layer.open {
+            transform: translateX(0);
+        }
+
+        .view-header {
+            height: 72px;
+            min-height: 72px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 0 16px;
+        }
+
+        .back-button {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: #151515;
+            color: #fff;
+            font-size: 18px;
+        }
+
+        .view-title {
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .view-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 22px 17px 35px;
+        }
+
+        .view-intro {
+            margin-bottom: 24px;
+        }
+
+        .view-intro h2 {
+            font-size: 24px;
+            letter-spacing: -0.8px;
+            margin-bottom: 7px;
+        }
+
+        .view-intro p {
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .empty-state {
+            padding: 40px 20px;
+            border: 1px dashed #292929;
+            border-radius: 18px;
+            text-align: center;
+        }
+
+        .empty-icon {
+            font-size: 32px;
+            margin-bottom: 12px;
+        }
+
+        .empty-title {
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .empty-text {
+            color: #666;
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        /* =========================
+           HISTORY
+        ========================= */
+
+        .history-item {
+            padding: 15px;
+            background: #111;
+            border: 1px solid var(--border);
+            border-radius: 15px;
+            margin-bottom: 9px;
+        }
+
+        .history-top {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .history-name {
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .history-status {
+            font-size: 9px;
+            padding: 5px 8px;
+            border-radius: 8px;
+            background: #1a1a1a;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .history-date {
+            color: #555;
+            font-size: 10px;
+            margin-top: 7px;
+        }
+
+        /* =========================
+           TUTORIAL
+        ========================= */
+
+        .tutorial-step {
+            padding: 18px;
+            background: #111;
+            border: 1px solid var(--border);
+            border-radius: 17px;
+            margin-bottom: 10px;
+        }
+
+        .step-number {
+            color: #777;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        .tutorial-step h3 {
+            font-size: 14px;
+            margin-bottom: 6px;
+        }
+
+        .tutorial-step p {
+            color: #777;
+            font-size: 12px;
+            line-height: 1.55;
+        }
+
+        /* =========================
+           SETTINGS
+        ========================= */
+
+        .setting-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            padding: 16px;
+            margin-bottom: 7px;
+            border-radius: 14px;
+            background: #111;
+            border: 1px solid var(--border);
+        }
+
+        .setting-info h3 {
+            font-size: 13px;
+            margin-bottom: 4px;
+        }
+
+        .setting-info p {
+            color: #666;
+            font-size: 10px;
+        }
+
+        .setting-arrow {
+            color: #555;
+            font-size: 16px;
+        }
+
+        /* =========================
+           MOBILE
+        ========================= */
+
+        @media (max-width: 480px) {
+            .header {
+                padding: 0 13px;
+            }
+
+            .messages {
+                padding-left: 12px;
+                padding-right: 12px;
+            }
+
+            .message {
+                max-width: 88%;
+            }
+
+            .side-panel {
+                width: 88vw;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="app">
+
+    <!-- =========================
+         HEADER
+    ========================== -->
+
+    <header class="header">
+
+        <div class="header-left">
+
+            <div class="avatar">
+                GA
+            </div>
+
+            <div class="header-info">
+                <div class="header-title">
+                    GmailAccounts
+                </div>
+
+                <div class="header-status">
+                    ● Sistema activo
+                </div>
+            </div>
+
+        </div>
+
+        <div class="header-actions">
+
+            <button
+                class="icon-button"
+                type="button"
+                onclick="openMenu()"
+                aria-label="Abrir menú"
+            >
+                ☰
+            </button>
+
+        </div>
+
+    </header>
+
+
+    <!-- =========================
+         CHAT
+    ========================== -->
+
+    <main class="chat">
+
+        <div
+            class="messages"
+            id="messages"
+        >
+
+            <div class="day-label">
+                Hoy
+            </div>
+
+            <div class="message-row system">
+
+                <div class="message system">
+
+                    Bienvenido a GmailAccounts.
+
+                    <br><br>
+
+                    Desde este chat podrás gestionar tus solicitudes y consultar el estado de tu cuenta dentro del sistema.
+
+                    <br><br>
+
+                    Pulsa <strong>INICIAR</strong> para comenzar.
+
+                    <span class="message-time">
+                        ahora
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =========================
+             BOTTOM
+        ========================== -->
+
+        <div class="bottom">
+
+            <div
+                class="start-area"
+                id="startArea"
+            >
+
+                <button
+                    class="start-button"
+                    type="button"
+                    onclick="startChat()"
+                >
+                    INICIAR
+                </button>
+
+            </div>
+
+
+            <form
+                class="composer"
+                id="composer"
+                onsubmit="sendMessage(event)"
+            >
+
+                <div class="input-wrapper">
+
+                    <input
+                        class="message-input"
+                        id="messageInput"
+                        type="text"
+                        placeholder="Escribe un mensaje..."
+                        autocomplete="off"
+                    >
+
+                </div>
+
+                <button
+                    class="send-button"
+                    id="sendButton"
+                    type="submit"
+                    disabled
+                >
+                    ➤
+                </button>
+
+            </form>
+
+        </div>
+
+    </main>
+
+</div>
+
+
+<!-- =========================
+     MENU OVERLAY
+========================== -->
+
+<div
+    class="overlay"
+    id="overlay"
+    onclick="closeMenu()"
+></div>
+
+
+<!-- =========================
+     SIDE MENU
+========================== -->
+
+<aside
+    class="side-panel"
+    id="sidePanel"
+>
+
+    <button
+        class="close-menu"
+        type="button"
+        onclick="closeMenu()"
+    >
+        ×
+    </button>
+
+
+    <div class="side-header">
+
+        <div class="side-profile">
+
+            <div class="side-avatar">
+                GA
+            </div>
+
+            <div class="side-user">
+
+                <div
+                    class="side-user-name"
+                    id="menuUsername"
+                >
+                    Usuario
+                </div>
+
+                <div class="side-user-status">
+                    Cuenta activa
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="menu-list">
+
+        <div class="menu-section">
+            Principal
+        </div>
+
+
+        <button
+            class="menu-item"
+            type="button"
+            onclick="openView('history')"
+        >
+
+            <div class="menu-icon">
+                📋
+            </div>
+
+            <div class="menu-text">
+
+                <div class="menu-title">
+                    Historial
+                </div>
+
+                <div class="menu-description">
+                    Consulta tus solicitudes
+                </div>
+
+            </div>
+
+        </button>
+
+
+        <button
+            class="menu-item"
+            type="button"
+            onclick="openView('tutorial')"
+        >
+
+            <div class="menu-icon">
+                ❓
+            </div>
+
+            <div class="menu-text">
+
+                <div class="menu-title">
+                    Tutorial
+                </div>
+
+                <div class="menu-description">
+                    Aprende cómo funciona
+                </div>
+
+            </div>
+
+        </button>
+
+
+        <div class="menu-section">
+            Cuenta
+        </div>
+
+
+        <button
+            class="menu-item"
+            type="button"
+            onclick="openView('account')"
+        >
+
+            <div class="menu-icon">
+                👤
+            </div>
+
+            <div class="menu-text">
+
+                <div class="menu-title">
+                    Mi cuenta
+                </div>
+
+                <div class="menu-description">
+                    Información de tu cuenta
+                </div>
+
+            </div>
+
+        </button>
+
+
+        <button
+            class="menu-item"
+            type="button"
+            onclick="openView('settings')"
+        >
+
+            <div class="menu-icon">
+                ⚙️
+            </div>
+
+            <div class="menu-text">
+
+                <div class="menu-title">
+                    Configuración
+                </div>
+
+                <div class="menu-description">
+                    Opciones de la aplicación
+                </div>
+
+            </div>
+
+        </button>
+
+
+        <div class="menu-section">
+            Sesión
+        </div>
+
+
+        <button
+            class="menu-item logout"
+            type="button"
+            onclick="logout()"
+        >
+
+            <div class="menu-icon">
+                ↪
+            </div>
+
+            <div class="menu-text">
+
+                <div class="menu-title">
+                    Cerrar sesión
+                </div>
+
+                <div class="menu-description">
+                    Salir de tu cuenta
+                </div>
+
+            </div>
+
+        </button>
+
+    </div>
+
+
+    <div class="side-footer">
+        GmailAccounts · Sistema privado
+    </div>
+
+</aside>
+
+
+<!-- =========================
+     INTERNAL VIEW
+========================== -->
+
+<section
+    class="view-layer"
+    id="viewLayer"
+>
+
+    <header class="view-header">
+
+        <button
+            class="back-button"
+            type="button"
+            onclick="closeView()"
+        >
+            ←
+        </button>
+
+        <div
+            class="view-title"
+            id="viewTitle"
+        >
+            Vista
+        </div>
+
+    </header>
+
+
+    <div
+        class="view-content"
+        id="viewContent"
+    ></div>
+
+</section>
+
+
+<script>
+
+    /* =========================
+       ELEMENTS
+    ========================== */
+
+    const messages = document.getElementById("messages");
+    const startArea = document.getElementById("startArea");
+    const composer = document.getElementById("composer");
+    const messageInput = document.getElementById("messageInput");
+    const sendButton = document.getElementById("sendButton");
+
+    const overlay = document.getElementById("overlay");
+    const sidePanel = document.getElementById("sidePanel");
+
+    const viewLayer = document.getElementById("viewLayer");
+    const viewTitle = document.getElementById("viewTitle");
+    const viewContent = document.getElementById("viewContent");
+
+
+    /* =========================
+       STATE
+    ========================== */
+
+    let chatStarted = false;
+
+
+    /* =========================
+       START CHAT
+    ========================== */
+
+    function startChat() {
+
+        if (chatStarted) {
+            return;
+        }
+
+        chatStarted = true;
+
+        startArea.style.display = "none";
+
+        composer.classList.add("visible");
+
+        addSystemMessage(
+            "Perfecto. El chat está listo.\n\n" +
+            "Escribe lo que quieres hacer y el sistema responderá según las funciones disponibles."
+        );
+
+        setTimeout(() => {
+            messageInput.focus();
+        }, 250);
+    }
+
+
+    /* =========================
+       SEND MESSAGE
+    ========================== */
+
+    function sendMessage(event) {
+
+        event.preventDefault();
+
+        const value = messageInput.value.trim();
+
+        if (!value) {
+            return;
+        }
+
+        addUserMessage(value);
+
+        messageInput.value = "";
+
+        updateSendButton();
+
+        /*
+         * TEMPORAL:
+         * Aquí posteriormente conectaremos
+         * las acciones reales del chat.
+         *
+         * No hay IA en este proyecto.
+         * Las respuestas serán determinadas
+         * por las funciones del sistema.
+         */
+
+        setTimeout(() => {
+
+            const lower = value.toLowerCase();
+
+            if (
+                lower.includes("hola") ||
+                lower.includes("buenas")
+            ) {
+
+                addSystemMessage(
+                    "Hola. El sistema está funcionando correctamente."
+                );
+
+                return;
+            }
+
+            if (
+                lower.includes("ayuda") ||
+                lower.includes("tutorial")
+            ) {
+
+                addSystemMessage(
+                    "Puedes abrir el menú ☰ y entrar en Tutorial para consultar la información disponible."
+                );
+
+                return;
+            }
+
+            addSystemMessage(
+                "He recibido tu mensaje.\n\n" +
+                "Esta función todavía está conectada a la lógica definitiva del sistema."
+            );
+
+        }, 450);
+    }
+
+
+    /* =========================
+       ADD USER MESSAGE
+    ========================== */
+
+    function addUserMessage(text) {
+
+        const row = document.createElement("div");
+
+        row.className = "message-row user";
+
+        const bubble = document.createElement("div");
+
+        bubble.className = "message user";
+
+        bubble.innerHTML =
+            escapeHTML(text) +
+            '<span class="message-time">ahora</span>';
+
+        row.appendChild(bubble);
+
+        messages.appendChild(row);
+
+        scrollToBottom();
+    }
+
+
+    /* =========================
+       ADD SYSTEM MESSAGE
+    ========================== */
+
+    function addSystemMessage(text) {
+
+        const row = document.createElement("div");
+
+        row.className = "message-row system";
+
+        const bubble = document.createElement("div");
+
+        bubble.className = "message system";
+
+        bubble.innerHTML =
+            escapeHTML(text) +
+            '<span class="message-time">ahora</span>';
+
+        row.appendChild(bubble);
+
+        messages.appendChild(row);
+
+        scrollToBottom();
+    }
+
+
+    /* =========================
+       SCROLL
+    ========================== */
+
+    function scrollToBottom() {
+
+        setTimeout(() => {
+
+            messages.scrollTo({
+                top: messages.scrollHeight,
+                behavior: "smooth"
+            });
+
+        }, 50);
+    }
+
+
+    /* =========================
+       SEND BUTTON
+    ========================== */
+
+    messageInput.addEventListener(
+        "input",
+        updateSendButton
+    );
+
+    function updateSendButton() {
+
+        sendButton.disabled =
+            !messageInput.value.trim();
+
+    }
+
+
+    /* =========================
+       MENU
+    ========================== */
+
+    function openMenu() {
+
+        sidePanel.classList.add("open");
+        overlay.classList.add("visible");
+
+    }
+
+
+    function closeMenu() {
+
+        sidePanel.classList.remove("open");
+        overlay.classList.remove("visible");
+
+    }
+
+
+    /* =========================
+       INTERNAL VIEWS
+    ========================== */
+
+    function openView(view) {
+
+        closeMenu();
+
+        viewLayer.classList.add("open");
+
+        if (view === "history") {
+            renderHistory();
+            return;
+        }
+
+        if (view === "tutorial") {
+            renderTutorial();
+            return;
+        }
+
+        if (view === "account") {
+            renderAccount();
+            return;
+        }
+
+        if (view === "settings") {
+            renderSettings();
+            return;
+        }
+
+    }
+
+
+    function closeView() {
+
+        viewLayer.classList.remove("open");
+
+    }
+
+
+    /* =========================
+       HISTORY
+    ========================== */
+
+    function renderHistory() {
+
+        viewTitle.textContent = "Historial";
+
+        viewContent.innerHTML = `
+
+            <div class="view-intro">
+
+                <h2>Historial</h2>
+
+                <p>
+                    Aquí aparecerán tus solicitudes y sus estados.
+                </p>
+
+            </div>
+
+            <div class="empty-state">
+
+                <div class="empty-icon">
+                    📋
+                </div>
+
+                <div class="empty-title">
+                    Sin solicitudes
+                </div>
+
+                <div class="empty-text">
+                    Cuando exista actividad en tu cuenta,
+                    aparecerá aquí.
+                </div>
+
+            </div>
+
+        `;
+
+    }
+
+
+    /* =========================
+       TUTORIAL
+    ========================== */
+
+    function renderTutorial() {
+
+        viewTitle.textContent = "Tutorial";
+
+        viewContent.innerHTML = `
+
+            <div class="view-intro">
+
+                <h2>Cómo funciona</h2>
+
+                <p>
+                    Información básica para utilizar
+                    el sistema.
+                </p>
+
+            </div>
+
+
+            <div class="tutorial-step">
+
+                <div class="step-number">
+                    PASO 01
+                </div>
+
+                <h3>
+                    Inicia el chat
+                </h3>
+
+                <p>
+                    Pulsa el botón INICIAR que aparece
+                    en la parte inferior de la pantalla.
+                </p>
+
+            </div>
+
+
+            <div class="tutorial-step">
+
+                <div class="step-number">
+                    PASO 02
+                </div>
+
+                <h3>
+                    Escribe tu solicitud
+                </h3>
+
+                <p>
+                    Utiliza el campo de texto para
+                    comunicarte con las funciones
+                    disponibles del sistema.
+                </p>
+
+            </div>
+
+
+            <div class="tutorial-step">
+
+                <div class="step-number">
+                    PASO 03
+                </div>
+
+                <h3>
+                    Consulta el resultado
+                </h3>
+
+                <p>
+                    El estado de tus operaciones podrá
+                    consultarse posteriormente desde
+                    el historial.
+                </p>
+
+            </div>
+
+        `;
+
+    }
+
+
+    /* =========================
+       ACCOUNT
+    ========================== */
+
+    function renderAccount() {
+
+        viewTitle.textContent = "Mi cuenta";
+
+        viewContent.innerHTML = `
+
+            <div class="view-intro">
+
+                <h2>Mi cuenta</h2>
+
+                <p>
+                    Información básica del usuario
+                    actualmente conectado.
+                </p>
+
+            </div>
+
+
+            <div class="setting-item">
+
+                <div class="setting-info">
+
+                    <h3>
+                        Usuario
+                    </h3>
+
+                    <p>
+                        Usuario
+                    </p>
+
+                </div>
+
+                <div class="setting-arrow">
+                    →
+                </div>
+
+            </div>
+
+
+            <div class="setting-item">
+
+                <div class="setting-info">
+
+                    <h3>
+                        Estado
+                    </h3>
+
+                    <p>
+                        Cuenta activa
+                    </p>
+
+                </div>
+
+                <div class="setting-arrow">
+                    ●
+                </div>
+
+            </div>
+
+
+            <div class="setting-item">
+
+                <div class="setting-info">
+
+                    <h3>
+                        ID
+                    </h3>
+
+                    <p>
+                        Se asignará al conectar la base de datos
+                    </p>
+
+                </div>
+
+                <div class="setting-arrow">
+                    #
+                </div>
+
+            </div>
+
+        `;
+
+    }
+
+
+    /* =========================
+       SETTINGS
+    ========================== */
+
+    function renderSettings() {
+
+        viewTitle.textContent = "Configuración";
+
+        viewContent.innerHTML = `
+
+            <div class="view-intro">
+
+                <h2>Configuración</h2>
+
+                <p>
+                    Opciones de tu cuenta y aplicación.
+                </p>
+
+            </div>
+
+
+            <div class="setting-item">
+
+                <div class="setting-info">
+
+                    <h3>
+                        Perfil
+                    </h3>
+
+                    <p>
+                        Información de usuario
+                    </p>
+
+                </div>
+
+                <div class="setting-arrow">
+                    →
+                </div>
+
+            </div>
+
+
+            <div class="setting-item">
+
+                <div class="setting-info">
+
+                    <h3>
+                        Notificaciones
+                    </h3>
+
+                    <p>
+                        Próximamente
+                    </p>
+
+                </div>
+
+                <div class="setting-arrow">
+                    →
+                </div>
+
+            </div>
+
+
+            <div class="setting-item">
+
+                <div class="setting-info">
+
+                    <h3>
+                        Seguridad
+                    </h3>
+
+                    <p>
+                        Próximamente
+                    </p>
+
+                </div>
+
+                <div class="setting-arrow">
+                    →
+                </div>
+
+            </div>
+
+        `;
+
+    }
+
+
+    /* =========================
+       LOGOUT
+    ========================== */
+
+    function logout() {
+
+        /*
+         * TEMPORAL.
+         * Cuando conectemos autenticación,
+         * aquí se destruirá la sesión real.
+         */
+
+        closeMenu();
+
+        window.location.href = "index.html";
+
+    }
+
+
+    /* =========================
+       ESCAPE HTML
+    ========================== */
+
+    function escapeHTML(value) {
+
+        const div = document.createElement("div");
+
+        div.textContent = value;
+
+        return div.innerHTML;
+
+    }
+
+
+    /* =========================
+       KEYBOARD
+    ========================== */
+
+    document.addEventListener(
+        "keydown",
+        function(event) {
+
+            if (event.key === "Escape") {
+
+                closeMenu();
+                closeView();
+
+            }
+
+        }
+    );
+
+</script>
+
+</body>
+  </html>
