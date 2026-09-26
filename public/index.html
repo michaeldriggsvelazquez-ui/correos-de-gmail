@@ -26,12 +26,10 @@
         :root {
             --background: #050505;
             --surface: #0d0d0d;
-            --surface-hover: #151515;
             --border: rgba(255, 255, 255, 0.10);
             --border-focus: rgba(255, 255, 255, 0.22);
             --text: #f5f5f5;
             --secondary: #999;
-            --muted: #666;
             --button: #f2f2f2;
             --button-text: #080808;
         }
@@ -67,16 +65,13 @@
             cursor: pointer;
         }
 
-
-        /* =========================================
-           MAIN
-        ========================================= */
-
         .page {
             min-height: 100vh;
+
             display: flex;
             align-items: center;
             justify-content: center;
+
             padding: 24px 18px;
 
             background:
@@ -88,23 +83,17 @@
                 #050505;
         }
 
-
         .container {
             width: 100%;
             max-width: 390px;
+
             animation: pageIn 0.55s ease;
         }
-
-
-        /* =========================================
-           BRAND
-        ========================================= */
 
         .brand {
             text-align: center;
             margin-bottom: 34px;
         }
-
 
         .logo {
             width: 58px;
@@ -124,12 +113,6 @@
                 0 10px 40px rgba(0,0,0,0.35);
         }
 
-
-        /*
-         * Logo de Google simplificado.
-         * No depende de una imagen externa.
-         */
-
         .google-logo {
             position: relative;
 
@@ -148,7 +131,6 @@
                 );
         }
 
-
         .google-logo::before {
             content: "";
 
@@ -160,7 +142,6 @@
 
             border-radius: 50%;
         }
-
 
         .google-logo::after {
             content: "";
@@ -178,7 +159,6 @@
             border-radius: 0 4px 4px 0;
         }
 
-
         .brand-title {
             font-size: 29px;
             line-height: 1;
@@ -188,11 +168,9 @@
             letter-spacing: -1.1px;
         }
 
-
         .brand-title span {
             color: #888;
         }
-
 
         .brand-subtitle {
             margin-top: 9px;
@@ -202,11 +180,6 @@
             font-size: 13px;
             line-height: 1.5;
         }
-
-
-        /* =========================================
-           AUTH CARD
-        ========================================= */
 
         .auth-card {
             width: 100%;
@@ -231,11 +204,6 @@
                 0 30px 80px rgba(0,0,0,0.35);
         }
 
-
-        /* =========================================
-           TABS
-        ========================================= */
-
         .tabs {
             display: grid;
 
@@ -253,7 +221,6 @@
 
             border-radius: 13px;
         }
-
 
         .tab {
             height: 40px;
@@ -274,7 +241,6 @@
                 background 0.2s ease;
         }
 
-
         .tab.active {
             background: #1b1b1b;
 
@@ -284,22 +250,15 @@
                 0 2px 8px rgba(0,0,0,0.25);
         }
 
-
-        /* =========================================
-           FORMS
-        ========================================= */
-
         .form {
             display: none;
         }
-
 
         .form.active {
             display: block;
 
             animation: formIn 0.25s ease;
         }
-
 
         .form-title {
             margin-bottom: 5px;
@@ -309,7 +268,6 @@
 
             letter-spacing: -0.4px;
         }
-
 
         .form-description {
             margin-bottom: 22px;
@@ -321,15 +279,9 @@
             line-height: 1.55;
         }
 
-
-        /* =========================================
-           INPUTS
-        ========================================= */
-
         .field {
             margin-bottom: 14px;
         }
-
 
         .field label {
             display: block;
@@ -341,7 +293,6 @@
             font-size: 11px;
             font-weight: 600;
         }
-
 
         .input {
             width: 100%;
@@ -369,11 +320,9 @@
                 box-shadow 0.2s ease;
         }
 
-
         .input::placeholder {
             color: #555;
         }
-
 
         .input:focus {
             border-color: var(--border-focus);
@@ -384,11 +333,6 @@
             box-shadow:
                 0 0 0 3px rgba(255,255,255,0.025);
         }
-
-
-        /* =========================================
-           SUBMIT
-        ========================================= */
 
         .submit-button {
             width: 100%;
@@ -415,20 +359,18 @@
                 opacity 0.2s ease;
         }
 
-
         .submit-button:hover {
             opacity: 0.92;
         }
-
 
         .submit-button:active {
             transform: scale(0.985);
         }
 
-
-        /* =========================================
-           MESSAGE
-        ========================================= */
+        .submit-button:disabled {
+            cursor: wait;
+            opacity: 0.55;
+        }
 
         .message {
             display: none;
@@ -450,15 +392,29 @@
             line-height: 1.5;
         }
 
-
         .message.show {
             display: block;
         }
 
+        .message.error {
+            color: #ff8f8f;
 
-        /* =========================================
-           FOOTER
-        ========================================= */
+            border-color:
+                rgba(255,100,100,0.18);
+
+            background:
+                rgba(255,80,80,0.055);
+        }
+
+        .message.success {
+            color: #a9e8b3;
+
+            border-color:
+                rgba(100,220,120,0.18);
+
+            background:
+                rgba(80,200,100,0.055);
+        }
 
         .footer {
             margin-top: 20px;
@@ -471,11 +427,6 @@
 
             line-height: 1.5;
         }
-
-
-        /* =========================================
-           ANIMATIONS
-        ========================================= */
 
         @keyframes pageIn {
 
@@ -491,7 +442,6 @@
 
         }
 
-
         @keyframes formIn {
 
             from {
@@ -505,11 +455,6 @@
             }
 
         }
-
-
-        /* =========================================
-           SMALL SCREENS
-        ========================================= */
 
         @media (max-width: 420px) {
 
@@ -541,31 +486,21 @@
     </style>
 </head>
 
-
 <body>
 
     <main class="page">
 
         <div class="container">
 
-
-            <!-- =====================================
-                 BRAND
-            ====================================== -->
-
             <section class="brand">
 
                 <div class="logo">
-
                     <div class="google-logo"></div>
-
                 </div>
-
 
                 <h1 class="brand-title">
                     Gmail<span>Accounts</span>
                 </h1>
-
 
                 <p class="brand-subtitle">
                     Gestiona tu cuenta desde un solo lugar.
@@ -573,15 +508,7 @@
 
             </section>
 
-
-            <!-- =====================================
-                 AUTH
-            ====================================== -->
-
             <section class="auth-card">
-
-
-                <!-- TABS -->
 
                 <div class="tabs">
 
@@ -593,7 +520,6 @@
                         Iniciar sesión
                     </button>
 
-
                     <button
                         type="button"
                         class="tab"
@@ -604,10 +530,7 @@
 
                 </div>
 
-
-                <!-- =================================
-                     LOGIN
-                ================================== -->
+                <!-- LOGIN -->
 
                 <form
                     class="form active"
@@ -618,12 +541,10 @@
                         Bienvenido de nuevo
                     </h2>
 
-
                     <p class="form-description">
                         Inicia sesión para continuar
                         utilizando GmailAccounts.
                     </p>
-
 
                     <div class="field">
 
@@ -642,7 +563,6 @@
 
                     </div>
 
-
                     <div class="field">
 
                         <label for="loginPassword">
@@ -660,14 +580,13 @@
 
                     </div>
 
-
                     <button
                         type="submit"
                         class="submit-button"
+                        id="loginButton"
                     >
                         CONTINUAR
                     </button>
-
 
                     <div
                         class="message"
@@ -676,10 +595,7 @@
 
                 </form>
 
-
-                <!-- =================================
-                     REGISTER
-                ================================== -->
+                <!-- REGISTRO -->
 
                 <form
                     class="form"
@@ -690,11 +606,9 @@
                         Crear cuenta
                     </h2>
 
-
                     <p class="form-description">
                         Crea tu cuenta para comenzar.
                     </p>
-
 
                     <div class="field">
 
@@ -708,11 +622,12 @@
                             type="text"
                             placeholder="Elige un usuario"
                             autocomplete="username"
+                            minlength="3"
+                            maxlength="30"
                             required
                         >
 
                     </div>
-
 
                     <div class="field">
 
@@ -731,7 +646,6 @@
 
                     </div>
 
-
                     <div class="field">
 
                         <label for="registerPassword">
@@ -744,19 +658,19 @@
                             type="password"
                             placeholder="Crea una contraseña"
                             autocomplete="new-password"
+                            minlength="8"
                             required
                         >
 
                     </div>
 
-
                     <button
                         type="submit"
                         class="submit-button"
+                        id="registerButton"
                     >
                         CREAR CUENTA
                     </button>
-
 
                     <div
                         class="message"
@@ -767,27 +681,21 @@
 
             </section>
 
-
-            <!-- =====================================
-                 FOOTER
-            ====================================== -->
-
             <footer class="footer">
-
                 GmailAccounts · Sistema privado
-
             </footer>
 
         </div>
 
     </main>
 
-
     <script>
 
-        /* =========================================
-           ELEMENTOS
-        ========================================= */
+        /*
+         * =========================================
+         * ELEMENTOS
+         * =========================================
+         */
 
         const loginTab =
             document.getElementById("loginTab");
@@ -807,10 +715,48 @@
         const registerMessage =
             document.getElementById("registerMessage");
 
+        const loginButton =
+            document.getElementById("loginButton");
 
-        /* =========================================
-           CAMBIAR A LOGIN
-        ========================================= */
+        const registerButton =
+            document.getElementById("registerButton");
+
+
+        /*
+         * =========================================
+         * MENSAJES
+         * =========================================
+         */
+
+        function showMessage(
+            element,
+            text,
+            type = ""
+        ) {
+            element.textContent = text;
+
+            element.className =
+                "message show";
+
+            if (type) {
+                element.classList.add(type);
+            }
+        }
+
+
+        function hideMessage(element) {
+            element.textContent = "";
+
+            element.className =
+                "message";
+        }
+
+
+        /*
+         * =========================================
+         * CAMBIAR FORMULARIOS
+         * =========================================
+         */
 
         function showLogin() {
 
@@ -820,15 +766,11 @@
             loginForm.classList.add("active");
             registerForm.classList.remove("active");
 
-            loginMessage.classList.remove("show");
-            registerMessage.classList.remove("show");
+            hideMessage(loginMessage);
+            hideMessage(registerMessage);
 
         }
 
-
-        /* =========================================
-           CAMBIAR A REGISTRO
-        ========================================= */
 
         function showRegister() {
 
@@ -838,8 +780,8 @@
             registerForm.classList.add("active");
             loginForm.classList.remove("active");
 
-            loginMessage.classList.remove("show");
-            registerMessage.classList.remove("show");
+            hideMessage(loginMessage);
+            hideMessage(registerMessage);
 
         }
 
@@ -856,59 +798,384 @@
         );
 
 
-        /* =========================================
-           LOGIN TEMPORAL
-        ========================================= */
+        /*
+         * =========================================
+         * API
+         * =========================================
+         */
+
+        async function apiRequest(
+            endpoint,
+            options = {}
+        ) {
+
+            const response =
+                await fetch(
+                    endpoint,
+                    {
+                        ...options,
+
+                        headers: {
+                            "Content-Type":
+                                "application/json",
+
+                            ...(options.headers || {})
+                        }
+                    }
+                );
+
+            let data = null;
+
+            try {
+                data =
+                    await response.json();
+            } catch {
+                data = {};
+            }
+
+            if (!response.ok) {
+
+                throw new Error(
+                    data.error ||
+                    "No se pudo completar la solicitud."
+                );
+
+            }
+
+            return data;
+        }
+
+
+        /*
+         * =========================================
+         * GUARDAR SESIÓN
+         * =========================================
+         */
+
+        function saveSession(token) {
+
+            if (!token) {
+                return;
+            }
+
+            localStorage.setItem(
+                "gmailaccounts_session",
+                token
+            );
+
+        }
+
+
+        /*
+         * =========================================
+         * IR A LA APP
+         * =========================================
+         */
+
+        function goToApp() {
+
+            window.location.href =
+                "/app.html";
+
+        }
+
+
+        /*
+         * =========================================
+         * LOGIN
+         * =========================================
+         */
 
         loginForm.addEventListener(
             "submit",
-            function(event) {
+            async function(event) {
 
                 event.preventDefault();
 
-                /*
-                 * TEMPORAL
-                 *
-                 * Aquí conectaremos posteriormente
-                 * la autenticación real con nuestro
-                 * Worker + D1.
-                 */
+                hideMessage(loginMessage);
 
-                loginMessage.textContent =
-                    "La autenticación se conectará al sistema de cuentas.";
+                const identifier =
+                    document
+                        .getElementById(
+                            "loginIdentifier"
+                        )
+                        .value
+                        .trim();
 
-                loginMessage.classList.add("show");
+                const password =
+                    document
+                        .getElementById(
+                            "loginPassword"
+                        )
+                        .value;
+
+                if (
+                    !identifier ||
+                    !password
+                ) {
+                    showMessage(
+                        loginMessage,
+                        "Completa todos los campos.",
+                        "error"
+                    );
+
+                    return;
+                }
+
+                loginButton.disabled = true;
+
+                loginButton.textContent =
+                    "CONECTANDO...";
+
+                try {
+
+                    const data =
+                        await apiRequest(
+                            "/api/auth/login",
+                            {
+                                method: "POST",
+
+                                body: JSON.stringify({
+                                    identifier,
+                                    password
+                                })
+                            }
+                        );
+
+                    saveSession(
+                        data.session
+                    );
+
+                    showMessage(
+                        loginMessage,
+                        "Inicio de sesión correcto. Abriendo GmailAccounts...",
+                        "success"
+                    );
+
+                    setTimeout(
+                        goToApp,
+                        350
+                    );
+
+                } catch (error) {
+
+                    showMessage(
+                        loginMessage,
+                        error.message ||
+                        "Usuario o contraseña incorrectos.",
+                        "error"
+                    );
+
+                } finally {
+
+                    loginButton.disabled = false;
+
+                    loginButton.textContent =
+                        "CONTINUAR";
+
+                }
 
             }
         );
 
 
-        /* =========================================
-           REGISTRO TEMPORAL
-        ========================================= */
+        /*
+         * =========================================
+         * REGISTRO
+         * =========================================
+         */
 
         registerForm.addEventListener(
             "submit",
-            function(event) {
+            async function(event) {
 
                 event.preventDefault();
 
-                /*
-                 * TEMPORAL
-                 *
-                 * Aquí conectaremos posteriormente
-                 * el registro con Cloudflare D1.
-                 */
+                hideMessage(registerMessage);
 
-                registerMessage.textContent =
-                    "El registro se conectará al sistema de cuentas.";
+                const username =
+                    document
+                        .getElementById(
+                            "registerUsername"
+                        )
+                        .value
+                        .trim();
 
-                registerMessage.classList.add("show");
+                const email =
+                    document
+                        .getElementById(
+                            "registerEmail"
+                        )
+                        .value
+                        .trim();
+
+                const password =
+                    document
+                        .getElementById(
+                            "registerPassword"
+                        )
+                        .value;
+
+                if (
+                    !username ||
+                    !email ||
+                    !password
+                ) {
+
+                    showMessage(
+                        registerMessage,
+                        "Completa todos los campos.",
+                        "error"
+                    );
+
+                    return;
+                }
+
+                if (password.length < 8) {
+
+                    showMessage(
+                        registerMessage,
+                        "La contraseña debe tener al menos 8 caracteres.",
+                        "error"
+                    );
+
+                    return;
+                }
+
+                registerButton.disabled = true;
+
+                registerButton.textContent =
+                    "CREANDO...";
+
+                try {
+
+                    const data =
+                        await apiRequest(
+                            "/api/auth/register",
+                            {
+                                method: "POST",
+
+                                body: JSON.stringify({
+                                    username,
+                                    email,
+                                    password
+                                })
+                            }
+                        );
+
+                    saveSession(
+                        data.session
+                    );
+
+                    showMessage(
+                        registerMessage,
+                        "Cuenta creada correctamente. Abriendo GmailAccounts...",
+                        "success"
+                    );
+
+                    setTimeout(
+                        goToApp,
+                        350
+                    );
+
+                } catch (error) {
+
+                    showMessage(
+                        registerMessage,
+                        error.message ||
+                        "No se pudo crear la cuenta.",
+                        "error"
+                    );
+
+                } finally {
+
+                    registerButton.disabled = false;
+
+                    registerButton.textContent =
+                        "CREAR CUENTA";
+
+                }
 
             }
         );
+
+
+        /*
+         * =========================================
+         * COMPROBAR SESIÓN EXISTENTE
+         * =========================================
+         */
+
+        async function checkExistingSession() {
+
+            const token =
+                localStorage.getItem(
+                    "gmailaccounts_session"
+                );
+
+            if (!token) {
+                return;
+            }
+
+            try {
+
+                const response =
+                    await fetch(
+                        "/api/auth/me",
+                        {
+                            method: "GET",
+
+                            headers: {
+                                "Authorization":
+                                    "Bearer " + token
+                            }
+                        }
+                    );
+
+                if (
+                    response.ok
+                ) {
+
+                    const data =
+                        await response.json();
+
+                    if (
+                        data.success &&
+                        data.authenticated
+                    ) {
+
+                        goToApp();
+
+                    }
+
+                } else {
+
+                    localStorage.removeItem(
+                        "gmailaccounts_session"
+                    );
+
+                }
+
+            } catch {
+                /*
+                 * Si temporalmente no se puede
+                 * consultar la sesión, dejamos
+                 * visible el login.
+                 */
+            }
+
+        }
+
+
+        /*
+         * =========================================
+         * INICIO
+         * =========================================
+         */
+
+        checkExistingSession();
 
     </script>
 
 </body>
-                  </html>
+                    </html>
