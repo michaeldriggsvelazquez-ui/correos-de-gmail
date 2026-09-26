@@ -30,7 +30,7 @@
         :root {
             --bg: #050505;
             --surface: rgba(18, 18, 18, 0.72);
-            --surface-strong: rgba(24, 24, 24, 0.88);
+            --surface-strong: rgba(24, 24, 24, 0.92);
             --surface-soft: rgba(255, 255, 255, 0.045);
 
             --border: rgba(255, 255, 255, 0.09);
@@ -111,6 +111,60 @@
 
 
         /* =========================================================
+           AUTH LOADING
+        ========================================================= */
+
+        .auth-loading {
+            position: fixed;
+            inset: 0;
+
+            z-index: 500;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            background: #050505;
+
+            transition:
+                opacity .2s ease,
+                visibility .2s ease;
+        }
+
+        .auth-loading.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .auth-loading-inner {
+            text-align: center;
+        }
+
+        .auth-loading-logo {
+            width: 48px;
+            height: 48px;
+
+            margin: 0 auto 13px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border-radius: 15px;
+
+            background: #fff;
+        }
+
+        .auth-loading-text {
+            color: #666;
+
+            font-size: 10px;
+            letter-spacing: .5px;
+        }
+
+
+        /* =========================================================
            HEADER
         ========================================================= */
 
@@ -134,13 +188,11 @@
             -webkit-backdrop-filter: blur(28px);
         }
 
-
         .brand-mini {
             display: flex;
             align-items: center;
             gap: 11px;
         }
-
 
         .brand-logo {
             width: 36px;
@@ -154,7 +206,6 @@
 
             background: #fff;
         }
-
 
         .google-g {
             font-size: 20px;
@@ -175,7 +226,6 @@
             color: transparent;
         }
 
-
         .brand-mini-name {
             font-size: 15px;
             font-weight: 700;
@@ -183,18 +233,15 @@
             letter-spacing: -0.3px;
         }
 
-
         .brand-mini-name span {
             color: #777;
         }
-
 
         .top-actions {
             display: flex;
             align-items: center;
             gap: 7px;
         }
-
 
         .icon-button {
             width: 40px;
@@ -219,11 +266,9 @@
                 transform .15s ease;
         }
 
-
         .icon-button:hover {
             background: rgba(255,255,255,0.08);
         }
-
 
         .icon-button:active {
             transform: scale(.95);
@@ -239,8 +284,19 @@
             min-height: 0;
 
             position: relative;
+
+            overflow: hidden;
         }
 
+        /*
+         * IMPORTANTE:
+         * Todas las vistas ocupan exactamente el mismo espacio.
+         * Solo la vista .active se muestra.
+         *
+         * Antes #chatView tenía display:flex permanente y,
+         * por tener mayor especificidad que .view, seguía visible
+         * detrás de las demás vistas.
+         */
 
         .view {
             position: absolute;
@@ -253,13 +309,13 @@
             padding: 22px 17px 125px;
 
             scrollbar-width: none;
-        }
 
+            background: #050505;
+        }
 
         .view::-webkit-scrollbar {
             display: none;
         }
-
 
         .view.active {
             display: block;
@@ -267,6 +323,24 @@
             animation: viewIn .22s ease;
         }
 
+        /*
+         * El chat necesita flex, pero SOLO cuando está activo.
+         */
+
+        #chatView {
+            display: none;
+
+            flex-direction: column;
+
+            padding:
+                18px
+                15px
+                92px;
+        }
+
+        #chatView.active {
+            display: flex;
+        }
 
         @keyframes viewIn {
 
@@ -287,19 +361,10 @@
            CHAT
         ========================================================= */
 
-        #chatView {
-            display: flex;
-            flex-direction: column;
-
-            padding:
-                18px
-                15px
-                92px;
-        }
-
-
         .chat-scroll {
             flex: 1;
+
+            min-height: 0;
 
             overflow-y: auto;
 
@@ -308,18 +373,15 @@
             padding: 5px 2px 20px;
         }
 
-
         .chat-scroll::-webkit-scrollbar {
             display: none;
         }
-
 
         .chat-welcome {
             padding: 28px 8px 20px;
 
             text-align: center;
         }
-
 
         .welcome-logo {
             width: 54px;
@@ -339,11 +401,9 @@
                 0 15px 45px rgba(0,0,0,.28);
         }
 
-
         .welcome-logo .google-g {
             font-size: 29px;
         }
-
 
         .welcome-title {
             font-size: 25px;
@@ -354,11 +414,9 @@
             margin-bottom: 8px;
         }
 
-
         .welcome-title span {
             color: #777;
         }
-
 
         .welcome-description {
             max-width: 315px;
@@ -383,23 +441,19 @@
             margin: 11px 0;
         }
 
-
         .message.system {
             justify-content: flex-start;
         }
 
-
         .message.user {
             justify-content: flex-end;
         }
-
 
         .bubble {
             max-width: 84%;
 
             padding: 13px 15px;
 
-            /* Ligeramente más redondeado */
             border-radius: 21px;
 
             border: 1px solid var(--border);
@@ -410,10 +464,11 @@
 
             white-space: pre-line;
 
+            overflow-wrap: anywhere;
+
             backdrop-filter: blur(18px);
             -webkit-backdrop-filter: blur(18px);
         }
-
 
         .message.system .bubble {
             background:
@@ -426,7 +481,6 @@
             border-bottom-left-radius: 9px;
         }
 
-
         .message.user .bubble {
             background:
                 rgba(255,255,255,.095);
@@ -437,11 +491,9 @@
             border-bottom-right-radius: 9px;
         }
 
-
         .bubble strong {
             color: #fff;
         }
-
 
         .bubble .emoji {
             display: inline-block;
@@ -450,7 +502,7 @@
 
 
         /* =========================================================
-           SALE CARD
+           SALE / REQUEST CARD
         ========================================================= */
 
         .sale-card {
@@ -473,14 +525,12 @@
             -webkit-backdrop-filter: blur(25px);
         }
 
-
         .sale-card-title {
             font-size: 13px;
             font-weight: 700;
 
             margin-bottom: 6px;
         }
-
 
         .sale-card-text {
             color: #8e8e8e;
@@ -491,7 +541,6 @@
 
             margin-bottom: 14px;
         }
-
 
         .sale-input {
             width: 100%;
@@ -511,12 +560,10 @@
             font-size: 12px;
         }
 
-
         .sale-input:focus {
             border-color:
                 rgba(255,255,255,.22);
         }
-
 
         .sale-button {
             width: 100%;
@@ -569,7 +616,6 @@
                 0 15px 50px rgba(0,0,0,.35);
         }
 
-
         .start-button {
             width: 100%;
             height: 48px;
@@ -588,6 +634,9 @@
             letter-spacing: .6px;
         }
 
+        .start-button:active {
+            transform: scale(.99);
+        }
 
         .chat-form {
             display: none;
@@ -597,14 +646,14 @@
             gap: 7px;
         }
 
-
         .chat-form.visible {
             display: flex;
         }
 
-
         .chat-input {
             flex: 1;
+
+            min-width: 0;
 
             height: 45px;
 
@@ -619,11 +668,9 @@
             font-size: 13px;
         }
 
-
         .chat-input::placeholder {
             color: #555;
         }
-
 
         .send-button {
             width: 39px;
@@ -651,7 +698,6 @@
             margin-bottom: 19px;
         }
 
-
         .page-eyebrow {
             color: #626262;
 
@@ -663,7 +709,6 @@
             margin-bottom: 7px;
         }
 
-
         .page-title {
             font-size: 26px;
 
@@ -671,7 +716,6 @@
 
             font-weight: 750;
         }
-
 
         .page-subtitle {
             margin-top: 6px;
@@ -744,7 +788,6 @@
             -webkit-backdrop-filter: blur(30px);
         }
 
-
         .balance-label {
             color: #777;
 
@@ -752,7 +795,6 @@
 
             margin-bottom: 8px;
         }
-
 
         .balance-value {
             font-size: 36px;
@@ -762,7 +804,6 @@
             letter-spacing: -1.5px;
         }
 
-
         .balance-currency {
             color: #777;
 
@@ -770,7 +811,6 @@
 
             margin-left: 5px;
         }
-
 
         .balance-actions {
             display: grid;
@@ -781,7 +821,6 @@
 
             margin-top: 18px;
         }
-
 
         .secondary-button {
             height: 42px;
@@ -800,6 +839,10 @@
             font-weight: 650;
         }
 
+        .secondary-button:active {
+            transform: scale(.98);
+        }
+
 
         /* =========================================================
            STATS
@@ -815,7 +858,6 @@
             margin-bottom: 13px;
         }
 
-
         .stat {
             padding: 15px;
 
@@ -828,7 +870,6 @@
                 rgba(255,255,255,.035);
         }
 
-
         .stat-label {
             color: #696969;
 
@@ -836,7 +877,6 @@
 
             margin-bottom: 7px;
         }
-
 
         .stat-value {
             font-size: 19px;
@@ -849,6 +889,16 @@
            TUTORIAL
         ========================================================= */
 
+        .tutorial-intro {
+            color: #858585;
+
+            font-size: 11px;
+
+            line-height: 1.65;
+
+            margin-bottom: 3px;
+        }
+
         .tutorial-step {
             display: flex;
 
@@ -860,12 +910,10 @@
                 1px solid rgba(255,255,255,.055);
         }
 
-
         .tutorial-step:last-child {
             border-bottom: 0;
             padding-bottom: 0;
         }
-
 
         .step-number {
             width: 30px;
@@ -888,6 +936,9 @@
             font-weight: 800;
         }
 
+        .step-content {
+            min-width: 0;
+        }
 
         .step-content h3 {
             font-size: 12px;
@@ -895,20 +946,30 @@
             margin-bottom: 5px;
         }
 
-
         .step-content p {
             color: #777;
 
             font-size: 11px;
 
-            line-height: 1.55;
+            line-height: 1.6;
         }
 
+        .tutorial-mini-title {
+            color: #ddd;
+
+            font-size: 10px;
+            font-weight: 800;
+
+            letter-spacing: .6px;
+
+            margin:
+                18px 0 3px;
+        }
 
         .tutorial-note {
-            margin-top: 14px;
+            margin-top: 17px;
 
-            padding: 12px;
+            padding: 13px;
 
             border-radius: 12px;
 
@@ -922,7 +983,7 @@
 
             font-size: 10px;
 
-            line-height: 1.5;
+            line-height: 1.6;
         }
 
 
@@ -949,7 +1010,6 @@
 
             margin-top: 10px;
         }
-
 
         .copy-button {
             width: 100%;
@@ -990,16 +1050,13 @@
                 1px solid rgba(255,255,255,.055);
         }
 
-
         .history-item:last-child {
             border-bottom: 0;
         }
 
-
         .history-main {
             min-width: 0;
         }
-
 
         .history-email {
             overflow: hidden;
@@ -1011,7 +1068,6 @@
             font-size: 12px;
         }
 
-
         .history-date {
             color: #606060;
 
@@ -1020,6 +1076,13 @@
             margin-top: 4px;
         }
 
+        .history-id {
+            color: #4f4f4f;
+
+            font-size: 8px;
+
+            margin-top: 3px;
+        }
 
         .status {
             flex-shrink: 0;
@@ -1032,18 +1095,15 @@
             font-weight: 700;
         }
 
-
         .status.pending {
             color: #d9b66e;
             background: rgba(217,182,110,.09);
         }
 
-
         .status.approved {
             color: var(--green);
             background: rgba(85,217,138,.09);
         }
-
 
         .status.rejected {
             color: var(--red);
@@ -1064,7 +1124,6 @@
 
             margin-bottom: 17px;
         }
-
 
         .profile-avatar {
             width: 56px;
@@ -1092,13 +1151,11 @@
             font-weight: 700;
         }
 
-
         .profile-name {
             font-size: 15px;
 
             font-weight: 700;
         }
-
 
         .profile-email {
             color: #666;
@@ -1108,6 +1165,15 @@
             margin-top: 4px;
         }
 
+        .profile-id {
+            color: #4d4d4d;
+
+            font-size: 9px;
+
+            margin-top: 4px;
+
+            word-break: break-all;
+        }
 
         .profile-option {
             width: 100%;
@@ -1133,11 +1199,9 @@
             font-size: 12px;
         }
 
-
         .profile-option:last-child {
             border-bottom: 0;
         }
-
 
         .profile-option span:last-child {
             color: #555;
@@ -1145,9 +1209,323 @@
             font-size: 14px;
         }
 
-
         .danger {
             color: #ff7373;
+        }
+
+
+        /* =========================================================
+           SETTINGS
+        ========================================================= */
+
+        .setting-row {
+            min-height: 58px;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: space-between;
+
+            gap: 14px;
+
+            border-bottom:
+                1px solid rgba(255,255,255,.055);
+        }
+
+        .setting-row:last-child {
+            border-bottom: 0;
+        }
+
+        .setting-info {
+            min-width: 0;
+        }
+
+        .setting-title {
+            font-size: 12px;
+        }
+
+        .setting-description {
+            color: #666;
+
+            font-size: 9px;
+
+            line-height: 1.45;
+
+            margin-top: 3px;
+        }
+
+        .toggle {
+            position: relative;
+
+            width: 42px;
+            height: 24px;
+
+            flex-shrink: 0;
+
+            border: 0;
+
+            border-radius: 20px;
+
+            background: #292929;
+        }
+
+        .toggle::after {
+            content: "";
+
+            position: absolute;
+
+            top: 4px;
+            left: 4px;
+
+            width: 16px;
+            height: 16px;
+
+            border-radius: 50%;
+
+            background: #777;
+
+            transition:
+                transform .2s ease,
+                background .2s ease;
+        }
+
+        .toggle.active {
+            background: rgba(85,217,138,.18);
+        }
+
+        .toggle.active::after {
+            transform: translateX(18px);
+
+            background: var(--green);
+        }
+
+        .settings-input {
+            width: 100%;
+            height: 44px;
+
+            margin-top: 7px;
+
+            padding: 0 12px;
+
+            border: 1px solid var(--border);
+
+            border-radius: 12px;
+
+            background: rgba(0,0,0,.22);
+
+            color: #fff;
+
+            font-size: 12px;
+        }
+
+        .settings-input:focus {
+            border-color: rgba(255,255,255,.22);
+        }
+
+        .settings-label {
+            color: #666;
+
+            font-size: 9px;
+            font-weight: 700;
+
+            letter-spacing: .8px;
+        }
+
+        .settings-save {
+            width: 100%;
+            height: 44px;
+
+            margin-top: 12px;
+
+            border: 0;
+
+            border-radius: 12px;
+
+            background: #f2f2f2;
+
+            color: #080808;
+
+            font-size: 10px;
+            font-weight: 800;
+
+            letter-spacing: .4px;
+        }
+
+        .settings-disabled {
+            opacity: .55;
+
+            cursor: default;
+        }
+
+
+        /* =========================================================
+           MODAL
+        ========================================================= */
+
+        .modal-overlay {
+            position: fixed;
+
+            inset: 0;
+
+            z-index: 200;
+
+            display: none;
+
+            align-items: flex-end;
+            justify-content: center;
+
+            padding: 12px;
+
+            background:
+                rgba(0,0,0,.58);
+
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+
+        .modal-overlay.open {
+            display: flex;
+        }
+
+        .modal {
+            width: min(560px, 100%);
+
+            max-height: 88vh;
+
+            overflow-y: auto;
+
+            padding: 18px;
+
+            border:
+                1px solid rgba(255,255,255,.10);
+
+            border-radius: 24px;
+
+            background:
+                linear-gradient(
+                    160deg,
+                    rgba(25,25,25,.98),
+                    rgba(9,9,9,.99)
+                );
+
+            box-shadow:
+                0 25px 80px rgba(0,0,0,.55);
+
+            animation: modalIn .2s ease;
+        }
+
+        @keyframes modalIn {
+
+            from {
+                opacity: 0;
+                transform: translateY(18px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+
+        }
+
+        .modal-head {
+            display: flex;
+
+            align-items: center;
+
+            justify-content: space-between;
+
+            margin-bottom: 16px;
+        }
+
+        .modal-title {
+            font-size: 17px;
+
+            font-weight: 750;
+
+            letter-spacing: -.3px;
+        }
+
+        .modal-close {
+            width: 36px;
+            height: 36px;
+
+            border:
+                1px solid var(--border);
+
+            border-radius: 11px;
+
+            background:
+                rgba(255,255,255,.04);
+
+            color: #bbb;
+
+            font-size: 17px;
+        }
+
+        .modal-text {
+            color: #777;
+
+            font-size: 11px;
+
+            line-height: 1.6;
+
+            margin-bottom: 13px;
+        }
+
+
+        /* =========================================================
+           TOAST
+        ========================================================= */
+
+        .toast {
+            position: fixed;
+
+            left: 50%;
+
+            bottom: 84px;
+
+            z-index: 300;
+
+            max-width: calc(100vw - 34px);
+
+            padding: 11px 14px;
+
+            border:
+                1px solid rgba(255,255,255,.10);
+
+            border-radius: 13px;
+
+            background:
+                rgba(22,22,22,.94);
+
+            color: #ddd;
+
+            font-size: 10px;
+
+            line-height: 1.4;
+
+            box-shadow:
+                0 15px 45px rgba(0,0,0,.4);
+
+            transform:
+                translate(-50%, 15px);
+
+            opacity: 0;
+
+            pointer-events: none;
+
+            transition:
+                opacity .2s ease,
+                transform .2s ease;
+        }
+
+        .toast.show {
+            opacity: 1;
+
+            transform:
+                translate(-50%, 0);
         }
 
 
@@ -1171,11 +1549,9 @@
             -webkit-backdrop-filter: blur(7px);
         }
 
-
         .menu-overlay.open {
             display: block;
         }
-
 
         .menu-panel {
             position: absolute;
@@ -1209,7 +1585,6 @@
             animation: menuIn .22s ease;
         }
 
-
         @keyframes menuIn {
 
             from {
@@ -1222,7 +1597,6 @@
 
         }
 
-
         .menu-top {
             display: flex;
 
@@ -1233,7 +1607,6 @@
             margin-bottom: 25px;
         }
 
-
         .menu-title {
             font-size: 19px;
 
@@ -1241,7 +1614,6 @@
 
             letter-spacing: -.4px;
         }
-
 
         .menu-close {
             width: 37px;
@@ -1260,7 +1632,6 @@
             font-size: 17px;
         }
 
-
         .menu-section-title {
             color: #555;
 
@@ -1272,7 +1643,6 @@
             margin:
                 18px 6px 7px;
         }
-
 
         .menu-item {
             width: 100%;
@@ -1303,14 +1673,12 @@
                 color .2s ease;
         }
 
-
         .menu-item:hover {
             background:
                 rgba(255,255,255,.055);
 
             color: #fff;
         }
-
 
         .menu-icon {
             width: 29px;
@@ -1368,7 +1736,6 @@
                 0 18px 60px rgba(0,0,0,.45);
         }
 
-
         .nav-item {
             border: 0;
 
@@ -1395,11 +1762,9 @@
                 color .2s ease;
         }
 
-
         .nav-icon {
             font-size: 17px;
         }
-
 
         .nav-item.active {
             background:
@@ -1421,13 +1786,11 @@
             color: #606060;
         }
 
-
         .empty-icon {
             font-size: 27px;
 
             margin-bottom: 10px;
         }
-
 
         .empty-title {
             color: #888;
@@ -1436,7 +1799,6 @@
 
             margin-bottom: 5px;
         }
-
 
         .empty-text {
             font-size: 10px;
@@ -1478,6 +1840,10 @@
                 right: 20px;
             }
 
+            .modal-overlay {
+                align-items: center;
+            }
+
         }
 
     </style>
@@ -1490,6 +1856,32 @@
 
 
     <!-- =========================================================
+         AUTH LOADING
+    ========================================================== -->
+
+    <div
+        class="auth-loading"
+        id="authLoading"
+    >
+
+        <div class="auth-loading-inner">
+
+            <div class="auth-loading-logo">
+                <div class="google-g">
+                    G
+                </div>
+            </div>
+
+            <div class="auth-loading-text">
+                Comprobando sesión...
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================================================
          TOP BAR
     ========================================================== -->
 
@@ -1498,7 +1890,9 @@
         <div class="brand-mini">
 
             <div class="brand-logo">
-                <div class="google-g">G</div>
+                <div class="google-g">
+                    G
+                </div>
             </div>
 
             <div class="brand-mini-name">
@@ -1525,7 +1919,7 @@
 
     <!-- =========================================================
          MAIN
-    ========================================================= -->
+    ========================================================== -->
 
     <main class="main">
 
@@ -1550,7 +1944,9 @@
                 >
 
                     <div class="welcome-logo">
-                        <div class="google-g">G</div>
+                        <div class="google-g">
+                            G
+                        </div>
                     </div>
 
                     <h1 class="welcome-title">
@@ -1579,8 +1975,8 @@
                         <br><br>
 
                         Aquí puedes gestionar tus solicitudes
-                        de cuentas y consultar el estado de
-                        tus operaciones.
+                        y consultar el estado de tus
+                        operaciones.
 
                         <br><br>
 
@@ -1668,7 +2064,10 @@
                     BALANCE DISPONIBLE
                 </div>
 
-                <div class="balance-value">
+                <div
+                    class="balance-value"
+                    id="balanceValue"
+                >
                     0.00
                     <span class="balance-currency">
                         USDT
@@ -1777,7 +2176,7 @@
             <div class="page-header">
 
                 <div class="page-eyebrow">
-                    GUÍA
+                    GUÍA COMPLETA
                 </div>
 
                 <h2 class="page-title">
@@ -1785,15 +2184,24 @@
                 </h2>
 
                 <p class="page-subtitle">
-                    Una guía sencilla para utilizar
-                    GmailAccounts sin perderte entre
-                    veinte botones innecesarios.
+                    Todo lo necesario para utilizar
+                    GmailAccounts y encontrar cada función
+                    sin tener que explorar a ciegas.
                 </p>
 
             </div>
 
 
             <div class="glass-card">
+
+                <p class="tutorial-intro">
+                    GmailAccounts está organizado alrededor
+                    de una interfaz principal. Desde el chat
+                    puedes iniciar solicitudes y desde la
+                    navegación inferior puedes consultar
+                    balance, tutorial y menú.
+                </p>
+
 
                 <div class="tutorial-step">
 
@@ -1808,9 +2216,11 @@
                         </h3>
 
                         <p>
-                            Regístrate desde la pantalla
-                            inicial utilizando tus datos
-                            de acceso.
+                            Desde la pantalla inicial utiliza
+                            el formulario de registro. Introduce
+                            un correo válido, un nombre de usuario
+                            y una contraseña que cumpla los
+                            requisitos indicados por el sistema.
                         </p>
 
                     </div>
@@ -1827,13 +2237,15 @@
                     <div class="step-content">
 
                         <h3>
-                            Entra al chat
+                            Inicia sesión
                         </h3>
 
                         <p>
-                            Después de iniciar sesión,
-                            llegarás directamente a la
-                            interfaz principal.
+                            Después del registro puedes acceder
+                            con tu correo o nombre de usuario
+                            junto con tu contraseña. Si ya existe
+                            una sesión válida, la aplicación puede
+                            llevarte directamente a esta interfaz.
                         </p>
 
                     </div>
@@ -1850,13 +2262,15 @@
                     <div class="step-content">
 
                         <h3>
-                            Inicia una solicitud
+                            Conoce el Chat
                         </h3>
 
                         <p>
-                            Pulsa INICIAR y sigue las
-                            instrucciones que aparecen
-                            automáticamente en el chat.
+                            El Chat es la pantalla principal.
+                            Pulsa INICIAR para activar el flujo
+                            de solicitudes. Las instrucciones
+                            aparecerán directamente dentro de
+                            la conversación.
                         </p>
 
                     </div>
@@ -1873,13 +2287,15 @@
                     <div class="step-content">
 
                         <h3>
-                            Consulta el estado
+                            Envía una solicitud
                         </h3>
 
                         <p>
-                            Tus solicitudes aparecerán
-                            posteriormente en el historial
-                            con su estado correspondiente.
+                            Sigue las instrucciones mostradas
+                            por la interfaz y proporciona el
+                            identificador de cuenta solicitado.
+                            El sistema valida el formato antes
+                            de crear la solicitud.
                         </p>
 
                     </div>
@@ -1896,13 +2312,260 @@
                     <div class="step-content">
 
                         <h3>
-                            Consulta tu balance
+                            Revisa tu solicitud
                         </h3>
 
                         <p>
-                            Los movimientos registrados
-                            podrán consultarse desde el
-                            apartado de Balance.
+                            Cuando una solicitud se crea,
+                            recibe un identificador y un estado.
+                            Inicialmente puede aparecer como
+                            Pendiente mientras espera revisión.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="tutorial-step">
+
+                    <div class="step-number">
+                        6
+                    </div>
+
+                    <div class="step-content">
+
+                        <h3>
+                            Consulta Mis cuentas
+                        </h3>
+
+                        <p>
+                            En Mis cuentas encontrarás las
+                            solicitudes realizadas durante
+                            la sesión disponible en la aplicación.
+                            Cada registro muestra su identificador,
+                            fecha, dato enviado y estado.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="tutorial-step">
+
+                    <div class="step-number">
+                        7
+                    </div>
+
+                    <div class="step-content">
+
+                        <h3>
+                            Entiende los estados
+                        </h3>
+
+                        <p>
+                            Pendiente significa que la solicitud
+                            todavía está esperando revisión.
+                            Aceptada indica que fue aprobada.
+                            Rechazada indica que no fue aprobada.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="tutorial-step">
+
+                    <div class="step-number">
+                        8
+                    </div>
+
+                    <div class="step-content">
+
+                        <h3>
+                            Consulta tu Balance
+                        </h3>
+
+                        <p>
+                            Balance muestra el saldo disponible
+                            asociado a tu cuenta y algunos
+                            indicadores de actividad. Los valores
+                            que aparecen aquí pertenecen al
+                            sistema de la aplicación.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="tutorial-step">
+
+                    <div class="step-number">
+                        9
+                    </div>
+
+                    <div class="step-content">
+
+                        <h3>
+                            Revisa los movimientos
+                        </h3>
+
+                        <p>
+                            En la sección Movimientos se mostrarán
+                            los registros relacionados con el
+                            balance cuando esa información esté
+                            disponible desde la base de datos.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="tutorial-step">
+
+                    <div class="step-number">
+                        10
+                    </div>
+
+                    <div class="step-content">
+
+                        <h3>
+                            Retiros
+                        </h3>
+
+                        <p>
+                            La opción Retiro está preparada como
+                            punto de entrada para el futuro sistema
+                            de solicitudes de retiro. La validación,
+                            revisión y registro definitivo se
+                            conectarán posteriormente con el backend.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="tutorial-step">
+
+                    <div class="step-number">
+                        11
+                    </div>
+
+                    <div class="step-content">
+
+                        <h3>
+                            Utiliza Referidos
+                        </h3>
+
+                        <p>
+                            Referidos será el espacio destinado a
+                            consultar invitaciones, registros y
+                            movimientos asociados a tu código o
+                            enlace personal cuando la función esté
+                            conectada a D1.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="tutorial-step">
+
+                    <div class="step-number">
+                        12
+                    </div>
+
+                    <div class="step-content">
+
+                        <h3>
+                            Configura tu perfil
+                        </h3>
+
+                        <p>
+                            Desde Mi perfil puedes consultar tus
+                            datos de cuenta y acceder a las
+                            preferencias de la aplicación,
+                            incluyendo notificaciones y privacidad.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="tutorial-step">
+
+                    <div class="step-number">
+                        13
+                    </div>
+
+                    <div class="step-content">
+
+                        <h3>
+                            Configuración de cuenta
+                        </h3>
+
+                        <p>
+                            Esta sección reunirá posteriormente
+                            las opciones relacionadas con tu
+                            cuenta, seguridad y otros ajustes
+                            que necesiten conexión directa con
+                            el backend.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="tutorial-step">
+
+                    <div class="step-number">
+                        14
+                    </div>
+
+                    <div class="step-content">
+
+                        <h3>
+                            Privacidad
+                        </h3>
+
+                        <p>
+                            Aquí podrás revisar las preferencias
+                            relacionadas con el funcionamiento de
+                            la aplicación y controlar las opciones
+                            disponibles para tu cuenta.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="tutorial-step">
+
+                    <div class="step-number">
+                        15
+                    </div>
+
+                    <div class="step-content">
+
+                        <h3>
+                            Cerrar sesión
+                        </h3>
+
+                        <p>
+                            Desde Mi perfil puedes cerrar la
+                            sesión actual. La aplicación revoca
+                            la sesión en el servidor y elimina
+                            el token guardado localmente antes
+                            de volver a la pantalla de acceso.
                         </p>
 
                     </div>
@@ -1911,11 +2574,47 @@
 
 
                 <div class="tutorial-note">
-                    💡 Las instrucciones definitivas,
-                    capturas y pasos detallados podrán
-                    modificarse posteriormente desde
-                    la configuración del proyecto.
+                    💡 Consejo: no necesitas memorizar dónde
+                    está cada función. Chat, Balance y Tutorial
+                    están en la navegación inferior, mientras
+                    que Menú reúne las secciones adicionales.
                 </div>
+
+            </div>
+
+
+            <div class="glass-card">
+
+                <div class="page-eyebrow">
+                    ESTRUCTURA
+                </div>
+
+                <div class="tutorial-mini-title">
+                    CHAT
+                </div>
+
+                <p class="tutorial-intro">
+                    Crear y consultar solicitudes desde una
+                    conversación sencilla.
+                </p>
+
+                <div class="tutorial-mini-title">
+                    BALANCE
+                </div>
+
+                <p class="tutorial-intro">
+                    Consultar balance, actividad y futuras
+                    funciones relacionadas con retiros.
+                </p>
+
+                <div class="tutorial-mini-title">
+                    MENÚ
+                </div>
+
+                <p class="tutorial-intro">
+                    Acceder rápidamente a Mis cuentas,
+                    Referidos y Mi perfil.
+                </p>
 
             </div>
 
@@ -2100,6 +2799,11 @@
                     Mi perfil
                 </h2>
 
+                <p class="page-subtitle">
+                    Consulta tu información y administra
+                    tus preferencias.
+                </p>
+
             </div>
 
 
@@ -2128,6 +2832,13 @@
                             id="profileEmail"
                         >
                             usuario@email.com
+                        </div>
+
+                        <div
+                            class="profile-id"
+                            id="profileId"
+                        >
+                            ID no disponible
                         </div>
 
                     </div>
@@ -2213,6 +2924,39 @@
                     </span>
 
                 </button>
+
+            </div>
+
+
+            <div class="glass-card">
+
+                <div class="page-eyebrow">
+                    ESTADO
+                </div>
+
+                <div class="setting-row">
+
+                    <div class="setting-info">
+
+                        <div class="setting-title">
+                            Sesión
+                        </div>
+
+                        <div class="setting-description">
+                            Tu sesión actual está protegida
+                            por el sistema de autenticación.
+                        </div>
+
+                    </div>
+
+                    <div
+                        class="status approved"
+                        id="sessionStatus"
+                    >
+                        Activa
+                    </div>
+
+                </div>
 
             </div>
 
@@ -2354,7 +3098,7 @@
                     ?
                 </span>
 
-                Cómo crear una cuenta
+                Tutorial
 
             </button>
 
@@ -2416,6 +3160,58 @@
 
 
     <!-- =========================================================
+         SETTINGS MODAL
+    ========================================================== -->
+
+    <div
+        class="modal-overlay"
+        id="settingsModal"
+    >
+
+        <div
+            class="modal"
+            role="dialog"
+            aria-modal="true"
+        >
+
+            <div class="modal-head">
+
+                <div
+                    class="modal-title"
+                    id="modalTitle"
+                >
+                    Configuración
+                </div>
+
+                <button
+                    class="modal-close"
+                    id="modalClose"
+                    aria-label="Cerrar"
+                >
+                    ×
+                </button>
+
+            </div>
+
+
+            <div id="modalContent"></div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================================================
+         TOAST
+    ========================================================== -->
+
+    <div
+        class="toast"
+        id="toast"
+    ></div>
+
+
+    <!-- =========================================================
          JAVASCRIPT
     ========================================================== -->
 
@@ -2427,6 +3223,67 @@
 
         const SESSION_KEY =
             "gmailaccounts_session";
+
+
+        /* =====================================================
+           LOCAL SETTINGS
+        ====================================================== */
+
+        const SETTINGS_KEY =
+            "gmailaccounts_settings";
+
+
+        const defaultSettings = {
+
+            notifications: true,
+
+            activityNotifications: true,
+
+            privacyMode: true
+
+        };
+
+
+        function getSettings() {
+
+            try {
+
+                const saved =
+                    JSON.parse(
+                        localStorage.getItem(
+                            SETTINGS_KEY
+                        ) || "{}"
+                    );
+
+
+                return {
+                    ...defaultSettings,
+                    ...saved
+                };
+
+            } catch {
+
+                return {
+                    ...defaultSettings
+                };
+
+            }
+
+        }
+
+
+        let settings =
+            getSettings();
+
+
+        function saveSettings() {
+
+            localStorage.setItem(
+                SETTINGS_KEY,
+                JSON.stringify(settings)
+            );
+
+        }
 
 
         /* =====================================================
@@ -2463,29 +3320,114 @@
         const views =
             document.querySelectorAll(".view");
 
+
         const navItems =
             document.querySelectorAll(".nav-item");
 
+
         const menuOverlay =
-            document.getElementById("menuOverlay");
+            document.getElementById(
+                "menuOverlay"
+            );
+
 
         const menuButton =
-            document.getElementById("menuButton");
+            document.getElementById(
+                "menuButton"
+            );
+
 
         const menuClose =
-            document.getElementById("menuClose");
+            document.getElementById(
+                "menuClose"
+            );
+
 
         const startButton =
-            document.getElementById("startButton");
+            document.getElementById(
+                "startButton"
+            );
+
 
         const chatForm =
-            document.getElementById("chatForm");
+            document.getElementById(
+                "chatForm"
+            );
+
 
         const chatInput =
-            document.getElementById("chatInput");
+            document.getElementById(
+                "chatInput"
+            );
+
 
         const chatScroll =
-            document.getElementById("chatScroll");
+            document.getElementById(
+                "chatScroll"
+            );
+
+
+        const settingsModal =
+            document.getElementById(
+                "settingsModal"
+            );
+
+
+        const modalTitle =
+            document.getElementById(
+                "modalTitle"
+            );
+
+
+        const modalContent =
+            document.getElementById(
+                "modalContent"
+            );
+
+
+        const toast =
+            document.getElementById(
+                "toast"
+            );
+
+
+        const authLoading =
+            document.getElementById(
+                "authLoading"
+            );
+
+
+        /* =====================================================
+           TOAST
+        ====================================================== */
+
+        let toastTimer = null;
+
+
+        function showToast(message) {
+
+            clearTimeout(toastTimer);
+
+
+            toast.textContent =
+                message;
+
+
+            toast.classList.add(
+                "show"
+            );
+
+
+            toastTimer =
+                setTimeout(function() {
+
+                    toast.classList.remove(
+                        "show"
+                    );
+
+                }, 2200);
+
+        }
 
 
         /* =====================================================
@@ -2539,6 +3481,24 @@
 
 
         /* =====================================================
+           REDIRECT TO LOGIN
+        ====================================================== */
+
+        function redirectToLogin() {
+
+            localStorage.removeItem(
+                SESSION_KEY
+            );
+
+
+            window.location.replace(
+                "index.html"
+            );
+
+        }
+
+
+        /* =====================================================
            LOAD CURRENT USER
         ====================================================== */
 
@@ -2552,8 +3512,7 @@
 
             if (!token) {
 
-                window.location.href =
-                    "index.html";
+                redirectToLogin();
 
                 return false;
 
@@ -2570,12 +3529,7 @@
 
                 if (!response.ok) {
 
-                    localStorage.removeItem(
-                        SESSION_KEY
-                    );
-
-                    window.location.href =
-                        "index.html";
+                    redirectToLogin();
 
                     return false;
 
@@ -2591,12 +3545,7 @@
                     !data.user
                 ) {
 
-                    localStorage.removeItem(
-                        SESSION_KEY
-                    );
-
-                    window.location.href =
-                        "index.html";
+                    redirectToLogin();
 
                     return false;
 
@@ -2644,14 +3593,7 @@
                 );
 
 
-                localStorage.removeItem(
-                    SESSION_KEY
-                );
-
-
-                window.location.href =
-                    "index.html";
-
+                redirectToLogin();
 
                 return false;
 
@@ -2666,15 +3608,55 @@
 
         function showView(viewId) {
 
+            const target =
+                document.getElementById(
+                    viewId
+                );
+
+
+            if (!target) {
+                return;
+            }
+
+
+            /*
+             * Primero cerramos el menú y cualquier modal.
+             */
+
+            menuOverlay.classList.remove(
+                "open"
+            );
+
+            settingsModal.classList.remove(
+                "open"
+            );
+
+
+            /*
+             * Una sola vista visible.
+             */
+
             views.forEach(function(view) {
 
-                view.classList.toggle(
-                    "active",
-                    view.id === viewId
+                view.classList.remove(
+                    "active"
                 );
 
             });
 
+
+            /*
+             * Activamos únicamente la solicitada.
+             */
+
+            target.classList.add(
+                "active"
+            );
+
+
+            /*
+             * Actualizamos la navegación inferior.
+             */
 
             navItems.forEach(function(item) {
 
@@ -2686,7 +3668,21 @@
             });
 
 
-            menuOverlay.classList.remove("open");
+            /*
+             * Cada cambio comienza desde arriba.
+             */
+
+            target.scrollTop = 0;
+
+
+            if (viewId === "chatView") {
+
+                setTimeout(
+                    scrollChat,
+                    40
+                );
+
+            }
 
         }
 
@@ -2696,6 +3692,7 @@
             if (!item.dataset.view) {
                 return;
             }
+
 
             item.addEventListener(
                 "click",
@@ -2737,7 +3734,9 @@
             "click",
             function() {
 
-                menuOverlay.classList.add("open");
+                menuOverlay.classList.add(
+                    "open"
+                );
 
             }
         );
@@ -2747,7 +3746,9 @@
             "click",
             function() {
 
-                menuOverlay.classList.remove("open");
+                menuOverlay.classList.remove(
+                    "open"
+                );
 
             }
         );
@@ -2780,8 +3781,10 @@
             const wrapper =
                 document.createElement("div");
 
+
             wrapper.className =
                 "message system";
+
 
             wrapper.innerHTML = `
                 <div class="bubble">
@@ -2789,7 +3792,11 @@
                 </div>
             `;
 
-            chatScroll.appendChild(wrapper);
+
+            chatScroll.appendChild(
+                wrapper
+            );
+
 
             scrollChat();
 
@@ -2805,8 +3812,10 @@
             const wrapper =
                 document.createElement("div");
 
+
             wrapper.className =
                 "message user";
+
 
             wrapper.innerHTML = `
                 <div class="bubble">
@@ -2814,7 +3823,11 @@
                 </div>
             `;
 
-            chatScroll.appendChild(wrapper);
+
+            chatScroll.appendChild(
+                wrapper
+            );
+
 
             scrollChat();
 
@@ -2828,9 +3841,14 @@
         function escapeHtml(text) {
 
             const div =
-                document.createElement("div");
+                document.createElement(
+                    "div"
+                );
 
-            div.textContent = text;
+
+            div.textContent =
+                text;
+
 
             return div.innerHTML;
 
@@ -2838,7 +3856,7 @@
 
 
         /* =====================================================
-           SCROLL
+           SCROLL CHAT
         ====================================================== */
 
         function scrollChat() {
@@ -2846,8 +3864,13 @@
             setTimeout(function() {
 
                 chatScroll.scrollTo({
-                    top: chatScroll.scrollHeight,
-                    behavior: "smooth"
+
+                    top:
+                        chatScroll.scrollHeight,
+
+                    behavior:
+                        "smooth"
+
                 });
 
             }, 40);
@@ -2923,16 +3946,24 @@
                 }
 
 
-                addUserMessage(value);
+                addUserMessage(
+                    value
+                );
 
-                chatInput.value = "";
+
+                chatInput.value =
+                    "";
 
 
                 const emailPattern =
                     /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 
-                if (!emailPattern.test(value)) {
+                if (
+                    !emailPattern.test(
+                        value
+                    )
+                ) {
 
                     setTimeout(function() {
 
@@ -2946,6 +3977,7 @@
                     }, 350);
 
                     return;
+
                 }
 
 
@@ -2959,7 +3991,9 @@
                     );
 
 
-                    createRequest(value);
+                    createRequest(
+                        value
+                    );
 
                 }, 450);
 
@@ -2981,9 +4015,11 @@
                         .toString()
                         .slice(-7),
 
-                email: email,
+                email:
+                    email,
 
-                status: "pending",
+                status:
+                    "pending",
 
                 createdAt:
                     new Date()
@@ -2991,7 +4027,10 @@
             };
 
 
-            state.requests.push(request);
+            state.requests.push(
+                request
+            );
+
 
             renderHistory();
 
@@ -3009,6 +4048,36 @@
                 );
 
             }, 650);
+
+        }
+
+
+        /* =====================================================
+           FORMAT DATE
+        ====================================================== */
+
+        function formatDate(date) {
+
+            if (
+                !(date instanceof Date) ||
+                Number.isNaN(
+                    date.getTime()
+                )
+            ) {
+
+                return "Fecha no disponible";
+
+            }
+
+
+            return date.toLocaleDateString(
+                "es-ES",
+                {
+                    day: "2-digit",
+                    month: "2-digit",
+                    year: "numeric"
+                }
+            );
 
         }
 
@@ -3047,6 +4116,7 @@
                 `;
 
                 return;
+
             }
 
 
@@ -3065,10 +4135,9 @@
 
 
                         const date =
-                            request.createdAt
-                                .toLocaleDateString(
-                                    "es-ES"
-                                );
+                            formatDate(
+                                request.createdAt
+                            );
 
 
                         return `
@@ -3086,10 +4155,102 @@
                                         ${date}
                                     </div>
 
+                                    <div class="history-id">
+                                        ${escapeHtml(
+                                            request.id
+                                        )}
+                                    </div>
+
                                 </div>
 
                                 <div class="status ${request.status}">
                                     ${statusText}
+                                </div>
+
+                            </div>
+                        `;
+
+                    })
+                    .join("");
+
+        }
+
+
+        /* =====================================================
+           UPDATE BALANCE TRANSACTIONS
+        ====================================================== */
+
+        function renderBalanceTransactions() {
+
+            const container =
+                document.getElementById(
+                    "balanceTransactions"
+                );
+
+
+            if (!state.requests.length) {
+
+                container.innerHTML = `
+                    <div class="empty">
+
+                        <div class="empty-icon">
+                            ◌
+                        </div>
+
+                        <div class="empty-title">
+                            Sin movimientos
+                        </div>
+
+                        <div class="empty-text">
+                            Tus movimientos aparecerán
+                            aquí cuando existan registros.
+                        </div>
+
+                    </div>
+                `;
+
+                return;
+
+            }
+
+
+            container.innerHTML =
+                state.requests
+                    .slice()
+                    .reverse()
+                    .map(function(request) {
+
+                        const statusText =
+                            request.status === "approved"
+                                ? "Aceptada"
+                                : request.status === "rejected"
+                                    ? "Rechazada"
+                                    : "Pendiente";
+
+
+                        return `
+                            <div class="history-item">
+
+                                <div class="history-main">
+
+                                    <div class="history-email">
+                                        Solicitud ${escapeHtml(
+                                            request.id
+                                        )}
+                                    </div>
+
+                                    <div class="history-date">
+                                        ${escapeHtml(
+                                            statusText
+                                        )}
+                                    </div>
+
+                                </div>
+
+                                <div class="status ${request.status}">
+                                    ${request.status === "approved"
+                                        ? "Registrada"
+                                        : statusText}
                                 </div>
 
                             </div>
@@ -3111,7 +4272,10 @@
                 state.requests.filter(
                     function(request) {
 
-                        return request.status === "approved";
+                        return (
+                            request.status ===
+                            "approved"
+                        );
 
                     }
                 ).length;
@@ -3121,7 +4285,10 @@
                 state.requests.filter(
                     function(request) {
 
-                        return request.status === "pending";
+                        return (
+                            request.status ===
+                            "pending"
+                        );
 
                     }
                 ).length;
@@ -3129,25 +4296,30 @@
 
             document.getElementById(
                 "acceptedCount"
-            ).textContent = accepted;
+            ).textContent =
+                accepted;
 
 
             document.getElementById(
                 "pendingCount"
-            ).textContent = pending;
+            ).textContent =
+                pending;
 
 
-            document.querySelector(
-                ".balance-value"
+            document.getElementById(
+                "balanceValue"
             ).innerHTML =
                 Number(
                     state.balance || 0
                 ).toFixed(2) +
                 `
-                <span class="balance-currency">
-                    USDT
-                </span>
+                    <span class="balance-currency">
+                        USDT
+                    </span>
                 `;
+
+
+            renderBalanceTransactions();
 
         }
 
@@ -3157,12 +4329,16 @@
         ====================================================== */
 
         document
-            .getElementById("profileTopButton")
+            .getElementById(
+                "profileTopButton"
+            )
             .addEventListener(
                 "click",
                 function() {
 
-                    showView("profileView");
+                    showView(
+                        "profileView"
+                    );
 
                 }
             );
@@ -3184,14 +4360,27 @@
                 "usuario@email.com";
 
 
+            const id =
+                state.user.id ||
+                "ID no disponible";
+
+
             document.getElementById(
                 "profileName"
-            ).textContent = username;
+            ).textContent =
+                username;
 
 
             document.getElementById(
                 "profileEmail"
-            ).textContent = email;
+            ).textContent =
+                email;
+
+
+            document.getElementById(
+                "profileId"
+            ).textContent =
+                "ID: " + id;
 
 
             document.getElementById(
@@ -3205,74 +4394,466 @@
 
 
         /* =====================================================
-           PROFILE OPTIONS
+           MODAL
+        ====================================================== */
+
+        function openModal(
+            title,
+            content
+        ) {
+
+            modalTitle.textContent =
+                title;
+
+
+            modalContent.innerHTML =
+                content;
+
+
+            settingsModal.classList.add(
+                "open"
+            );
+
+        }
+
+
+        function closeModal() {
+
+            settingsModal.classList.remove(
+                "open"
+            );
+
+        }
+
+
+        document
+            .getElementById(
+                "modalClose"
+            )
+            .addEventListener(
+                "click",
+                closeModal
+            );
+
+
+        settingsModal.addEventListener(
+            "click",
+            function(event) {
+
+                if (
+                    event.target ===
+                    settingsModal
+                ) {
+
+                    closeModal();
+
+                }
+
+            }
+        );
+
+
+        /* =====================================================
+           EDIT PROFILE
         ====================================================== */
 
         document
-            .getElementById("editProfile")
+            .getElementById(
+                "editProfile"
+            )
             .addEventListener(
                 "click",
                 function() {
 
-                    addSystemMessage(
-                        "La edición del perfil estará " +
-                        "disponible cuando conectemos " +
-                        "la cuenta con D1."
-                    );
+                    openModal(
+                        "Editar perfil",
+                        `
+                            <p class="modal-text">
+                                Estos datos proceden de tu cuenta
+                                autenticada. El correo y el ID no
+                                se pueden modificar desde esta
+                                interfaz.
+                            </p>
 
-                    showView("chatView");
+                            <div class="settings-label">
+                                NOMBRE DE USUARIO
+                            </div>
+
+                            <input
+                                class="settings-input settings-disabled"
+                                type="text"
+                                value="${escapeHtml(
+                                    state.user.username
+                                )}"
+                                disabled
+                            >
+
+                            <div
+                                class="settings-label"
+                                style="display:block;margin-top:14px;"
+                            >
+                                CORREO
+                            </div>
+
+                            <input
+                                class="settings-input settings-disabled"
+                                type="email"
+                                value="${escapeHtml(
+                                    state.user.email
+                                )}"
+                                disabled
+                            >
+
+                            <div
+                                class="settings-label"
+                                style="display:block;margin-top:14px;"
+                            >
+                                ID DE CUENTA
+                            </div>
+
+                            <input
+                                class="settings-input settings-disabled"
+                                type="text"
+                                value="${escapeHtml(
+                                    state.user.id ||
+                                    "No disponible"
+                                )}"
+                                disabled
+                            >
+
+                            <p
+                                class="modal-text"
+                                style="margin-top:13px;margin-bottom:0;"
+                            >
+                                La modificación real de estos
+                                datos requerirá un endpoint
+                                específico en el Worker y una
+                                actualización segura en D1.
+                            </p>
+                        `
+                    );
 
                 }
             );
 
 
+        /* =====================================================
+           ACCOUNT SETTINGS
+        ====================================================== */
+
         document
-            .getElementById("accountSettings")
+            .getElementById(
+                "accountSettings"
+            )
             .addEventListener(
                 "click",
                 function() {
 
-                    addSystemMessage(
-                        "Las opciones de cuenta se " +
-                        "conectarán posteriormente."
-                    );
+                    openModal(
+                        "Configuración de cuenta",
+                        `
+                            <div class="setting-row">
 
-                    showView("chatView");
+                                <div class="setting-info">
+
+                                    <div class="setting-title">
+                                        Cuenta autenticada
+                                    </div>
+
+                                    <div class="setting-description">
+                                        La aplicación comprueba tu
+                                        sesión con el servidor.
+                                    </div>
+
+                                </div>
+
+                                <div class="status approved">
+                                    Activa
+                                </div>
+
+                            </div>
+
+                            <div class="setting-row">
+
+                                <div class="setting-info">
+
+                                    <div class="setting-title">
+                                        Rol
+                                    </div>
+
+                                    <div class="setting-description">
+                                        Nivel de acceso actual
+                                        asociado a tu cuenta.
+                                    </div>
+
+                                </div>
+
+                                <div
+                                    class="status"
+                                    style="
+                                        color:#aaa;
+                                        background:rgba(255,255,255,.05);
+                                    "
+                                >
+                                    ${escapeHtml(
+                                        state.user.role ||
+                                        "user"
+                                    )}
+                                </div>
+
+                            </div>
+
+                            <p
+                                class="modal-text"
+                                style="margin-top:14px;margin-bottom:0;"
+                            >
+                                Las opciones de seguridad que
+                                modifiquen datos de la cuenta
+                                se conectarán posteriormente
+                                con el backend.
+                            </p>
+                        `
+                    );
 
                 }
             );
 
 
+        /* =====================================================
+           NOTIFICATIONS
+        ====================================================== */
+
         document
-            .getElementById("notificationsSettings")
+            .getElementById(
+                "notificationsSettings"
+            )
             .addEventListener(
                 "click",
                 function() {
 
-                    addSystemMessage(
-                        "Las notificaciones se configurarán " +
-                        "cuando conectemos el sistema de " +
-                        "notificaciones push."
+                    openModal(
+                        "Notificaciones",
+                        `
+                            <div class="setting-row">
+
+                                <div class="setting-info">
+
+                                    <div class="setting-title">
+                                        Notificaciones
+                                    </div>
+
+                                    <div class="setting-description">
+                                        Control general de avisos
+                                        dentro de la aplicación.
+                                    </div>
+
+                                </div>
+
+                                <button
+                                    class="toggle ${
+                                        settings.notifications
+                                            ? "active"
+                                            : ""
+                                    }"
+                                    id="toggleNotifications"
+                                    aria-label="Notificaciones"
+                                ></button>
+
+                            </div>
+
+
+                            <div class="setting-row">
+
+                                <div class="setting-info">
+
+                                    <div class="setting-title">
+                                        Actividad
+                                    </div>
+
+                                    <div class="setting-description">
+                                        Avisos relacionados con
+                                        cambios de estado.
+                                    </div>
+
+                                </div>
+
+                                <button
+                                    class="toggle ${
+                                        settings.activityNotifications
+                                            ? "active"
+                                            : ""
+                                    }"
+                                    id="toggleActivity"
+                                    aria-label="Actividad"
+                                ></button>
+
+                            </div>
+
+
+                            <p
+                                class="modal-text"
+                                style="margin-top:14px;margin-bottom:0;"
+                            >
+                                Estas preferencias se guardan
+                                localmente en este dispositivo.
+                                Las notificaciones push reales
+                                necesitarán conexión con el
+                                sistema de notificaciones.
+                            </p>
+                        `
                     );
 
-                    showView("chatView");
+
+                    document
+                        .getElementById(
+                            "toggleNotifications"
+                        )
+                        .addEventListener(
+                            "click",
+                            function() {
+
+                                settings.notifications =
+                                    !settings.notifications;
+
+
+                                this.classList.toggle(
+                                    "active",
+                                    settings.notifications
+                                );
+
+
+                                saveSettings();
+
+                            }
+                        );
+
+
+                    document
+                        .getElementById(
+                            "toggleActivity"
+                        )
+                        .addEventListener(
+                            "click",
+                            function() {
+
+                                settings.activityNotifications =
+                                    !settings.activityNotifications;
+
+
+                                this.classList.toggle(
+                                    "active",
+                                    settings.activityNotifications
+                                );
+
+
+                                saveSettings();
+
+                            }
+                        );
 
                 }
             );
 
 
+        /* =====================================================
+           PRIVACY
+        ====================================================== */
+
         document
-            .getElementById("privacySettings")
+            .getElementById(
+                "privacySettings"
+            )
             .addEventListener(
                 "click",
                 function() {
 
-                    addSystemMessage(
-                        "La configuración de privacidad " +
-                        "estará disponible próximamente."
+                    openModal(
+                        "Privacidad",
+                        `
+                            <div class="setting-row">
+
+                                <div class="setting-info">
+
+                                    <div class="setting-title">
+                                        Modo de privacidad
+                                    </div>
+
+                                    <div class="setting-description">
+                                        Mantiene activada la
+                                        preferencia de privacidad
+                                        de la interfaz.
+                                    </div>
+
+                                </div>
+
+                                <button
+                                    class="toggle ${
+                                        settings.privacyMode
+                                            ? "active"
+                                            : ""
+                                    }"
+                                    id="togglePrivacy"
+                                    aria-label="Modo de privacidad"
+                                ></button>
+
+                            </div>
+
+
+                            <div
+                                class="glass-card"
+                                style="
+                                    margin-top:14px;
+                                    margin-bottom:0;
+                                    padding:13px;
+                                "
+                            >
+
+                                <div class="page-eyebrow">
+                                    DATOS DE SESIÓN
+                                </div>
+
+                                <p
+                                    style="
+                                        color:#777;
+                                        font-size:10px;
+                                        line-height:1.6;
+                                    "
+                                >
+                                    La sesión utiliza un token
+                                    almacenado localmente para
+                                    comunicarse con el Worker.
+                                    Al cerrar sesión, el token
+                                    local se elimina y se solicita
+                                    su eliminación en el servidor.
+                                </p>
+
+                            </div>
+                        `
                     );
 
-                    showView("chatView");
+
+                    document
+                        .getElementById(
+                            "togglePrivacy"
+                        )
+                        .addEventListener(
+                            "click",
+                            function() {
+
+                                settings.privacyMode =
+                                    !settings.privacyMode;
+
+
+                                this.classList.toggle(
+                                    "active",
+                                    settings.privacyMode
+                                );
+
+
+                                saveSettings();
+
+                            }
+                        );
 
                 }
             );
@@ -3283,7 +4864,9 @@
         ====================================================== */
 
         document
-            .getElementById("logoutButton")
+            .getElementById(
+                "logoutButton"
+            )
             .addEventListener(
                 "click",
                 async function() {
@@ -3292,7 +4875,12 @@
                         this;
 
 
-                    button.disabled = true;
+                    button.disabled =
+                        true;
+
+
+                    button.style.opacity =
+                        ".5";
 
 
                     try {
@@ -3319,8 +4907,9 @@
                     );
 
 
-                    window.location.href =
-                        "index.html";
+                    window.location.replace(
+                        "index.html"
+                    );
 
                 }
             );
@@ -3331,7 +4920,9 @@
         ====================================================== */
 
         document
-            .getElementById("copyReferral")
+            .getElementById(
+                "copyReferral"
+            )
             .addEventListener(
                 "click",
                 async function() {
@@ -3339,12 +4930,17 @@
                     const link =
                         document.getElementById(
                             "referralLink"
-                        ).textContent;
+                        ).textContent.trim();
 
 
                     if (
-                        link === "próximamente"
+                        link ===
+                        "próximamente"
                     ) {
+
+                        showToast(
+                            "El enlace de referidos todavía no está conectado."
+                        );
 
                         return;
 
@@ -3354,7 +4950,10 @@
                     try {
 
                         await navigator.clipboard
-                            .writeText(link);
+                            .writeText(
+                                link
+                            );
+
 
                         this.textContent =
                             "COPIADO ✓";
@@ -3372,8 +4971,9 @@
 
                     } catch {
 
-                        this.textContent =
-                            "NO DISPONIBLE";
+                        showToast(
+                            "No se pudo copiar el enlace."
+                        );
 
                     }
 
@@ -3386,17 +4986,58 @@
         ====================================================== */
 
         document
-            .getElementById("withdrawButton")
+            .getElementById(
+                "withdrawButton"
+            )
             .addEventListener(
                 "click",
                 function() {
 
-                    showView("chatView");
+                    openModal(
+                        "Retiro",
+                        `
+                            <p class="modal-text">
+                                La interfaz de retiros está
+                                preparada, pero la creación y
+                                revisión de solicitudes todavía
+                                necesita conexión con el backend
+                                y D1.
+                            </p>
 
-                    addSystemMessage(
-                        "La sección de retiros estará " +
-                        "disponible cuando conectemos " +
-                        "el balance con D1."
+                            <div
+                                class="glass-card"
+                                style="
+                                    margin-bottom:0;
+                                    padding:14px;
+                                "
+                            >
+
+                                <div class="page-eyebrow">
+                                    BALANCE DISPONIBLE
+                                </div>
+
+                                <div
+                                    style="
+                                        font-size:24px;
+                                        font-weight:750;
+                                        margin-top:5px;
+                                    "
+                                >
+                                    ${Number(
+                                        state.balance || 0
+                                    ).toFixed(2)}
+                                    <span
+                                        style="
+                                            color:#777;
+                                            font-size:11px;
+                                        "
+                                    >
+                                        USDT
+                                    </span>
+                                </div>
+
+                            </div>
+                        `
                     );
 
                 }
@@ -3404,23 +5045,63 @@
 
 
         document
-            .getElementById("transactionsButton")
+            .getElementById(
+                "transactionsButton"
+            )
             .addEventListener(
                 "click",
                 function() {
 
-                    showView("balanceView");
+                    showView(
+                        "balanceView"
+                    );
 
-                    document
-                        .getElementById(
-                            "balanceTransactions"
-                        )
-                        .scrollIntoView({
-                            behavior: "smooth"
-                        });
+
+                    setTimeout(function() {
+
+                        document
+                            .getElementById(
+                                "balanceTransactions"
+                            )
+                            .scrollIntoView({
+                                behavior:
+                                    "smooth",
+                                block:
+                                    "start"
+                            });
+
+                    }, 80);
 
                 }
             );
+
+
+        /* =====================================================
+           KEYBOARD / ESC
+        ====================================================== */
+
+        document.addEventListener(
+            "keydown",
+            function(event) {
+
+                if (
+                    event.key ===
+                    "Escape"
+                ) {
+
+                    menuOverlay.classList.remove(
+                        "open"
+                    );
+
+
+                    settingsModal.classList.remove(
+                        "open"
+                    );
+
+                }
+
+            }
+        );
 
 
         /* =====================================================
@@ -3443,6 +5124,18 @@
             renderHistory();
 
             renderProfile();
+
+
+            authLoading.classList.add(
+                "hidden"
+            );
+
+
+            setTimeout(function() {
+
+                authLoading.remove();
+
+            }, 250);
 
         }
 
