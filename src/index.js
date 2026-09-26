@@ -6,33 +6,70 @@ export default {
 
     /*
      * =========================
-     * API
+     * HEALTH
      * =========================
      */
 
-    if (url.pathname === "/api/health") {
+    if (
+      url.pathname === "/api/health" &&
+      request.method === "GET"
+    ) {
       return handleHealth(env);
     }
 
-    if (url.pathname === "/api/auth/register" && request.method === "POST") {
+    /*
+     * =========================
+     * AUTH
+     * =========================
+     */
+
+    if (
+      url.pathname === "/api/auth/register" &&
+      request.method === "POST"
+    ) {
       return handleRegister(request, env);
     }
 
-    if (url.pathname === "/api/auth/login" && request.method === "POST") {
+    if (
+      url.pathname === "/api/auth/login" &&
+      request.method === "POST"
+    ) {
       return handleLogin(request, env);
     }
 
-    if (url.pathname === "/api/auth/logout" && request.method === "POST") {
+    if (
+      url.pathname === "/api/auth/logout" &&
+      request.method === "POST"
+    ) {
       return handleLogout(request, env);
     }
 
-    if (url.pathname === "/api/auth/me" && request.method === "GET") {
+    if (
+      url.pathname === "/api/auth/me" &&
+      request.method === "GET"
+    ) {
       return handleMe(request, env);
     }
 
     /*
      * =========================
-     * ARCHIVOS PUBLIC
+     * FUTURAS API
+     * =========================
+     */
+
+    if (url.pathname.startsWith("/api/")) {
+      return json(
+        {
+          success: false,
+          error: "Ruta API no disponible."
+        },
+        404
+      );
+    }
+
+    /*
+     * =========================
+     * PUBLIC ASSETS
      * =========================
      */
 
@@ -43,7 +80,7 @@ export default {
 
 /*
  * =========================
- * HEALTH CHECK
+ * HEALTH
  * =========================
  */
 
@@ -58,10 +95,11 @@ async function handleHealth(env) {
       database: result?.ok === 1,
       message: "GmailAccounts API funcionando correctamente."
     });
-  } catch (error) {
+  } catch {
     return json(
       {
         success: false,
+        database: false,
         error: "No se pudo conectar con la base de datos."
       },
       500
@@ -72,7 +110,7 @@ async function handleHealth(env) {
 
 /*
  * =========================
- * REGISTRO
+ * REGISTER
  * =========================
  */
 
@@ -119,9 +157,32 @@ async function handleRegister(request, env) {
       );
     }
 
+    /*
+     * El correo administrativo no puede
+     * registrarse mediante el formulario normal.
+     */
+
+    const adminEmail = getAdminEmail(env);
+
+    if (adminEmail && email === adminEmail.toLowerCase()) {
+      return json(
+        {
+          success: false,
+          error: "Esta cuenta está reservada para administración."
+        },
+        403
+      );
+    }
+
     const existing = await env.DB1
       .prepare(
-        "SELECT id FROM users WHERE email = ?1 OR username = ?2 LIMIT 1"
+        `
+        SELECT id
+        FROM users
+        WHERE email = ?1
+           OR username = ?2
+        LIMIT 1
+        `
       )
       .bind(email, username)
       .first();
@@ -157,7 +218,18 @@ async function handleRegister(request, env) {
           created_at,
           updated_at
         )
-        VALUES (?1, ?2, ?3, ?4, 'user', 0, ?5, NULL, ?6, ?6)
+        VALUES (
+          ?1,
+          ?2,
+          ?3,
+          ?4,
+          'user',
+          0,
+          ?5,
+          NULL,
+          ?6,
+          ?6
+        )
         `
       )
       .bind(
@@ -170,7 +242,10 @@ async function handleRegister(request, env) {
       )
       .run();
 
-    const session = await createSession(userId, env);
+    const session = await createSession(
+      userId,
+      env
+    );
 
     return json({
       success: true,
@@ -184,7 +259,7 @@ async function handleRegister(request, env) {
       },
       session: session.token
     });
-  } catch (error) {
+  } catch {
     return json(
       {
         success: false,
@@ -206,11 +281,15 @@ async function handleLogin(request, env) {
   try {
     const body = await request.json();
 
-    const identifier = String(body.identifier || "")
+    const identifier = String(
+      body.identifier || ""
+    )
       .trim()
       .toLowerCase();
 
-    const password = String(body.password || "");
+    const password = String(
+      body.password || ""
+    );
 
     if (!identifier || !password) {
       return json(
@@ -221,6 +300,54 @@ async function handleLogin(request, env) {
         400
       );
     }
+
+    /*
+     * =========================
+     * ADMIN LOGIN
+     * =========================
+     *
+     * Las credenciales reales vienen
+     * desde Cloudflare Secrets.
+     */
+
+    const adminEmail = getAdminEmail(env);
+    const adminPassword = getAdminPassword(env);
+
+    if (
+      adminEmail &&
+      adminPassword &&
+      identifier === adminEmail.toLowerCase() &&
+      password === adminPassword
+    ) {
+      const admin = await getOrCreateAdmin(
+        env,
+        adminEmail
+      );
+
+      const session = await createSession(
+        admin.id,
+        env
+      );
+
+      return json({
+        success: true,
+        message: "Inicio de sesión administrativo correcto.",
+        user: {
+          id: admin.id,
+          email: admin.email,
+          username: admin.username,
+          role: "admin",
+          balance: admin.balance
+        },
+        session: session.token
+      });
+    }
+
+    /*
+     * =========================
+     * USER LOGIN
+     * =========================
+     */
 
     const user = await env.DB1
       .prepare(
@@ -241,14 +368,6 @@ async function handleLogin(request, env) {
       .bind(identifier)
       .first();
 
-    /*
-     * La cuenta administrativa se configurará
-     * posteriormente mediante secretos del Worker.
-     *
-     * No ponemos la contraseña administrativa
-     * directamente en el código público.
-     */
-
     if (!user) {
       return json(
         {
@@ -259,10 +378,11 @@ async function handleLogin(request, env) {
       );
     }
 
-    const passwordCorrect = await verifyPassword(
-      password,
-      user.password_hash
-    );
+    const passwordCorrect =
+      await verifyPassword(
+        password,
+        user.password_hash
+      );
 
     if (!passwordCorrect) {
       return json(
@@ -274,7 +394,10 @@ async function handleLogin(request, env) {
       );
     }
 
-    const session = await createSession(user.id, env);
+    const session = await createSession(
+      user.id,
+      env
+    );
 
     return json({
       success: true,
@@ -288,7 +411,7 @@ async function handleLogin(request, env) {
       },
       session: session.token
     });
-  } catch (error) {
+  } catch {
     return json(
       {
         success: false,
@@ -302,19 +425,152 @@ async function handleLogin(request, env) {
 
 /*
  * =========================
+ * ADMIN USER
+ * =========================
+ */
+
+async function getOrCreateAdmin(
+  env,
+  adminEmail
+) {
+  let admin = await env.DB1
+    .prepare(
+      `
+      SELECT
+        id,
+        email,
+        username,
+        role,
+        balance
+      FROM users
+      WHERE LOWER(email) = ?1
+      LIMIT 1
+      `
+    )
+    .bind(adminEmail.toLowerCase())
+    .first();
+
+  if (admin) {
+    if (admin.role !== "admin") {
+      await env.DB1
+        .prepare(
+          `
+          UPDATE users
+          SET role = 'admin',
+              updated_at = ?1
+          WHERE id = ?2
+          `
+        )
+        .bind(
+          Date.now(),
+          admin.id
+        )
+        .run();
+
+      admin.role = "admin";
+    }
+
+    return admin;
+  }
+
+  const id = crypto.randomUUID();
+  const username =
+    adminEmail
+      .split("@")[0]
+      .replace(/[^a-zA-Z0-9_]/g, "")
+      .slice(0, 30) || "admin";
+
+  const referralCode =
+    createReferralCode();
+
+  const now = Date.now();
+
+  /*
+   * Esta cuenta se crea únicamente como
+   * identidad administrativa interna.
+   *
+   * La contraseña NO se almacena aquí.
+   * La validación se hace mediante
+   * ADMIN_PASSWORD de Cloudflare.
+   */
+
+  const placeholderPassword =
+    await hashPassword(
+      crypto.randomUUID()
+    );
+
+  await env.DB1
+    .prepare(
+      `
+      INSERT INTO users (
+        id,
+        email,
+        username,
+        password_hash,
+        role,
+        balance,
+        referral_code,
+        referred_by,
+        created_at,
+        updated_at
+      )
+      VALUES (
+        ?1,
+        ?2,
+        ?3,
+        ?4,
+        'admin',
+        0,
+        ?5,
+        NULL,
+        ?6,
+        ?6
+      )
+      `
+    )
+    .bind(
+      id,
+      adminEmail.toLowerCase(),
+      username,
+      placeholderPassword,
+      referralCode,
+      now
+    )
+    .run();
+
+  return {
+    id,
+    email: adminEmail.toLowerCase(),
+    username,
+    role: "admin",
+    balance: 0
+  };
+}
+
+
+/*
+ * =========================
  * LOGOUT
  * =========================
  */
 
-async function handleLogout(request, env) {
-  const token = getSessionToken(request);
+async function handleLogout(
+  request,
+  env
+) {
+  const token =
+    getSessionToken(request);
 
   if (token) {
-    const tokenHash = await hashToken(token);
+    const tokenHash =
+      await hashToken(token);
 
     await env.DB1
       .prepare(
-        "DELETE FROM sessions WHERE token_hash = ?1"
+        `
+        DELETE FROM sessions
+        WHERE token_hash = ?1
+        `
       )
       .bind(tokenHash)
       .run();
@@ -329,12 +585,19 @@ async function handleLogout(request, env) {
 
 /*
  * =========================
- * USUARIO ACTUAL
+ * CURRENT USER
  * =========================
  */
 
-async function handleMe(request, env) {
-  const user = await getAuthenticatedUser(request, env);
+async function handleMe(
+  request,
+  env
+) {
+  const user =
+    await getAuthenticatedUser(
+      request,
+      env
+    );
 
   if (!user) {
     return json(
@@ -362,18 +625,30 @@ async function handleMe(request, env) {
 
 /*
  * =========================
- * SESIONES
+ * SESSIONS
  * =========================
  */
 
-async function createSession(userId, env) {
-  const token = crypto.randomUUID() + crypto.randomUUID();
-  const tokenHash = await hashToken(token);
+async function createSession(
+  userId,
+  env
+) {
+  const token =
+    crypto.randomUUID() +
+    crypto.randomUUID();
 
-  const sessionId = crypto.randomUUID();
+  const tokenHash =
+    await hashToken(token);
 
-  const createdAt = Date.now();
-  const expiresAt = createdAt + SESSION_DURATION;
+  const sessionId =
+    crypto.randomUUID();
+
+  const createdAt =
+    Date.now();
+
+  const expiresAt =
+    createdAt +
+    SESSION_DURATION;
 
   await env.DB1
     .prepare(
@@ -385,7 +660,13 @@ async function createSession(userId, env) {
         expires_at,
         created_at
       )
-      VALUES (?1, ?2, ?3, ?4, ?5)
+      VALUES (
+        ?1,
+        ?2,
+        ?3,
+        ?4,
+        ?5
+      )
       `
     )
     .bind(
@@ -405,38 +686,49 @@ async function createSession(userId, env) {
 }
 
 
-async function getAuthenticatedUser(request, env) {
-  const token = getSessionToken(request);
+async function getAuthenticatedUser(
+  request,
+  env
+) {
+  const token =
+    getSessionToken(request);
 
   if (!token) {
     return null;
   }
 
-  const tokenHash = await hashToken(token);
-  const now = Date.now();
+  const tokenHash =
+    await hashToken(token);
 
-  const session = await env.DB1
-    .prepare(
-      `
-      SELECT
-        sessions.id AS session_id,
-        sessions.user_id,
-        sessions.expires_at,
-        users.id,
-        users.email,
-        users.username,
-        users.role,
-        users.balance
-      FROM sessions
-      INNER JOIN users
-        ON users.id = sessions.user_id
-      WHERE sessions.token_hash = ?1
-        AND sessions.expires_at > ?2
-      LIMIT 1
-      `
-    )
-    .bind(tokenHash, now)
-    .first();
+  const now =
+    Date.now();
+
+  const session =
+    await env.DB1
+      .prepare(
+        `
+        SELECT
+          sessions.id AS session_id,
+          sessions.user_id,
+          sessions.expires_at,
+          users.id,
+          users.email,
+          users.username,
+          users.role,
+          users.balance
+        FROM sessions
+        INNER JOIN users
+          ON users.id = sessions.user_id
+        WHERE sessions.token_hash = ?1
+          AND sessions.expires_at > ?2
+        LIMIT 1
+        `
+      )
+      .bind(
+        tokenHash,
+        now
+      )
+      .first();
 
   if (!session) {
     return null;
@@ -446,20 +738,32 @@ async function getAuthenticatedUser(request, env) {
 }
 
 
-function getSessionToken(request) {
-  const authorization = request.headers.get("Authorization");
+function getSessionToken(
+  request
+) {
+  const authorization =
+    request.headers.get(
+      "Authorization"
+    );
 
-  if (authorization && authorization.startsWith("Bearer ")) {
-    return authorization.slice(7).trim();
+  if (
+    authorization &&
+    authorization.startsWith("Bearer ")
+  ) {
+    return authorization
+      .slice(7)
+      .trim();
   }
 
-  const cookieHeader = request.headers.get("Cookie");
+  const cookieHeader =
+    request.headers.get("Cookie");
 
   if (!cookieHeader) {
     return null;
   }
 
-  const cookies = parseCookies(cookieHeader);
+  const cookies =
+    parseCookies(cookieHeader);
 
   return cookies.session || null;
 }
@@ -467,51 +771,73 @@ function getSessionToken(request) {
 
 /*
  * =========================
- * SEGURIDAD
+ * PASSWORD / TOKEN HASHING
  * =========================
  */
 
-async function hashPassword(password) {
-  const encoder = new TextEncoder();
+async function hashPassword(
+  password
+) {
+  const encoder =
+    new TextEncoder();
 
-  const data = encoder.encode(password);
+  const data =
+    encoder.encode(password);
 
-  const hashBuffer = await crypto.subtle.digest(
-    "SHA-256",
-    data
+  const hashBuffer =
+    await crypto.subtle.digest(
+      "SHA-256",
+      data
+    );
+
+  return bufferToHex(
+    hashBuffer
   );
-
-  return bufferToHex(hashBuffer);
 }
 
 
-async function verifyPassword(password, storedHash) {
-  const hash = await hashPassword(password);
+async function verifyPassword(
+  password,
+  storedHash
+) {
+  const hash =
+    await hashPassword(password);
 
   return hash === storedHash;
 }
 
 
-async function hashToken(token) {
-  const encoder = new TextEncoder();
+async function hashToken(
+  token
+) {
+  const encoder =
+    new TextEncoder();
 
-  const data = encoder.encode(token);
+  const data =
+    encoder.encode(token);
 
-  const hashBuffer = await crypto.subtle.digest(
-    "SHA-256",
-    data
+  const hashBuffer =
+    await crypto.subtle.digest(
+      "SHA-256",
+      data
+    );
+
+  return bufferToHex(
+    hashBuffer
   );
-
-  return bufferToHex(hashBuffer);
 }
 
 
-function bufferToHex(buffer) {
+function bufferToHex(
+  buffer
+) {
   return Array.from(
     new Uint8Array(buffer)
   )
     .map((byte) =>
-      byte.toString(16).padStart(2, "0")
+      byte
+        .toString(16)
+        .padStart(2, "0")
     )
     .join("");
 }
@@ -519,12 +845,34 @@ function bufferToHex(buffer) {
 
 /*
  * =========================
- * UTILIDADES
+ * ADMIN SECRETS
+ * =========================
+ */
+
+function getAdminEmail(env) {
+  return env.ADMIN_EMAIL
+    ? String(env.ADMIN_EMAIL).trim()
+    : null;
+}
+
+
+function getAdminPassword(env) {
+  return env.ADMIN_PASSWORD
+    ? String(env.ADMIN_PASSWORD)
+    : null;
+}
+
+
+/*
+ * =========================
+ * UTILITIES
  * =========================
  */
 
 function isValidEmail(email) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
+    email
+  );
 }
 
 
@@ -540,37 +888,54 @@ function createReferralCode() {
 function parseCookies(header) {
   const cookies = {};
 
-  for (const part of header.split(";")) {
-    const separator = part.indexOf("=");
+  for (
+    const part of header.split(";")
+  ) {
+    const separator =
+      part.indexOf("=");
 
     if (separator === -1) {
       continue;
     }
 
-    const key = part
-      .slice(0, separator)
-      .trim();
+    const key =
+      part
+        .slice(0, separator)
+        .trim();
 
-    const value = part
-      .slice(separator + 1)
-      .trim();
+    const value =
+      part
+        .slice(separator + 1)
+        .trim();
 
-    cookies[key] = decodeURIComponent(value);
+    cookies[key] =
+      decodeURIComponent(value);
   }
 
   return cookies;
 }
 
 
-function json(data, status = 200) {
+/*
+ * =========================
+ * JSON RESPONSE
+ * =========================
+ */
+
+function json(
+  data,
+  status = 200
+) {
   return new Response(
     JSON.stringify(data),
     {
       status,
       headers: {
-        "Content-Type": "application/json; charset=UTF-8",
-        "Cache-Control": "no-store"
+        "Content-Type":
+          "application/json; charset=UTF-8",
+        "Cache-Control":
+          "no-store"
       }
     }
   );
-        }
+      }
