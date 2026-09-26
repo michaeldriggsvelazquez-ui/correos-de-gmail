@@ -11,7 +11,7 @@ directory = "./public"
 binding = "ASSETS"
 
 [[d1_databases]]
-binding = "DB"
+binding = "DB1"
 database_name = "gmail-db"
 database_id = "8b16ac40-600f-45c5-9b3e-4a2cdff646a6"
 
