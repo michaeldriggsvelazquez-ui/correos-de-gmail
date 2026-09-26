@@ -2,14 +2,25 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+
     <meta
         name="viewport"
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
     >
 
-    <title>GmailAccounts — Chat</title>
+    <meta
+        name="theme-color"
+        content="#050505"
+    >
+
+    <title>GmailAccounts</title>
 
     <style>
+
+        /* =========================================================
+           RESET
+        ========================================================= */
+
         * {
             box-sizing: border-box;
             margin: 0;
@@ -17,17 +28,26 @@
         }
 
         :root {
-            --bg: #070707;
-            --panel: #101010;
-            --panel-2: #151515;
-            --panel-3: #1b1b1b;
-            --border: #252525;
+            --bg: #050505;
+            --surface: rgba(18, 18, 18, 0.72);
+            --surface-strong: rgba(24, 24, 24, 0.88);
+            --surface-soft: rgba(255, 255, 255, 0.045);
+
+            --border: rgba(255, 255, 255, 0.09);
+            --border-soft: rgba(255, 255, 255, 0.06);
+
             --text: #f5f5f5;
-            --muted: #858585;
-            --soft: #bdbdbd;
-            --accent: #ffffff;
-            --danger: #ff5c5c;
-            --success: #66e39a;
+            --secondary: #999;
+            --muted: #626262;
+
+            --green: #55d98a;
+            --red: #ff6969;
+            --blue: #6ea8ff;
+
+            --radius-xl: 26px;
+            --radius-lg: 20px;
+            --radius-md: 15px;
+            --radius-sm: 11px;
         }
 
         html,
@@ -36,11 +56,15 @@
             min-height: 100%;
             background: var(--bg);
             color: var(--text);
+
             font-family:
                 Inter,
                 -apple-system,
                 BlinkMacSystemFont,
                 "Segoe UI",
+                Roboto,
+                Helvetica,
+                Arial,
                 sans-serif;
         }
 
@@ -55,728 +79,1442 @@
         }
 
         button {
-            border: none;
             cursor: pointer;
         }
 
-        /* =========================
+        button,
+        input {
+            outline: none;
+        }
+
+
+        /* =========================================================
            APP
-        ========================= */
+        ========================================================= */
 
         .app {
             width: 100%;
             height: 100vh;
+            height: 100dvh;
+
             display: flex;
             flex-direction: column;
+
             background:
                 radial-gradient(
-                    circle at 50% -20%,
-                    #191919 0%,
-                    #0b0b0b 40%,
-                    #070707 75%
-                );
+                    circle at 50% -10%,
+                    rgba(255,255,255,0.045),
+                    transparent 38%
+                ),
+                #050505;
         }
 
-        /* =========================
-           HEADER
-        ========================= */
 
-        .header {
-            height: 72px;
-            min-height: 72px;
+        /* =========================================================
+           HEADER
+        ========================================================= */
+
+        .topbar {
+            height: 70px;
+
+            flex-shrink: 0;
+
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0 18px;
-            border-bottom: 1px solid var(--border);
-            background: rgba(8, 8, 8, 0.92);
-            backdrop-filter: blur(18px);
-            position: relative;
-            z-index: 10;
+
+            padding: 0 17px;
+
+            border-bottom: 1px solid var(--border-soft);
+
+            background:
+                rgba(5, 5, 5, 0.76);
+
+            backdrop-filter: blur(28px);
+            -webkit-backdrop-filter: blur(28px);
         }
 
-        .header-left {
+
+        .brand-mini {
             display: flex;
             align-items: center;
-            gap: 12px;
-            min-width: 0;
+            gap: 11px;
         }
 
-        .avatar {
-            width: 42px;
-            height: 42px;
-            border-radius: 50%;
-            background: #202020;
-            border: 1px solid #303030;
+
+        .brand-logo {
+            width: 36px;
+            height: 36px;
+
+            border-radius: 11px;
+
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 17px;
-            font-weight: 700;
-            flex-shrink: 0;
+
+            background: #fff;
         }
 
-        .header-info {
-            min-width: 0;
+
+        .google-g {
+            font-size: 20px;
+            font-weight: 800;
+
+            background:
+                conic-gradient(
+                    #4285f4,
+                    #34a853,
+                    #fbbc05,
+                    #ea4335,
+                    #4285f4
+                );
+
+            -webkit-background-clip: text;
+            background-clip: text;
+
+            color: transparent;
         }
 
-        .header-title {
+
+        .brand-mini-name {
             font-size: 15px;
             font-weight: 700;
-            letter-spacing: -0.2px;
+
+            letter-spacing: -0.3px;
         }
 
-        .header-status {
-            margin-top: 3px;
-            color: var(--success);
-            font-size: 11px;
-            font-weight: 500;
+
+        .brand-mini-name span {
+            color: #777;
         }
 
-        .header-actions {
+
+        .top-actions {
             display: flex;
             align-items: center;
             gap: 7px;
         }
 
+
         .icon-button {
             width: 40px;
             height: 40px;
-            border-radius: 12px;
-            background: transparent;
-            color: #fff;
+
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 20px;
-            transition: background 0.2s ease;
+
+            border: 1px solid var(--border);
+
+            border-radius: 13px;
+
+            background: var(--surface-soft);
+
+            color: #ddd;
+
+            font-size: 18px;
+
+            transition:
+                background .2s ease,
+                transform .15s ease;
         }
+
+
+        .icon-button:hover {
+            background: rgba(255,255,255,0.08);
+        }
+
 
         .icon-button:active {
-            background: #1c1c1c;
+            transform: scale(.95);
         }
 
-        /* =========================
-           CHAT
-        ========================= */
 
-        .chat {
+        /* =========================================================
+           MAIN
+        ========================================================= */
+
+        .main {
             flex: 1;
             min-height: 0;
+
             position: relative;
-            overflow: hidden;
         }
 
-        .messages {
-            width: 100%;
-            height: 100%;
-            overflow-y: auto;
-            padding: 22px 16px 125px;
-            scroll-behavior: smooth;
-        }
 
-        .messages::-webkit-scrollbar {
-            width: 3px;
-        }
-
-        .messages::-webkit-scrollbar-thumb {
-            background: #292929;
-            border-radius: 20px;
-        }
-
-        .day-label {
-            width: max-content;
-            margin: 0 auto 20px;
-            padding: 6px 11px;
-            border-radius: 20px;
-            background: #151515;
-            color: #777;
-            font-size: 10px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .message-row {
-            width: 100%;
-            display: flex;
-            margin-bottom: 12px;
-        }
-
-        .message-row.system {
-            justify-content: flex-start;
-        }
-
-        .message-row.user {
-            justify-content: flex-end;
-        }
-
-        .message {
-            max-width: min(82%, 420px);
-            padding: 12px 14px;
-            border-radius: 17px;
-            font-size: 14px;
-            line-height: 1.5;
-            white-space: pre-line;
-            animation: messageIn 0.22s ease;
-        }
-
-        .message.system {
-            background: var(--panel-2);
-            border: 1px solid var(--border);
-            border-bottom-left-radius: 6px;
-            color: #ededed;
-        }
-
-        .message.user {
-            background: #f0f0f0;
-            color: #080808;
-            border-bottom-right-radius: 6px;
-        }
-
-        .message-time {
-            display: block;
-            margin-top: 5px;
-            font-size: 9px;
-            opacity: 0.45;
-            text-align: right;
-        }
-
-        @keyframes messageIn {
-            from {
-                opacity: 0;
-                transform: translateY(7px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* =========================
-           BOTTOM AREA
-        ========================= */
-
-        .bottom {
+        .view {
             position: absolute;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            padding: 12px 14px 18px;
-            background:
-                linear-gradient(
-                    to top,
-                    #070707 70%,
-                    rgba(7, 7, 7, 0)
-                );
-            z-index: 5;
-        }
+            inset: 0;
 
-        .start-area {
-            display: flex;
-            justify-content: center;
-        }
-
-        .start-button {
-            width: 100%;
-            max-width: 440px;
-            height: 52px;
-            border-radius: 16px;
-            background: #f1f1f1;
-            color: #080808;
-            font-size: 13px;
-            font-weight: 800;
-            letter-spacing: 1.4px;
-            transition:
-                transform 0.15s ease,
-                background 0.2s ease;
-        }
-
-        .start-button:active {
-            transform: scale(0.98);
-            background: #dcdcdc;
-        }
-
-        .composer {
             display: none;
-            align-items: center;
-            gap: 8px;
-            max-width: 600px;
-            margin: 0 auto;
+
+            overflow-y: auto;
+
+            padding: 22px 17px 125px;
+
+            scrollbar-width: none;
         }
 
-        .composer.visible {
-            display: flex;
-            animation: composerIn 0.25s ease;
+
+        .view::-webkit-scrollbar {
+            display: none;
         }
 
-        @keyframes composerIn {
+
+        .view.active {
+            display: block;
+
+            animation: viewIn .22s ease;
+        }
+
+
+        @keyframes viewIn {
+
             from {
                 opacity: 0;
-                transform: translateY(10px);
+                transform: translateY(5px);
             }
 
             to {
                 opacity: 1;
                 transform: translateY(0);
             }
+
         }
 
-        .input-wrapper {
-            flex: 1;
-            min-width: 0;
-            height: 52px;
-            border-radius: 17px;
-            border: 1px solid var(--border);
-            background: #111;
-            display: flex;
-            align-items: center;
-            padding: 0 15px;
-        }
 
-        .message-input {
-            width: 100%;
-            border: none;
-            outline: none;
-            background: transparent;
-            color: #fff;
-            font-size: 14px;
-        }
+        /* =========================================================
+           CHAT
+        ========================================================= */
 
-        .message-input::placeholder {
-            color: #626262;
-        }
-
-        .send-button {
-            width: 52px;
-            height: 52px;
-            border-radius: 17px;
-            background: #f1f1f1;
-            color: #080808;
-            font-size: 20px;
-            flex-shrink: 0;
-        }
-
-        .send-button:disabled {
-            opacity: 0.35;
-            cursor: default;
-        }
-
-        /* =========================
-           SIDE / MENU PANEL
-        ========================= */
-
-        .overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.65);
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.25s ease;
-            z-index: 20;
-        }
-
-        .overlay.visible {
-            opacity: 1;
-            pointer-events: auto;
-        }
-
-        .side-panel {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: min(88vw, 360px);
-            height: 100vh;
-            background: #0c0c0c;
-            border-right: 1px solid var(--border);
-            transform: translateX(-100%);
-            transition: transform 0.28s ease;
-            z-index: 30;
+        #chatView {
             display: flex;
             flex-direction: column;
+
+            padding:
+                18px
+                15px
+                92px;
         }
 
-        .side-panel.open {
-            transform: translateX(0);
-        }
 
-        .side-header {
-            padding: 25px 20px 20px;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .side-profile {
-            display: flex;
-            align-items: center;
-            gap: 13px;
-        }
-
-        .side-avatar {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: #1c1c1c;
-            border: 1px solid #303030;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 800;
-        }
-
-        .side-user {
-            min-width: 0;
-        }
-
-        .side-user-name {
-            font-size: 15px;
-            font-weight: 700;
-        }
-
-        .side-user-status {
-            color: var(--muted);
-            font-size: 11px;
-            margin-top: 4px;
-        }
-
-        .close-menu {
-            position: absolute;
-            top: 17px;
-            right: 15px;
-            width: 38px;
-            height: 38px;
-            border-radius: 11px;
-            background: #161616;
-            color: #aaa;
-            font-size: 17px;
-        }
-
-        .menu-list {
+        .chat-scroll {
             flex: 1;
+
             overflow-y: auto;
-            padding: 14px 10px;
+
+            scrollbar-width: none;
+
+            padding: 5px 2px 20px;
         }
 
-        .menu-section {
-            margin: 12px 10px 7px;
-            color: #555;
-            font-size: 9px;
-            font-weight: 700;
-            letter-spacing: 1.5px;
-            text-transform: uppercase;
+
+        .chat-scroll::-webkit-scrollbar {
+            display: none;
         }
 
-        .menu-item {
-            width: 100%;
-            min-height: 52px;
-            display: flex;
-            align-items: center;
-            gap: 13px;
-            padding: 0 13px;
-            margin-bottom: 4px;
-            border-radius: 13px;
-            background: transparent;
-            color: #ddd;
-            text-align: left;
-            transition: background 0.18s ease;
-        }
 
-        .menu-item:active {
-            background: #191919;
-        }
+        .chat-welcome {
+            padding: 28px 8px 20px;
 
-        .menu-icon {
-            width: 34px;
-            height: 34px;
-            border-radius: 10px;
-            background: #171717;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 16px;
-            flex-shrink: 0;
-        }
-
-        .menu-text {
-            display: flex;
-            flex-direction: column;
-            gap: 3px;
-        }
-
-        .menu-title {
-            font-size: 13px;
-            font-weight: 600;
-        }
-
-        .menu-description {
-            color: #666;
-            font-size: 10px;
-        }
-
-        .logout {
-            color: var(--danger);
-        }
-
-        .side-footer {
-            padding: 15px 20px 20px;
-            border-top: 1px solid var(--border);
-            color: #4e4e4e;
-            font-size: 9px;
-            text-align: center;
-            letter-spacing: 0.4px;
-        }
-
-        /* =========================
-           INTERNAL VIEW
-        ========================= */
-
-        .view-layer {
-            position: fixed;
-            inset: 0;
-            background: #080808;
-            z-index: 40;
-            transform: translateX(100%);
-            transition: transform 0.28s ease;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .view-layer.open {
-            transform: translateX(0);
-        }
-
-        .view-header {
-            height: 72px;
-            min-height: 72px;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 0 16px;
-        }
-
-        .back-button {
-            width: 40px;
-            height: 40px;
-            border-radius: 12px;
-            background: #151515;
-            color: #fff;
-            font-size: 18px;
-        }
-
-        .view-title {
-            font-size: 16px;
-            font-weight: 700;
-        }
-
-        .view-content {
-            flex: 1;
-            overflow-y: auto;
-            padding: 22px 17px 35px;
-        }
-
-        .view-intro {
-            margin-bottom: 24px;
-        }
-
-        .view-intro h2 {
-            font-size: 24px;
-            letter-spacing: -0.8px;
-            margin-bottom: 7px;
-        }
-
-        .view-intro p {
-            color: var(--muted);
-            font-size: 13px;
-            line-height: 1.6;
-        }
-
-        .empty-state {
-            padding: 40px 20px;
-            border: 1px dashed #292929;
-            border-radius: 18px;
             text-align: center;
         }
 
-        .empty-icon {
-            font-size: 32px;
-            margin-bottom: 12px;
-        }
 
-        .empty-title {
-            font-size: 14px;
-            font-weight: 700;
-            margin-bottom: 6px;
-        }
+        .welcome-logo {
+            width: 54px;
+            height: 54px;
 
-        .empty-text {
-            color: #666;
-            font-size: 12px;
-            line-height: 1.5;
-        }
+            margin: 0 auto 17px;
 
-        /* =========================
-           HISTORY
-        ========================= */
-
-        .history-item {
-            padding: 15px;
-            background: #111;
-            border: 1px solid var(--border);
-            border-radius: 15px;
-            margin-bottom: 9px;
-        }
-
-        .history-top {
             display: flex;
-            justify-content: space-between;
-            gap: 10px;
-        }
+            align-items: center;
+            justify-content: center;
 
-        .history-name {
-            font-size: 13px;
-            font-weight: 600;
-        }
-
-        .history-status {
-            font-size: 9px;
-            padding: 5px 8px;
-            border-radius: 8px;
-            background: #1a1a1a;
-            color: #888;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .history-date {
-            color: #555;
-            font-size: 10px;
-            margin-top: 7px;
-        }
-
-        /* =========================
-           TUTORIAL
-        ========================= */
-
-        .tutorial-step {
-            padding: 18px;
-            background: #111;
-            border: 1px solid var(--border);
             border-radius: 17px;
-            margin-bottom: 10px;
+
+            background: #fff;
+
+            box-shadow:
+                0 15px 45px rgba(0,0,0,.28);
         }
 
-        .step-number {
-            color: #777;
-            font-size: 10px;
-            font-weight: 700;
-            letter-spacing: 1px;
+
+        .welcome-logo .google-g {
+            font-size: 29px;
+        }
+
+
+        .welcome-title {
+            font-size: 25px;
+            font-weight: 750;
+
+            letter-spacing: -0.9px;
+
             margin-bottom: 8px;
         }
 
-        .tutorial-step h3 {
-            font-size: 14px;
-            margin-bottom: 6px;
+
+        .welcome-title span {
+            color: #777;
         }
 
-        .tutorial-step p {
-            color: #777;
+
+        .welcome-description {
+            max-width: 315px;
+
+            margin: 0 auto;
+
+            color: #858585;
+
             font-size: 12px;
+
             line-height: 1.55;
         }
 
-        /* =========================
-           SETTINGS
-        ========================= */
 
-        .setting-item {
+        /* =========================================================
+           MESSAGES
+        ========================================================= */
+
+        .message {
             display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 15px;
-            padding: 16px;
-            margin-bottom: 7px;
-            border-radius: 14px;
-            background: #111;
+
+            margin: 11px 0;
+        }
+
+
+        .message.system {
+            justify-content: flex-start;
+        }
+
+
+        .message.user {
+            justify-content: flex-end;
+        }
+
+
+        .bubble {
+            max-width: 84%;
+
+            padding: 13px 15px;
+
+            border-radius: 18px;
+
             border: 1px solid var(--border);
-        }
 
-        .setting-info h3 {
             font-size: 13px;
-            margin-bottom: 4px;
+
+            line-height: 1.55;
+
+            white-space: pre-line;
+
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
         }
 
-        .setting-info p {
-            color: #666;
-            font-size: 10px;
+
+        .message.system .bubble {
+            background:
+                linear-gradient(
+                    135deg,
+                    rgba(255,255,255,.065),
+                    rgba(255,255,255,.025)
+                );
+
+            border-bottom-left-radius: 7px;
         }
 
-        .setting-arrow {
+
+        .message.user .bubble {
+            background:
+                rgba(255,255,255,.095);
+
+            border-color:
+                rgba(255,255,255,.12);
+
+            border-bottom-right-radius: 7px;
+        }
+
+
+        .bubble strong {
+            color: #fff;
+        }
+
+
+        .bubble .emoji {
+            display: inline-block;
+            margin-left: 3px;
+        }
+
+
+        /* =========================================================
+           SALE CARD
+        ========================================================= */
+
+        .sale-card {
+            margin: 13px 0;
+
+            padding: 17px;
+
+            border-radius: 20px;
+
+            border: 1px solid rgba(255,255,255,.10);
+
+            background:
+                linear-gradient(
+                    145deg,
+                    rgba(255,255,255,.07),
+                    rgba(255,255,255,.025)
+                );
+
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+        }
+
+
+        .sale-card-title {
+            font-size: 13px;
+            font-weight: 700;
+
+            margin-bottom: 6px;
+        }
+
+
+        .sale-card-text {
+            color: #8e8e8e;
+
+            font-size: 11px;
+
+            line-height: 1.5;
+
+            margin-bottom: 14px;
+        }
+
+
+        .sale-input {
+            width: 100%;
+            height: 45px;
+
+            padding: 0 13px;
+
+            border-radius: 12px;
+
+            border: 1px solid var(--border);
+
+            background:
+                rgba(0,0,0,.22);
+
+            color: #fff;
+
+            font-size: 12px;
+        }
+
+
+        .sale-input:focus {
+            border-color:
+                rgba(255,255,255,.22);
+        }
+
+
+        .sale-button {
+            width: 100%;
+            height: 44px;
+
+            margin-top: 9px;
+
+            border: 0;
+
+            border-radius: 12px;
+
+            background: #f2f2f2;
+
+            color: #080808;
+
+            font-size: 11px;
+            font-weight: 800;
+
+            letter-spacing: .4px;
+        }
+
+
+        /* =========================================================
+           BOTTOM INPUT
+        ========================================================= */
+
+        .chat-composer {
+            position: absolute;
+
+            left: 15px;
+            right: 15px;
+            bottom: 13px;
+
+            z-index: 20;
+
+            padding: 6px;
+
+            border:
+                1px solid rgba(255,255,255,.09);
+
+            border-radius: 19px;
+
+            background:
+                rgba(18,18,18,.72);
+
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+
+            box-shadow:
+                0 15px 50px rgba(0,0,0,.35);
+        }
+
+
+        .start-button {
+            width: 100%;
+            height: 48px;
+
+            border: 0;
+
+            border-radius: 14px;
+
+            background: #f3f3f3;
+
+            color: #080808;
+
+            font-size: 11px;
+            font-weight: 850;
+
+            letter-spacing: .6px;
+        }
+
+
+        .chat-form {
+            display: none;
+
+            align-items: center;
+
+            gap: 7px;
+        }
+
+
+        .chat-form.visible {
+            display: flex;
+        }
+
+
+        .chat-input {
+            flex: 1;
+
+            height: 45px;
+
+            border: 0;
+
+            background: transparent;
+
+            color: #fff;
+
+            padding: 0 10px;
+
+            font-size: 13px;
+        }
+
+
+        .chat-input::placeholder {
             color: #555;
+        }
+
+
+        .send-button {
+            width: 39px;
+            height: 39px;
+
+            flex-shrink: 0;
+
+            border: 0;
+
+            border-radius: 12px;
+
+            background: #f1f1f1;
+
+            color: #050505;
+
             font-size: 16px;
         }
 
-        /* =========================
-           MOBILE
-        ========================= */
 
-        @media (max-width: 480px) {
-            .header {
-                padding: 0 13px;
-            }
+        /* =========================================================
+           PAGE HEADERS
+        ========================================================= */
 
-            .messages {
-                padding-left: 12px;
-                padding-right: 12px;
-            }
-
-            .message {
-                max-width: 88%;
-            }
-
-            .side-panel {
-                width: 88vw;
-            }
+        .page-header {
+            margin-bottom: 19px;
         }
+
+
+        .page-eyebrow {
+            color: #626262;
+
+            font-size: 9px;
+            font-weight: 800;
+
+            letter-spacing: 1.5px;
+
+            margin-bottom: 7px;
+        }
+
+
+        .page-title {
+            font-size: 26px;
+
+            letter-spacing: -.9px;
+
+            font-weight: 750;
+        }
+
+
+        .page-subtitle {
+            margin-top: 6px;
+
+            color: #777;
+
+            font-size: 12px;
+
+            line-height: 1.5;
+        }
+
+
+        /* =========================================================
+           GLASS CARDS
+        ========================================================= */
+
+        .glass-card {
+            padding: 17px;
+
+            margin-bottom: 12px;
+
+            border-radius: var(--radius-lg);
+
+            border:
+                1px solid rgba(255,255,255,.085);
+
+            background:
+                linear-gradient(
+                    145deg,
+                    rgba(255,255,255,.065),
+                    rgba(255,255,255,.022)
+                );
+
+            backdrop-filter: blur(28px);
+            -webkit-backdrop-filter: blur(28px);
+
+            box-shadow:
+                inset 0 1px rgba(255,255,255,.025),
+                0 14px 45px rgba(0,0,0,.18);
+        }
+
+
+        /* =========================================================
+           BALANCE
+        ========================================================= */
+
+        .balance-card {
+            padding: 23px;
+
+            border-radius: 24px;
+
+            margin-bottom: 13px;
+
+            background:
+                radial-gradient(
+                    circle at 90% 0%,
+                    rgba(110,168,255,.12),
+                    transparent 35%
+                ),
+                linear-gradient(
+                    145deg,
+                    rgba(255,255,255,.075),
+                    rgba(255,255,255,.025)
+                );
+
+            border:
+                1px solid rgba(255,255,255,.10);
+
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+        }
+
+
+        .balance-label {
+            color: #777;
+
+            font-size: 10px;
+
+            margin-bottom: 8px;
+        }
+
+
+        .balance-value {
+            font-size: 36px;
+
+            font-weight: 750;
+
+            letter-spacing: -1.5px;
+        }
+
+
+        .balance-currency {
+            color: #777;
+
+            font-size: 12px;
+
+            margin-left: 5px;
+        }
+
+
+        .balance-actions {
+            display: grid;
+
+            grid-template-columns: 1fr 1fr;
+
+            gap: 8px;
+
+            margin-top: 18px;
+        }
+
+
+        .secondary-button {
+            height: 42px;
+
+            border:
+                1px solid var(--border);
+
+            border-radius: 12px;
+
+            background:
+                rgba(255,255,255,.045);
+
+            color: #ddd;
+
+            font-size: 11px;
+            font-weight: 650;
+        }
+
+
+        /* =========================================================
+           STATS
+        ========================================================= */
+
+        .stats-grid {
+            display: grid;
+
+            grid-template-columns: 1fr 1fr;
+
+            gap: 10px;
+
+            margin-bottom: 13px;
+        }
+
+
+        .stat {
+            padding: 15px;
+
+            border:
+                1px solid var(--border);
+
+            border-radius: 17px;
+
+            background:
+                rgba(255,255,255,.035);
+        }
+
+
+        .stat-label {
+            color: #696969;
+
+            font-size: 10px;
+
+            margin-bottom: 7px;
+        }
+
+
+        .stat-value {
+            font-size: 19px;
+
+            font-weight: 700;
+        }
+
+
+        /* =========================================================
+           TUTORIAL
+        ========================================================= */
+
+        .tutorial-step {
+            display: flex;
+
+            gap: 13px;
+
+            padding: 16px 0;
+
+            border-bottom:
+                1px solid rgba(255,255,255,.055);
+        }
+
+
+        .tutorial-step:last-child {
+            border-bottom: 0;
+            padding-bottom: 0;
+        }
+
+
+        .step-number {
+            width: 30px;
+            height: 30px;
+
+            flex-shrink: 0;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border-radius: 10px;
+
+            background:
+                rgba(255,255,255,.075);
+
+            color: #ddd;
+
+            font-size: 11px;
+            font-weight: 800;
+        }
+
+
+        .step-content h3 {
+            font-size: 12px;
+
+            margin-bottom: 5px;
+        }
+
+
+        .step-content p {
+            color: #777;
+
+            font-size: 11px;
+
+            line-height: 1.55;
+        }
+
+
+        .tutorial-note {
+            margin-top: 14px;
+
+            padding: 12px;
+
+            border-radius: 12px;
+
+            background:
+                rgba(110,168,255,.055);
+
+            border:
+                1px solid rgba(110,168,255,.10);
+
+            color: #8ea9d5;
+
+            font-size: 10px;
+
+            line-height: 1.5;
+        }
+
+
+        /* =========================================================
+           REFERRALS
+        ========================================================= */
+
+        .referral-link {
+            padding: 13px;
+
+            border-radius: 13px;
+
+            background:
+                rgba(0,0,0,.20);
+
+            border:
+                1px solid var(--border);
+
+            color: #aaa;
+
+            font-size: 11px;
+
+            word-break: break-all;
+
+            margin-top: 10px;
+        }
+
+
+        .copy-button {
+            width: 100%;
+
+            height: 42px;
+
+            margin-top: 9px;
+
+            border: 1px solid var(--border);
+
+            border-radius: 12px;
+
+            background:
+                rgba(255,255,255,.045);
+
+            color: #ddd;
+
+            font-size: 11px;
+        }
+
+
+        /* =========================================================
+           HISTORY
+        ========================================================= */
+
+        .history-item {
+            display: flex;
+
+            align-items: center;
+
+            justify-content: space-between;
+
+            gap: 12px;
+
+            padding: 14px 0;
+
+            border-bottom:
+                1px solid rgba(255,255,255,.055);
+        }
+
+
+        .history-item:last-child {
+            border-bottom: 0;
+        }
+
+
+        .history-main {
+            min-width: 0;
+        }
+
+
+        .history-email {
+            overflow: hidden;
+
+            white-space: nowrap;
+
+            text-overflow: ellipsis;
+
+            font-size: 12px;
+        }
+
+
+        .history-date {
+            color: #606060;
+
+            font-size: 9px;
+
+            margin-top: 4px;
+        }
+
+
+        .status {
+            flex-shrink: 0;
+
+            padding: 6px 9px;
+
+            border-radius: 9px;
+
+            font-size: 9px;
+            font-weight: 700;
+        }
+
+
+        .status.pending {
+            color: #d9b66e;
+            background: rgba(217,182,110,.09);
+        }
+
+
+        .status.approved {
+            color: var(--green);
+            background: rgba(85,217,138,.09);
+        }
+
+
+        .status.rejected {
+            color: var(--red);
+            background: rgba(255,105,105,.08);
+        }
+
+
+        /* =========================================================
+           PROFILE
+        ========================================================= */
+
+        .profile-head {
+            display: flex;
+
+            align-items: center;
+
+            gap: 13px;
+
+            margin-bottom: 17px;
+        }
+
+
+        .profile-avatar {
+            width: 56px;
+            height: 56px;
+
+            flex-shrink: 0;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border-radius: 18px;
+
+            background:
+                linear-gradient(
+                    145deg,
+                    #292929,
+                    #111
+                );
+
+            border:
+                1px solid var(--border);
+
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+
+        .profile-name {
+            font-size: 15px;
+
+            font-weight: 700;
+        }
+
+
+        .profile-email {
+            color: #666;
+
+            font-size: 10px;
+
+            margin-top: 4px;
+        }
+
+
+        .profile-option {
+            width: 100%;
+
+            min-height: 48px;
+
+            display: flex;
+            align-items: center;
+
+            justify-content: space-between;
+
+            border: 0;
+
+            border-bottom:
+                1px solid rgba(255,255,255,.05);
+
+            background: transparent;
+
+            color: #ddd;
+
+            text-align: left;
+
+            font-size: 12px;
+        }
+
+
+        .profile-option:last-child {
+            border-bottom: 0;
+        }
+
+
+        .profile-option span:last-child {
+            color: #555;
+
+            font-size: 14px;
+        }
+
+
+        .danger {
+            color: #ff7373;
+        }
+
+
+        /* =========================================================
+           MENU OVERLAY
+        ========================================================= */
+
+        .menu-overlay {
+            position: fixed;
+
+            inset: 0;
+
+            z-index: 100;
+
+            display: none;
+
+            background:
+                rgba(0,0,0,.52);
+
+            backdrop-filter: blur(7px);
+            -webkit-backdrop-filter: blur(7px);
+        }
+
+
+        .menu-overlay.open {
+            display: block;
+        }
+
+
+        .menu-panel {
+            position: absolute;
+
+            top: 0;
+            left: 0;
+            bottom: 0;
+
+            width: min(330px, 88vw);
+
+            padding:
+                18px
+                16px
+                25px;
+
+            overflow-y: auto;
+
+            background:
+                linear-gradient(
+                    160deg,
+                    rgba(24,24,24,.96),
+                    rgba(10,10,10,.97)
+                );
+
+            border-right:
+                1px solid rgba(255,255,255,.09);
+
+            backdrop-filter: blur(35px);
+            -webkit-backdrop-filter: blur(35px);
+
+            animation: menuIn .22s ease;
+        }
+
+
+        @keyframes menuIn {
+
+            from {
+                transform: translateX(-100%);
+            }
+
+            to {
+                transform: translateX(0);
+            }
+
+        }
+
+
+        .menu-top {
+            display: flex;
+
+            align-items: center;
+
+            justify-content: space-between;
+
+            margin-bottom: 25px;
+        }
+
+
+        .menu-title {
+            font-size: 19px;
+
+            font-weight: 750;
+
+            letter-spacing: -.4px;
+        }
+
+
+        .menu-close {
+            width: 37px;
+            height: 37px;
+
+            border:
+                1px solid var(--border);
+
+            border-radius: 11px;
+
+            background:
+                rgba(255,255,255,.04);
+
+            color: #bbb;
+
+            font-size: 17px;
+        }
+
+
+        .menu-section-title {
+            color: #555;
+
+            font-size: 9px;
+            font-weight: 800;
+
+            letter-spacing: 1.3px;
+
+            margin:
+                18px 6px 7px;
+        }
+
+
+        .menu-item {
+            width: 100%;
+
+            height: 48px;
+
+            display: flex;
+            align-items: center;
+
+            gap: 12px;
+
+            border: 0;
+
+            border-radius: 13px;
+
+            padding: 0 12px;
+
+            background: transparent;
+
+            color: #bbb;
+
+            text-align: left;
+
+            font-size: 12px;
+
+            transition:
+                background .2s ease,
+                color .2s ease;
+        }
+
+
+        .menu-item:hover {
+            background:
+                rgba(255,255,255,.055);
+
+            color: #fff;
+        }
+
+
+        .menu-icon {
+            width: 29px;
+            height: 29px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border-radius: 9px;
+
+            background:
+                rgba(255,255,255,.055);
+
+            font-size: 14px;
+        }
+
+
+        /* =========================================================
+           BOTTOM NAVIGATION
+        ========================================================= */
+
+        .bottom-nav {
+            position: fixed;
+
+            left: 12px;
+            right: 12px;
+            bottom: 10px;
+
+            z-index: 50;
+
+            height: 61px;
+
+            display: grid;
+
+            grid-template-columns:
+                1fr 1fr 1fr 1fr;
+
+            gap: 4px;
+
+            padding: 5px;
+
+            border:
+                1px solid rgba(255,255,255,.09);
+
+            border-radius: 20px;
+
+            background:
+                rgba(16,16,16,.75);
+
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+
+            box-shadow:
+                0 18px 60px rgba(0,0,0,.45);
+        }
+
+
+        .nav-item {
+            border: 0;
+
+            border-radius: 15px;
+
+            background: transparent;
+
+            color: #666;
+
+            display: flex;
+
+            flex-direction: column;
+
+            align-items: center;
+
+            justify-content: center;
+
+            gap: 3px;
+
+            font-size: 9px;
+
+            transition:
+                background .2s ease,
+                color .2s ease;
+        }
+
+
+        .nav-icon {
+            font-size: 17px;
+        }
+
+
+        .nav-item.active {
+            background:
+                rgba(255,255,255,.075);
+
+            color: #f3f3f3;
+        }
+
+
+        /* =========================================================
+           EMPTY STATE
+        ========================================================= */
+
+        .empty {
+            padding: 35px 15px;
+
+            text-align: center;
+
+            color: #606060;
+        }
+
+
+        .empty-icon {
+            font-size: 27px;
+
+            margin-bottom: 10px;
+        }
+
+
+        .empty-title {
+            color: #888;
+
+            font-size: 12px;
+
+            margin-bottom: 5px;
+        }
+
+
+        .empty-text {
+            font-size: 10px;
+
+            line-height: 1.5;
+        }
+
+
+        /* =========================================================
+           RESPONSIVE
+        ========================================================= */
+
+        @media (min-width: 700px) {
+
+            .app {
+                max-width: 560px;
+
+                margin: 0 auto;
+
+                border-left:
+                    1px solid rgba(255,255,255,.04);
+
+                border-right:
+                    1px solid rgba(255,255,255,.04);
+            }
+
+            .bottom-nav {
+                left: 50%;
+
+                width: 536px;
+
+                right: auto;
+
+                transform: translateX(-50%);
+            }
+
+            .chat-composer {
+                left: 20px;
+                right: 20px;
+            }
+
+        }
+
     </style>
 </head>
+
 
 <body>
 
 <div class="app">
 
-    <!-- =========================
-         HEADER
-    ========================== -->
 
-    <header class="header">
+    <!-- =========================================================
+         TOP BAR
+    ========================================================== -->
 
-        <div class="header-left">
+    <header class="topbar">
 
-            <div class="avatar">
-                GA
+        <div class="brand-mini">
+
+            <div class="brand-logo">
+                <div class="google-g">G</div>
             </div>
 
-            <div class="header-info">
-                <div class="header-title">
-                    GmailAccounts
-                </div>
-
-                <div class="header-status">
-                    ● Sistema activo
-                </div>
+            <div class="brand-mini-name">
+                Gmail<span>Accounts</span>
             </div>
 
         </div>
 
-        <div class="header-actions">
+
+        <div class="top-actions">
 
             <button
                 class="icon-button"
-                type="button"
-                onclick="openMenu()"
-                aria-label="Abrir menú"
+                id="profileTopButton"
+                aria-label="Perfil"
             >
-                ☰
+                ●
             </button>
 
         </div>
@@ -784,970 +1522,1705 @@
     </header>
 
 
-    <!-- =========================
-         CHAT
-    ========================== -->
+    <!-- =========================================================
+         MAIN
+    ========================================================== -->
 
-    <main class="chat">
+    <main class="main">
 
-        <div
-            class="messages"
-            id="messages"
+
+        <!-- =====================================================
+             CHAT
+        ====================================================== -->
+
+        <section
+            class="view active"
+            id="chatView"
         >
 
-            <div class="day-label">
-                Hoy
-            </div>
+            <div
+                class="chat-scroll"
+                id="chatScroll"
+            >
 
-            <div class="message-row system">
+                <div
+                    class="chat-welcome"
+                    id="chatWelcome"
+                >
 
-                <div class="message system">
+                    <div class="welcome-logo">
+                        <div class="google-g">G</div>
+                    </div>
 
-                    Bienvenido a GmailAccounts.
+                    <h1 class="welcome-title">
+                        Gmail<span>Accounts</span>
+                    </h1>
 
-                    <br><br>
+                    <p class="welcome-description">
+                        Gestiona tus solicitudes y consulta
+                        tu actividad desde un solo lugar.
+                    </p>
 
-                    Desde este chat podrás gestionar tus solicitudes y consultar el estado de tu cuenta dentro del sistema.
+                </div>
 
-                    <br><br>
 
-                    Pulsa <strong>INICIAR</strong> para comenzar.
+                <div
+                    class="message system"
+                    id="initialMessage"
+                >
 
-                    <span class="message-time">
-                        ahora
-                    </span>
+                    <div class="bubble">
+
+                        Bienvenido a
+                        <strong>GmailAccounts.</strong>
+                        <span class="emoji">👋</span>
+
+                        <br><br>
+
+                        Aquí puedes gestionar tus solicitudes
+                        de cuentas y consultar el estado de
+                        tus operaciones.
+
+                        <br><br>
+
+                        Pulsa <strong>INICIAR</strong>
+                        para comenzar.
+
+                    </div>
 
                 </div>
 
             </div>
 
-        </div>
 
+            <!-- =================================================
+                 COMPOSER
+            ================================================== -->
 
-        <!-- =========================
-             BOTTOM
-        ========================== -->
-
-        <div class="bottom">
-
-            <div
-                class="start-area"
-                id="startArea"
-            >
+            <div class="chat-composer">
 
                 <button
                     class="start-button"
-                    type="button"
-                    onclick="startChat()"
+                    id="startButton"
                 >
                     INICIAR
                 </button>
 
+
+                <form
+                    class="chat-form"
+                    id="chatForm"
+                >
+
+                    <input
+                        class="chat-input"
+                        id="chatInput"
+                        type="text"
+                        autocomplete="off"
+                        placeholder="Escribe un mensaje..."
+                    >
+
+                    <button
+                        class="send-button"
+                        type="submit"
+                    >
+                        ↑
+                    </button>
+
+                </form>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             BALANCE
+        ====================================================== -->
+
+        <section
+            class="view"
+            id="balanceView"
+        >
+
+            <div class="page-header">
+
+                <div class="page-eyebrow">
+                    CUENTA
+                </div>
+
+                <h2 class="page-title">
+                    Balance
+                </h2>
+
+                <p class="page-subtitle">
+                    Consulta tu balance y el movimiento
+                    registrado en tu cuenta.
+                </p>
+
             </div>
 
 
-            <form
-                class="composer"
-                id="composer"
-                onsubmit="sendMessage(event)"
-            >
+            <div class="balance-card">
 
-                <div class="input-wrapper">
+                <div class="balance-label">
+                    BALANCE DISPONIBLE
+                </div>
 
-                    <input
-                        class="message-input"
-                        id="messageInput"
-                        type="text"
-                        placeholder="Escribe un mensaje..."
-                        autocomplete="off"
+                <div class="balance-value">
+                    0.00
+                    <span class="balance-currency">
+                        USDT
+                    </span>
+                </div>
+
+
+                <div class="balance-actions">
+
+                    <button
+                        class="secondary-button"
+                        id="withdrawButton"
                     >
+                        Retiro
+                    </button>
 
+                    <button
+                        class="secondary-button"
+                        id="transactionsButton"
+                    >
+                        Historial
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <div class="stats-grid">
+
+                <div class="stat">
+
+                    <div class="stat-label">
+                        CUENTAS ACEPTADAS
+                    </div>
+
+                    <div
+                        class="stat-value"
+                        id="acceptedCount"
+                    >
+                        0
+                    </div>
+
+                </div>
+
+
+                <div class="stat">
+
+                    <div class="stat-label">
+                        PENDIENTES
+                    </div>
+
+                    <div
+                        class="stat-value"
+                        id="pendingCount"
+                    >
+                        0
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="glass-card">
+
+                <div class="page-eyebrow">
+                    MOVIMIENTOS
+                </div>
+
+                <div id="balanceTransactions">
+
+                    <div class="empty">
+
+                        <div class="empty-icon">
+                            ◌
+                        </div>
+
+                        <div class="empty-title">
+                            Sin movimientos
+                        </div>
+
+                        <div class="empty-text">
+                            Tus movimientos aparecerán
+                            aquí cuando existan registros.
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             TUTORIAL
+        ====================================================== -->
+
+        <section
+            class="view"
+            id="tutorialView"
+        >
+
+            <div class="page-header">
+
+                <div class="page-eyebrow">
+                    GUÍA
+                </div>
+
+                <h2 class="page-title">
+                    Cómo funciona
+                </h2>
+
+                <p class="page-subtitle">
+                    Una guía sencilla para utilizar
+                    GmailAccounts sin perderte entre
+                    veinte botones innecesarios.
+                </p>
+
+            </div>
+
+
+            <div class="glass-card">
+
+                <div class="tutorial-step">
+
+                    <div class="step-number">
+                        1
+                    </div>
+
+                    <div class="step-content">
+
+                        <h3>
+                            Crea tu cuenta
+                        </h3>
+
+                        <p>
+                            Regístrate desde la pantalla
+                            inicial utilizando tus datos
+                            de acceso.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="tutorial-step">
+
+                    <div class="step-number">
+                        2
+                    </div>
+
+                    <div class="step-content">
+
+                        <h3>
+                            Entra al chat
+                        </h3>
+
+                        <p>
+                            Después de iniciar sesión,
+                            llegarás directamente a la
+                            interfaz principal.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="tutorial-step">
+
+                    <div class="step-number">
+                        3
+                    </div>
+
+                    <div class="step-content">
+
+                        <h3>
+                            Inicia una solicitud
+                        </h3>
+
+                        <p>
+                            Pulsa INICIAR y sigue las
+                            instrucciones que aparecen
+                            automáticamente en el chat.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="tutorial-step">
+
+                    <div class="step-number">
+                        4
+                    </div>
+
+                    <div class="step-content">
+
+                        <h3>
+                            Consulta el estado
+                        </h3>
+
+                        <p>
+                            Tus solicitudes aparecerán
+                            posteriormente en el historial
+                            con su estado correspondiente.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="tutorial-step">
+
+                    <div class="step-number">
+                        5
+                    </div>
+
+                    <div class="step-content">
+
+                        <h3>
+                            Consulta tu balance
+                        </h3>
+
+                        <p>
+                            Los movimientos registrados
+                            podrán consultarse desde el
+                            apartado de Balance.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="tutorial-note">
+                    💡 Las instrucciones definitivas,
+                    capturas y pasos detallados podrán
+                    modificarse posteriormente desde
+                    la configuración del proyecto.
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             REFERIDOS
+        ====================================================== -->
+
+        <section
+            class="view"
+            id="referralsView"
+        >
+
+            <div class="page-header">
+
+                <div class="page-eyebrow">
+                    INVITACIONES
+                </div>
+
+                <h2 class="page-title">
+                    Referidos
+                </h2>
+
+                <p class="page-subtitle">
+                    Consulta tus referidos y tu enlace
+                    personal.
+                </p>
+
+            </div>
+
+
+            <div class="glass-card">
+
+                <div class="stats-grid">
+
+                    <div class="stat">
+
+                        <div class="stat-label">
+                            REFERIDOS
+                        </div>
+
+                        <div class="stat-value">
+                            0
+                        </div>
+
+                    </div>
+
+
+                    <div class="stat">
+
+                        <div class="stat-label">
+                            GANADO
+                        </div>
+
+                        <div class="stat-value">
+                            0.00
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="page-eyebrow">
+                    TU ENLACE
+                </div>
+
+                <div
+                    class="referral-link"
+                    id="referralLink"
+                >
+                    próximamente
                 </div>
 
                 <button
-                    class="send-button"
-                    id="sendButton"
-                    type="submit"
-                    disabled
+                    class="copy-button"
+                    id="copyReferral"
                 >
-                    ➤
+                    COPIAR ENLACE
                 </button>
 
-            </form>
+            </div>
 
-        </div>
+
+            <div class="glass-card">
+
+                <div class="page-eyebrow">
+                    INFORMACIÓN
+                </div>
+
+                <p
+                    style="
+                        color:#777;
+                        font-size:11px;
+                        line-height:1.6;
+                    "
+                >
+                    Tu sistema de referidos mostrará
+                    aquí los registros y movimientos
+                    correspondientes cuando la función
+                    esté conectada a la base de datos.
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             HISTORIAL
+        ====================================================== -->
+
+        <section
+            class="view"
+            id="historyView"
+        >
+
+            <div class="page-header">
+
+                <div class="page-eyebrow">
+                    ACTIVIDAD
+                </div>
+
+                <h2 class="page-title">
+                    Mis cuentas
+                </h2>
+
+                <p class="page-subtitle">
+                    Aquí aparecerán las solicitudes
+                    que hayas enviado.
+                </p>
+
+            </div>
+
+
+            <div class="glass-card">
+
+                <div id="historyList">
+
+                    <div class="empty">
+
+                        <div class="empty-icon">
+                            ◌
+                        </div>
+
+                        <div class="empty-title">
+                            Todavía no hay solicitudes
+                        </div>
+
+                        <div class="empty-text">
+                            Cuando envíes una solicitud
+                            aparecerá aquí su estado.
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             PERFIL
+        ====================================================== -->
+
+        <section
+            class="view"
+            id="profileView"
+        >
+
+            <div class="page-header">
+
+                <div class="page-eyebrow">
+                    CUENTA
+                </div>
+
+                <h2 class="page-title">
+                    Mi perfil
+                </h2>
+
+            </div>
+
+
+            <div class="glass-card">
+
+                <div class="profile-head">
+
+                    <div
+                        class="profile-avatar"
+                        id="profileAvatar"
+                    >
+                        M
+                    </div>
+
+                    <div>
+
+                        <div
+                            class="profile-name"
+                            id="profileName"
+                        >
+                            Usuario
+                        </div>
+
+                        <div
+                            class="profile-email"
+                            id="profileEmail"
+                        >
+                            usuario@email.com
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <button
+                    class="profile-option"
+                    id="editProfile"
+                >
+
+                    <span>
+                        Editar perfil
+                    </span>
+
+                    <span>
+                        ›
+                    </span>
+
+                </button>
+
+
+                <button
+                    class="profile-option"
+                    id="accountSettings"
+                >
+
+                    <span>
+                        Configuración de cuenta
+                    </span>
+
+                    <span>
+                        ›
+                    </span>
+
+                </button>
+
+
+                <button
+                    class="profile-option"
+                    id="notificationsSettings"
+                >
+
+                    <span>
+                        Notificaciones
+                    </span>
+
+                    <span>
+                        ›
+                    </span>
+
+                </button>
+
+
+                <button
+                    class="profile-option"
+                    id="privacySettings"
+                >
+
+                    <span>
+                        Privacidad
+                    </span>
+
+                    <span>
+                        ›
+                    </span>
+
+                </button>
+
+
+                <button
+                    class="profile-option danger"
+                    id="logoutButton"
+                >
+
+                    <span>
+                        Cerrar sesión
+                    </span>
+
+                    <span>
+                        ↗
+                    </span>
+
+                </button>
+
+            </div>
+
+        </section>
 
     </main>
 
-</div>
 
+    <!-- =========================================================
+         BOTTOM NAV
+    ========================================================== -->
 
-<!-- =========================
-     MENU OVERLAY
-========================== -->
-
-<div
-    class="overlay"
-    id="overlay"
-    onclick="closeMenu()"
-></div>
-
-
-<!-- =========================
-     SIDE MENU
-========================== -->
-
-<aside
-    class="side-panel"
-    id="sidePanel"
->
-
-    <button
-        class="close-menu"
-        type="button"
-        onclick="closeMenu()"
-    >
-        ×
-    </button>
-
-
-    <div class="side-header">
-
-        <div class="side-profile">
-
-            <div class="side-avatar">
-                GA
-            </div>
-
-            <div class="side-user">
-
-                <div
-                    class="side-user-name"
-                    id="menuUsername"
-                >
-                    Usuario
-                </div>
-
-                <div class="side-user-status">
-                    Cuenta activa
-                </div>
-
-            </div>
-
-        </div>
-
-    </div>
-
-
-    <div class="menu-list">
-
-        <div class="menu-section">
-            Principal
-        </div>
-
+    <nav class="bottom-nav">
 
         <button
-            class="menu-item"
-            type="button"
-            onclick="openView('history')"
+            class="nav-item active"
+            data-view="chatView"
         >
 
-            <div class="menu-icon">
-                📋
-            </div>
+            <span class="nav-icon">
+                ◉
+            </span>
 
-            <div class="menu-text">
-
-                <div class="menu-title">
-                    Historial
-                </div>
-
-                <div class="menu-description">
-                    Consulta tus solicitudes
-                </div>
-
-            </div>
+            Chat
 
         </button>
 
 
         <button
-            class="menu-item"
-            type="button"
-            onclick="openView('tutorial')"
+            class="nav-item"
+            data-view="balanceView"
         >
 
-            <div class="menu-icon">
-                ❓
-            </div>
+            <span class="nav-icon">
+                ◇
+            </span>
 
-            <div class="menu-text">
-
-                <div class="menu-title">
-                    Tutorial
-                </div>
-
-                <div class="menu-description">
-                    Aprende cómo funciona
-                </div>
-
-            </div>
-
-        </button>
-
-
-        <div class="menu-section">
-            Cuenta
-        </div>
-
-
-        <button
-            class="menu-item"
-            type="button"
-            onclick="openView('account')"
-        >
-
-            <div class="menu-icon">
-                👤
-            </div>
-
-            <div class="menu-text">
-
-                <div class="menu-title">
-                    Mi cuenta
-                </div>
-
-                <div class="menu-description">
-                    Información de tu cuenta
-                </div>
-
-            </div>
+            Balance
 
         </button>
 
 
         <button
-            class="menu-item"
-            type="button"
-            onclick="openView('settings')"
+            class="nav-item"
+            data-view="tutorialView"
         >
 
-            <div class="menu-icon">
-                ⚙️
-            </div>
+            <span class="nav-icon">
+                ?
+            </span>
 
-            <div class="menu-text">
-
-                <div class="menu-title">
-                    Configuración
-                </div>
-
-                <div class="menu-description">
-                    Opciones de la aplicación
-                </div>
-
-            </div>
+            Tutorial
 
         </button>
-
-
-        <div class="menu-section">
-            Sesión
-        </div>
 
 
         <button
-            class="menu-item logout"
-            type="button"
-            onclick="logout()"
+            class="nav-item"
+            id="menuButton"
         >
 
-            <div class="menu-icon">
-                ↪
-            </div>
+            <span class="nav-icon">
+                ☰
+            </span>
 
-            <div class="menu-text">
-
-                <div class="menu-title">
-                    Cerrar sesión
-                </div>
-
-                <div class="menu-description">
-                    Salir de tu cuenta
-                </div>
-
-            </div>
+            Menú
 
         </button>
 
-    </div>
+    </nav>
 
 
-    <div class="side-footer">
-        GmailAccounts · Sistema privado
-    </div>
-
-</aside>
-
-
-<!-- =========================
-     INTERNAL VIEW
-========================== -->
-
-<section
-    class="view-layer"
-    id="viewLayer"
->
-
-    <header class="view-header">
-
-        <button
-            class="back-button"
-            type="button"
-            onclick="closeView()"
-        >
-            ←
-        </button>
-
-        <div
-            class="view-title"
-            id="viewTitle"
-        >
-            Vista
-        </div>
-
-    </header>
-
+    <!-- =========================================================
+         MENU
+    ========================================================== -->
 
     <div
-        class="view-content"
-        id="viewContent"
-    ></div>
+        class="menu-overlay"
+        id="menuOverlay"
+    >
 
-</section>
+        <aside class="menu-panel">
 
+            <div class="menu-top">
 
-<script>
+                <div class="menu-title">
+                    Menú
+                </div>
 
-    /* =========================
-       ELEMENTS
-    ========================== */
+                <button
+                    class="menu-close"
+                    id="menuClose"
+                >
+                    ×
+                </button>
 
-    const messages = document.getElementById("messages");
-    const startArea = document.getElementById("startArea");
-    const composer = document.getElementById("composer");
-    const messageInput = document.getElementById("messageInput");
-    const sendButton = document.getElementById("sendButton");
-
-    const overlay = document.getElementById("overlay");
-    const sidePanel = document.getElementById("sidePanel");
-
-    const viewLayer = document.getElementById("viewLayer");
-    const viewTitle = document.getElementById("viewTitle");
-    const viewContent = document.getElementById("viewContent");
+            </div>
 
 
-    /* =========================
-       STATE
-    ========================== */
-
-    let chatStarted = false;
+            <div class="menu-section-title">
+                PRINCIPAL
+            </div>
 
 
-    /* =========================
-       START CHAT
-    ========================== */
+            <button
+                class="menu-item"
+                data-menu-view="chatView"
+            >
 
-    function startChat() {
+                <span class="menu-icon">
+                    ◉
+                </span>
 
-        if (chatStarted) {
-            return;
-        }
+                Chat
 
-        chatStarted = true;
-
-        startArea.style.display = "none";
-
-        composer.classList.add("visible");
-
-        addSystemMessage(
-            "Perfecto. El chat está listo.\n\n" +
-            "Escribe lo que quieres hacer y el sistema responderá según las funciones disponibles."
-        );
-
-        setTimeout(() => {
-            messageInput.focus();
-        }, 250);
-    }
+            </button>
 
 
-    /* =========================
-       SEND MESSAGE
-    ========================== */
+            <button
+                class="menu-item"
+                data-menu-view="balanceView"
+            >
 
-    function sendMessage(event) {
+                <span class="menu-icon">
+                    ◇
+                </span>
 
-        event.preventDefault();
+                Balance
 
-        const value = messageInput.value.trim();
+            </button>
 
-        if (!value) {
-            return;
-        }
 
-        addUserMessage(value);
+            <button
+                class="menu-item"
+                data-menu-view="tutorialView"
+            >
 
-        messageInput.value = "";
+                <span class="menu-icon">
+                    ?
+                </span>
 
-        updateSendButton();
+                Cómo crear una cuenta
 
-        /*
-         * TEMPORAL:
-         * Aquí posteriormente conectaremos
-         * las acciones reales del chat.
-         *
-         * No hay IA en este proyecto.
-         * Las respuestas serán determinadas
-         * por las funciones del sistema.
-         */
+            </button>
 
-        setTimeout(() => {
 
-            const lower = value.toLowerCase();
+            <div class="menu-section-title">
+                ACTIVIDAD
+            </div>
 
-            if (
-                lower.includes("hola") ||
-                lower.includes("buenas")
-            ) {
 
-                addSystemMessage(
-                    "Hola. El sistema está funcionando correctamente."
-                );
+            <button
+                class="menu-item"
+                data-menu-view="historyView"
+            >
 
-                return;
+                <span class="menu-icon">
+                    ≡
+                </span>
+
+                Mis cuentas
+
+            </button>
+
+
+            <button
+                class="menu-item"
+                data-menu-view="referralsView"
+            >
+
+                <span class="menu-icon">
+                    ♧
+                </span>
+
+                Referidos
+
+            </button>
+
+
+            <div class="menu-section-title">
+                CUENTA
+            </div>
+
+
+            <button
+                class="menu-item"
+                data-menu-view="profileView"
+            >
+
+                <span class="menu-icon">
+                    ●
+                </span>
+
+                Mi perfil
+
+            </button>
+
+        </aside>
+
+    </div>
+
+
+    <!-- =========================================================
+         JAVASCRIPT
+    ========================================================== -->
+
+    <script>
+
+        /* =====================================================
+           STATE
+        ====================================================== */
+
+        const state = {
+
+            started: false,
+
+            requests: [],
+
+            balance: 0,
+
+            user: {
+                username: "Usuario",
+                email: "usuario@email.com"
             }
 
-            if (
-                lower.includes("ayuda") ||
-                lower.includes("tutorial")
-            ) {
+        };
 
-                addSystemMessage(
-                    "Puedes abrir el menú ☰ y entrar en Tutorial para consultar la información disponible."
+
+        /* =====================================================
+           ELEMENTS
+        ====================================================== */
+
+        const views =
+            document.querySelectorAll(".view");
+
+        const navItems =
+            document.querySelectorAll(".nav-item");
+
+        const menuOverlay =
+            document.getElementById("menuOverlay");
+
+        const menuButton =
+            document.getElementById("menuButton");
+
+        const menuClose =
+            document.getElementById("menuClose");
+
+        const startButton =
+            document.getElementById("startButton");
+
+        const chatForm =
+            document.getElementById("chatForm");
+
+        const chatInput =
+            document.getElementById("chatInput");
+
+        const chatScroll =
+            document.getElementById("chatScroll");
+
+
+        /* =====================================================
+           NAVIGATION
+        ====================================================== */
+
+        function showView(viewId) {
+
+            views.forEach(function(view) {
+
+                view.classList.toggle(
+                    "active",
+                    view.id === viewId
                 );
 
-                return;
-            }
-
-            addSystemMessage(
-                "He recibido tu mensaje.\n\n" +
-                "Esta función todavía está conectada a la lógica definitiva del sistema."
-            );
-
-        }, 450);
-    }
-
-
-    /* =========================
-       ADD USER MESSAGE
-    ========================== */
-
-    function addUserMessage(text) {
-
-        const row = document.createElement("div");
-
-        row.className = "message-row user";
-
-        const bubble = document.createElement("div");
-
-        bubble.className = "message user";
-
-        bubble.innerHTML =
-            escapeHTML(text) +
-            '<span class="message-time">ahora</span>';
-
-        row.appendChild(bubble);
-
-        messages.appendChild(row);
-
-        scrollToBottom();
-    }
-
-
-    /* =========================
-       ADD SYSTEM MESSAGE
-    ========================== */
-
-    function addSystemMessage(text) {
-
-        const row = document.createElement("div");
-
-        row.className = "message-row system";
-
-        const bubble = document.createElement("div");
-
-        bubble.className = "message system";
-
-        bubble.innerHTML =
-            escapeHTML(text) +
-            '<span class="message-time">ahora</span>';
-
-        row.appendChild(bubble);
-
-        messages.appendChild(row);
-
-        scrollToBottom();
-    }
-
-
-    /* =========================
-       SCROLL
-    ========================== */
-
-    function scrollToBottom() {
-
-        setTimeout(() => {
-
-            messages.scrollTo({
-                top: messages.scrollHeight,
-                behavior: "smooth"
             });
 
-        }, 50);
-    }
+
+            navItems.forEach(function(item) {
+
+                item.classList.toggle(
+                    "active",
+                    item.dataset.view === viewId
+                );
+
+            });
 
 
-    /* =========================
-       SEND BUTTON
-    ========================== */
+            menuOverlay.classList.remove("open");
 
-    messageInput.addEventListener(
-        "input",
-        updateSendButton
-    );
-
-    function updateSendButton() {
-
-        sendButton.disabled =
-            !messageInput.value.trim();
-
-    }
-
-
-    /* =========================
-       MENU
-    ========================== */
-
-    function openMenu() {
-
-        sidePanel.classList.add("open");
-        overlay.classList.add("visible");
-
-    }
-
-
-    function closeMenu() {
-
-        sidePanel.classList.remove("open");
-        overlay.classList.remove("visible");
-
-    }
-
-
-    /* =========================
-       INTERNAL VIEWS
-    ========================== */
-
-    function openView(view) {
-
-        closeMenu();
-
-        viewLayer.classList.add("open");
-
-        if (view === "history") {
-            renderHistory();
-            return;
         }
 
-        if (view === "tutorial") {
-            renderTutorial();
-            return;
-        }
 
-        if (view === "account") {
-            renderAccount();
-            return;
-        }
+        navItems.forEach(function(item) {
 
-        if (view === "settings") {
-            renderSettings();
-            return;
-        }
-
-    }
-
-
-    function closeView() {
-
-        viewLayer.classList.remove("open");
-
-    }
-
-
-    /* =========================
-       HISTORY
-    ========================== */
-
-    function renderHistory() {
-
-        viewTitle.textContent = "Historial";
-
-        viewContent.innerHTML = `
-
-            <div class="view-intro">
-
-                <h2>Historial</h2>
-
-                <p>
-                    Aquí aparecerán tus solicitudes y sus estados.
-                </p>
-
-            </div>
-
-            <div class="empty-state">
-
-                <div class="empty-icon">
-                    📋
-                </div>
-
-                <div class="empty-title">
-                    Sin solicitudes
-                </div>
-
-                <div class="empty-text">
-                    Cuando exista actividad en tu cuenta,
-                    aparecerá aquí.
-                </div>
-
-            </div>
-
-        `;
-
-    }
-
-
-    /* =========================
-       TUTORIAL
-    ========================== */
-
-    function renderTutorial() {
-
-        viewTitle.textContent = "Tutorial";
-
-        viewContent.innerHTML = `
-
-            <div class="view-intro">
-
-                <h2>Cómo funciona</h2>
-
-                <p>
-                    Información básica para utilizar
-                    el sistema.
-                </p>
-
-            </div>
-
-
-            <div class="tutorial-step">
-
-                <div class="step-number">
-                    PASO 01
-                </div>
-
-                <h3>
-                    Inicia el chat
-                </h3>
-
-                <p>
-                    Pulsa el botón INICIAR que aparece
-                    en la parte inferior de la pantalla.
-                </p>
-
-            </div>
-
-
-            <div class="tutorial-step">
-
-                <div class="step-number">
-                    PASO 02
-                </div>
-
-                <h3>
-                    Escribe tu solicitud
-                </h3>
-
-                <p>
-                    Utiliza el campo de texto para
-                    comunicarte con las funciones
-                    disponibles del sistema.
-                </p>
-
-            </div>
-
-
-            <div class="tutorial-step">
-
-                <div class="step-number">
-                    PASO 03
-                </div>
-
-                <h3>
-                    Consulta el resultado
-                </h3>
-
-                <p>
-                    El estado de tus operaciones podrá
-                    consultarse posteriormente desde
-                    el historial.
-                </p>
-
-            </div>
-
-        `;
-
-    }
-
-
-    /* =========================
-       ACCOUNT
-    ========================== */
-
-    function renderAccount() {
-
-        viewTitle.textContent = "Mi cuenta";
-
-        viewContent.innerHTML = `
-
-            <div class="view-intro">
-
-                <h2>Mi cuenta</h2>
-
-                <p>
-                    Información básica del usuario
-                    actualmente conectado.
-                </p>
-
-            </div>
-
-
-            <div class="setting-item">
-
-                <div class="setting-info">
-
-                    <h3>
-                        Usuario
-                    </h3>
-
-                    <p>
-                        Usuario
-                    </p>
-
-                </div>
-
-                <div class="setting-arrow">
-                    →
-                </div>
-
-            </div>
-
-
-            <div class="setting-item">
-
-                <div class="setting-info">
-
-                    <h3>
-                        Estado
-                    </h3>
-
-                    <p>
-                        Cuenta activa
-                    </p>
-
-                </div>
-
-                <div class="setting-arrow">
-                    ●
-                </div>
-
-            </div>
-
-
-            <div class="setting-item">
-
-                <div class="setting-info">
-
-                    <h3>
-                        ID
-                    </h3>
-
-                    <p>
-                        Se asignará al conectar la base de datos
-                    </p>
-
-                </div>
-
-                <div class="setting-arrow">
-                    #
-                </div>
-
-            </div>
-
-        `;
-
-    }
-
-
-    /* =========================
-       SETTINGS
-    ========================== */
-
-    function renderSettings() {
-
-        viewTitle.textContent = "Configuración";
-
-        viewContent.innerHTML = `
-
-            <div class="view-intro">
-
-                <h2>Configuración</h2>
-
-                <p>
-                    Opciones de tu cuenta y aplicación.
-                </p>
-
-            </div>
-
-
-            <div class="setting-item">
-
-                <div class="setting-info">
-
-                    <h3>
-                        Perfil
-                    </h3>
-
-                    <p>
-                        Información de usuario
-                    </p>
-
-                </div>
-
-                <div class="setting-arrow">
-                    →
-                </div>
-
-            </div>
-
-
-            <div class="setting-item">
-
-                <div class="setting-info">
-
-                    <h3>
-                        Notificaciones
-                    </h3>
-
-                    <p>
-                        Próximamente
-                    </p>
-
-                </div>
-
-                <div class="setting-arrow">
-                    →
-                </div>
-
-            </div>
-
-
-            <div class="setting-item">
-
-                <div class="setting-info">
-
-                    <h3>
-                        Seguridad
-                    </h3>
-
-                    <p>
-                        Próximamente
-                    </p>
-
-                </div>
-
-                <div class="setting-arrow">
-                    →
-                </div>
-
-            </div>
-
-        `;
-
-    }
-
-
-    /* =========================
-       LOGOUT
-    ========================== */
-
-    function logout() {
-
-        /*
-         * TEMPORAL.
-         * Cuando conectemos autenticación,
-         * aquí se destruirá la sesión real.
-         */
-
-        closeMenu();
-
-        window.location.href = "index.html";
-
-    }
-
-
-    /* =========================
-       ESCAPE HTML
-    ========================== */
-
-    function escapeHTML(value) {
-
-        const div = document.createElement("div");
-
-        div.textContent = value;
-
-        return div.innerHTML;
-
-    }
-
-
-    /* =========================
-       KEYBOARD
-    ========================== */
-
-    document.addEventListener(
-        "keydown",
-        function(event) {
-
-            if (event.key === "Escape") {
-
-                closeMenu();
-                closeView();
-
+            if (!item.dataset.view) {
+                return;
             }
 
-        }
-    );
+            item.addEventListener(
+                "click",
+                function() {
 
-</script>
+                    showView(item.dataset.view);
+
+                }
+            );
+
+        });
+
+
+        document
+            .querySelectorAll("[data-menu-view]")
+            .forEach(function(item) {
+
+                item.addEventListener(
+                    "click",
+                    function() {
+
+                        showView(
+                            item.dataset.menuView
+                        );
+
+                    }
+                );
+
+            });
+
+
+        /* =====================================================
+           MENU
+        ====================================================== */
+
+        menuButton.addEventListener(
+            "click",
+            function() {
+
+                menuOverlay.classList.add("open");
+
+            }
+        );
+
+
+        menuClose.addEventListener(
+            "click",
+            function() {
+
+                menuOverlay.classList.remove("open");
+
+            }
+        );
+
+
+        menuOverlay.addEventListener(
+            "click",
+            function(event) {
+
+                if (
+                    event.target === menuOverlay
+                ) {
+
+                    menuOverlay.classList.remove(
+                        "open"
+                    );
+
+                }
+
+            }
+        );
+
+
+        /* =====================================================
+           ADD SYSTEM MESSAGE
+        ====================================================== */
+
+        function addSystemMessage(text) {
+
+            const wrapper =
+                document.createElement("div");
+
+            wrapper.className =
+                "message system";
+
+            wrapper.innerHTML = `
+                <div class="bubble">
+                    ${text}
+                </div>
+            `;
+
+            chatScroll.appendChild(wrapper);
+
+            scrollChat();
+
+        }
+
+
+        /* =====================================================
+           ADD USER MESSAGE
+        ====================================================== */
+
+        function addUserMessage(text) {
+
+            const wrapper =
+                document.createElement("div");
+
+            wrapper.className =
+                "message user";
+
+            wrapper.innerHTML = `
+                <div class="bubble">
+                    ${escapeHtml(text)}
+                </div>
+            `;
+
+            chatScroll.appendChild(wrapper);
+
+            scrollChat();
+
+        }
+
+
+        /* =====================================================
+           ESCAPE HTML
+        ====================================================== */
+
+        function escapeHtml(text) {
+
+            const div =
+                document.createElement("div");
+
+            div.textContent = text;
+
+            return div.innerHTML;
+
+        }
+
+
+        /* =====================================================
+           SCROLL
+        ====================================================== */
+
+        function scrollChat() {
+
+            setTimeout(function() {
+
+                chatScroll.scrollTo({
+                    top: chatScroll.scrollHeight,
+                    behavior: "smooth"
+                });
+
+            }, 40);
+
+        }
+
+
+        /* =====================================================
+           START
+        ====================================================== */
+
+        startButton.addEventListener(
+            "click",
+            function() {
+
+                if (state.started) {
+                    return;
+                }
+
+
+                state.started = true;
+
+
+                startButton.style.display =
+                    "none";
+
+
+                chatForm.classList.add(
+                    "visible"
+                );
+
+
+                addSystemMessage(
+                    "Listo <span class=\"emoji\">✨</span> " +
+                    "Puedes comenzar a enviar tus solicitudes."
+                );
+
+
+                setTimeout(function() {
+
+                    addSystemMessage(
+                        "Para comenzar, escribe el " +
+                        "correo que quieres registrar " +
+                        "en una nueva solicitud."
+                    );
+
+                }, 500);
+
+
+                chatInput.focus();
+
+            }
+        );
+
+
+        /* =====================================================
+           CHAT
+        ====================================================== */
+
+        chatForm.addEventListener(
+            "submit",
+            function(event) {
+
+                event.preventDefault();
+
+
+                const value =
+                    chatInput.value.trim();
+
+
+                if (!value) {
+                    return;
+                }
+
+
+                addUserMessage(value);
+
+                chatInput.value = "";
+
+
+                const emailPattern =
+                    /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;
+
+
+                if (!emailPattern.test(value)) {
+
+                    setTimeout(function() {
+
+                        addSystemMessage(
+                            "Ese formato no parece un " +
+                            "correo válido. <span class=\"emoji\">📧</span>" +
+                            "<br><br>" +
+                            "Ejemplo: micuenta@gmail.com"
+                        );
+
+                    }, 350);
+
+                    return;
+                }
+
+
+                setTimeout(function() {
+
+                    addSystemMessage(
+                        "Recibido <span class=\"emoji\">📨</span>" +
+                        "<br><br>" +
+                        "Tu solicitud está lista para " +
+                        "ser enviada a revisión."
+                    );
+
+
+                    createRequest(value);
+
+                }, 450);
+
+            }
+        );
+
+
+        /* =====================================================
+           CREATE REQUEST
+        ====================================================== */
+
+        function createRequest(email) {
+
+            const request = {
+
+                id:
+                    "REQ-" +
+                    Date.now()
+                        .toString()
+                        .slice(-7),
+
+                email: email,
+
+                status: "pending",
+
+                createdAt:
+                    new Date()
+
+            };
+
+
+            state.requests.push(request);
+
+            renderHistory();
+
+            updateStats();
+
+
+            setTimeout(function() {
+
+                addSystemMessage(
+                    "Solicitud creada correctamente. " +
+                    "<span class=\"emoji\">⏳</span>" +
+                    "<br><br>" +
+                    "Cuando sea revisada, su estado " +
+                    "aparecerá en <strong>Mis cuentas</strong>."
+                );
+
+            }, 650);
+
+        }
+
+
+        /* =====================================================
+           RENDER HISTORY
+        ====================================================== */
+
+        function renderHistory() {
+
+            const container =
+                document.getElementById(
+                    "historyList"
+                );
+
+
+            if (!state.requests.length) {
+
+                container.innerHTML = `
+                    <div class="empty">
+
+                        <div class="empty-icon">
+                            ◌
+                        </div>
+
+                        <div class="empty-title">
+                            Todavía no hay solicitudes
+                        </div>
+
+                        <div class="empty-text">
+                            Cuando envíes una solicitud
+                            aparecerá aquí su estado.
+                        </div>
+
+                    </div>
+                `;
+
+                return;
+            }
+
+
+            container.innerHTML =
+                state.requests
+                    .slice()
+                    .reverse()
+                    .map(function(request) {
+
+                        const statusText =
+                            request.status === "approved"
+                                ? "Aceptada"
+                                : request.status === "rejected"
+                                    ? "Rechazada"
+                                    : "Pendiente";
+
+
+                        const date =
+                            request.createdAt
+                                .toLocaleDateString(
+                                    "es-ES"
+                                );
+
+
+                        return `
+                            <div class="history-item">
+
+                                <div class="history-main">
+
+                                    <div class="history-email">
+                                        ${escapeHtml(
+                                            request.email
+                                        )}
+                                    </div>
+
+                                    <div class="history-date">
+                                        ${date}
+                                    </div>
+
+                                </div>
+
+                                <div class="status ${request.status}">
+                                    ${statusText}
+                                </div>
+
+                            </div>
+                        `;
+
+                    })
+                    .join("");
+
+        }
+
+
+        /* =====================================================
+           UPDATE STATS
+        ====================================================== */
+
+        function updateStats() {
+
+            const accepted =
+                state.requests.filter(
+                    function(request) {
+
+                        return request.status === "approved";
+
+                    }
+                ).length;
+
+
+            const pending =
+                state.requests.filter(
+                    function(request) {
+
+                        return request.status === "pending";
+
+                    }
+                ).length;
+
+
+            document.getElementById(
+                "acceptedCount"
+            ).textContent = accepted;
+
+
+            document.getElementById(
+                "pendingCount"
+            ).textContent = pending;
+
+
+            document.querySelector(
+                ".balance-value"
+            ).innerHTML =
+                state.balance.toFixed(2) +
+                `
+                <span class="balance-currency">
+                    USDT
+                </span>
+                `;
+
+        }
+
+
+        /* =====================================================
+           TOP PROFILE
+        ====================================================== */
+
+        document
+            .getElementById("profileTopButton")
+            .addEventListener(
+                "click",
+                function() {
+
+                    showView("profileView");
+
+                }
+            );
+
+
+        /* =====================================================
+           PROFILE
+        ====================================================== */
+
+        function renderProfile() {
+
+            const username =
+                state.user.username ||
+                "Usuario";
+
+
+            const email =
+                state.user.email ||
+                "usuario@email.com";
+
+
+            document.getElementById(
+                "profileName"
+            ).textContent = username;
+
+
+            document.getElementById(
+                "profileEmail"
+            ).textContent = email;
+
+
+            document.getElementById(
+                "profileAvatar"
+            ).textContent =
+                username
+                    .charAt(0)
+                    .toUpperCase();
+
+        }
+
+
+        renderProfile();
+
+
+        /* =====================================================
+           PROFILE OPTIONS
+        ====================================================== */
+
+        document
+            .getElementById("editProfile")
+            .addEventListener(
+                "click",
+                function() {
+
+                    addSystemMessage(
+                        "La edición del perfil estará " +
+                        "disponible cuando conectemos " +
+                        "la cuenta con D1."
+                    );
+
+                    showView("chatView");
+
+                }
+            );
+
+
+        document
+            .getElementById("accountSettings")
+            .addEventListener(
+                "click",
+                function() {
+
+                    addSystemMessage(
+                        "Las opciones de cuenta se " +
+                        "conectarán posteriormente."
+                    );
+
+                    showView("chatView");
+
+                }
+            );
+
+
+        document
+            .getElementById("notificationsSettings")
+            .addEventListener(
+                "click",
+                function() {
+
+                    addSystemMessage(
+                        "Las notificaciones se configurarán " +
+                        "cuando conectemos el sistema de " +
+                        "notificaciones push."
+                    );
+
+                    showView("chatView");
+
+                }
+            );
+
+
+        document
+            .getElementById("privacySettings")
+            .addEventListener(
+                "click",
+                function() {
+
+                    addSystemMessage(
+                        "La configuración de privacidad " +
+                        "estará disponible próximamente."
+                    );
+
+                    showView("chatView");
+
+                }
+            );
+
+
+        /* =====================================================
+           LOGOUT
+        ====================================================== */
+
+        document
+            .getElementById("logoutButton")
+            .addEventListener(
+                "click",
+                function() {
+
+                    /*
+                     * La sesión real se conectará
+                     * posteriormente con nuestro Worker.
+                     */
+
+                    window.location.href =
+                        "index.html";
+
+                }
+            );
+
+
+        /* =====================================================
+           REFERRAL
+        ====================================================== */
+
+        document
+            .getElementById("copyReferral")
+            .addEventListener(
+                "click",
+                async function() {
+
+                    const link =
+                        document.getElementById(
+                            "referralLink"
+                        ).textContent;
+
+
+                    if (
+                        link === "próximamente"
+                    ) {
+
+                        return;
+
+                    }
+
+
+                    try {
+
+                        await navigator.clipboard
+                            .writeText(link);
+
+                        this.textContent =
+                            "COPIADO ✓";
+
+
+                        setTimeout(
+                            () => {
+
+                                this.textContent =
+                                    "COPIAR ENLACE";
+
+                            },
+                            1500
+                        );
+
+                    } catch {
+
+                        this.textContent =
+                            "NO DISPONIBLE";
+
+                    }
+
+                }
+            );
+
+
+        /* =====================================================
+           BALANCE BUTTONS
+        ====================================================== */
+
+        document
+            .getElementById("withdrawButton")
+            .addEventListener(
+                "click",
+                function() {
+
+                    showView("chatView");
+
+                    addSystemMessage(
+                        "La sección de retiros estará " +
+                        "disponible cuando conectemos " +
+                        "el balance con D1."
+                    );
+
+                }
+            );
+
+
+        document
+            .getElementById("transactionsButton")
+            .addEventListener(
+                "click",
+                function() {
+
+                    showView("balanceView");
+
+                    document
+                        .getElementById(
+                            "balanceTransactions"
+                        )
+                        .scrollIntoView({
+                            behavior: "smooth"
+                        });
+
+                }
+            );
+
+
+        /* =====================================================
+           INITIALIZE
+        ====================================================== */
+
+        updateStats();
+
+        renderHistory();
+
+        renderProfile();
+
+    </script>
+
+</div>
 
 </body>
-  </html>
+    </html>
