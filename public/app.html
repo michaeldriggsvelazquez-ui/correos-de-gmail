@@ -156,6 +156,45 @@
             background: #fff;
         }
 
+        .gmail-mark {
+            width: 25px;
+            height: 20px;
+            position: relative;
+        }
+
+        .gmail-mark::before,
+        .gmail-mark::after {
+            content: "";
+            position: absolute;
+            top: 1px;
+            width: 5px;
+            height: 18px;
+            border-radius: 3px;
+        }
+
+        .gmail-mark::before {
+            left: 3px;
+            background: #ea4335;
+            transform: rotate(-34deg);
+        }
+
+        .gmail-mark::after {
+            right: 3px;
+            background: #4285f4;
+            transform: rotate(34deg);
+        }
+
+        .gmail-m {
+            position: absolute;
+            left: 4px;
+            right: 4px;
+            top: 3px;
+            height: 14px;
+
+            border-top: 4px solid #34a853;
+            border-radius: 2px;
+        }
+
         .auth-loading-text {
             color: #666;
 
@@ -207,23 +246,8 @@
             background: #fff;
         }
 
-        .google-g {
-            font-size: 20px;
-            font-weight: 800;
-
-            background:
-                conic-gradient(
-                    #4285f4,
-                    #34a853,
-                    #fbbc05,
-                    #ea4335,
-                    #4285f4
-                );
-
-            -webkit-background-clip: text;
-            background-clip: text;
-
-            color: transparent;
+        .brand-logo .gmail-mark {
+            transform: scale(.86);
         }
 
         .brand-mini-name {
@@ -259,7 +283,8 @@
 
             color: #ddd;
 
-            font-size: 18px;
+            font-size: 21px;
+            line-height: 1;
 
             transition:
                 background .2s ease,
@@ -272,6 +297,24 @@
 
         .icon-button:active {
             transform: scale(.95);
+        }
+
+        .hamburger {
+            width: 19px;
+            height: 15px;
+
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .hamburger span {
+            width: 100%;
+            height: 2px;
+
+            border-radius: 4px;
+
+            background: #ddd;
         }
 
 
@@ -288,16 +331,6 @@
             overflow: hidden;
         }
 
-        /*
-         * IMPORTANTE:
-         * Todas las vistas ocupan exactamente el mismo espacio.
-         * Solo la vista .active se muestra.
-         *
-         * Antes #chatView tenía display:flex permanente y,
-         * por tener mayor especificidad que .view, seguía visible
-         * detrás de las demás vistas.
-         */
-
         .view {
             position: absolute;
             inset: 0;
@@ -306,7 +339,7 @@
 
             overflow-y: auto;
 
-            padding: 22px 17px 125px;
+            padding: 22px 17px 30px;
 
             scrollbar-width: none;
 
@@ -323,10 +356,6 @@
             animation: viewIn .22s ease;
         }
 
-        /*
-         * El chat necesita flex, pero SOLO cuando está activo.
-         */
-
         #chatView {
             display: none;
 
@@ -335,7 +364,7 @@
             padding:
                 18px
                 15px
-                92px;
+                86px;
         }
 
         #chatView.active {
@@ -378,7 +407,7 @@
         }
 
         .chat-welcome {
-            padding: 28px 8px 20px;
+            padding: 17px 8px 15px;
 
             text-align: center;
         }
@@ -387,7 +416,7 @@
             width: 54px;
             height: 54px;
 
-            margin: 0 auto 17px;
+            margin: 0 auto 15px;
 
             display: flex;
             align-items: center;
@@ -401,8 +430,8 @@
                 0 15px 45px rgba(0,0,0,.28);
         }
 
-        .welcome-logo .google-g {
-            font-size: 29px;
+        .welcome-logo .gmail-mark {
+            transform: scale(1.12);
         }
 
         .welcome-title {
@@ -411,7 +440,7 @@
 
             letter-spacing: -0.9px;
 
-            margin-bottom: 8px;
+            margin-bottom: 7px;
         }
 
         .welcome-title span {
@@ -438,7 +467,7 @@
         .message {
             display: flex;
 
-            margin: 11px 0;
+            margin: 10px 0;
         }
 
         .message.system {
@@ -452,15 +481,15 @@
         .bubble {
             max-width: 84%;
 
-            padding: 13px 15px;
+            padding: 12px 15px;
 
-            border-radius: 21px;
+            border-radius: 22px;
 
             border: 1px solid var(--border);
 
             font-size: 13px;
 
-            line-height: 1.55;
+            line-height: 1.5;
 
             white-space: pre-line;
 
@@ -478,7 +507,7 @@
                     rgba(255,255,255,.025)
                 );
 
-            border-bottom-left-radius: 9px;
+            border-bottom-left-radius: 10px;
         }
 
         .message.user .bubble {
@@ -488,7 +517,7 @@
             border-color:
                 rgba(255,255,255,.12);
 
-            border-bottom-right-radius: 9px;
+            border-bottom-right-radius: 10px;
         }
 
         .bubble strong {
@@ -502,92 +531,7 @@
 
 
         /* =========================================================
-           SALE / REQUEST CARD
-        ========================================================= */
-
-        .sale-card {
-            margin: 13px 0;
-
-            padding: 17px;
-
-            border-radius: 20px;
-
-            border: 1px solid rgba(255,255,255,.10);
-
-            background:
-                linear-gradient(
-                    145deg,
-                    rgba(255,255,255,.07),
-                    rgba(255,255,255,.025)
-                );
-
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
-        }
-
-        .sale-card-title {
-            font-size: 13px;
-            font-weight: 700;
-
-            margin-bottom: 6px;
-        }
-
-        .sale-card-text {
-            color: #8e8e8e;
-
-            font-size: 11px;
-
-            line-height: 1.5;
-
-            margin-bottom: 14px;
-        }
-
-        .sale-input {
-            width: 100%;
-            height: 45px;
-
-            padding: 0 13px;
-
-            border-radius: 12px;
-
-            border: 1px solid var(--border);
-
-            background:
-                rgba(0,0,0,.22);
-
-            color: #fff;
-
-            font-size: 12px;
-        }
-
-        .sale-input:focus {
-            border-color:
-                rgba(255,255,255,.22);
-        }
-
-        .sale-button {
-            width: 100%;
-            height: 44px;
-
-            margin-top: 9px;
-
-            border: 0;
-
-            border-radius: 12px;
-
-            background: #f2f2f2;
-
-            color: #080808;
-
-            font-size: 11px;
-            font-weight: 800;
-
-            letter-spacing: .4px;
-        }
-
-
-        /* =========================================================
-           BOTTOM INPUT
+           BOTTOM COMPOSER
         ========================================================= */
 
         .chat-composer {
@@ -686,7 +630,12 @@
 
             color: #050505;
 
-            font-size: 16px;
+            font-size: 17px;
+            font-weight: 700;
+        }
+
+        .send-button:active {
+            transform: scale(.94);
         }
 
 
@@ -1332,26 +1281,6 @@
             letter-spacing: .8px;
         }
 
-        .settings-save {
-            width: 100%;
-            height: 44px;
-
-            margin-top: 12px;
-
-            border: 0;
-
-            border-radius: 12px;
-
-            background: #f2f2f2;
-
-            color: #080808;
-
-            font-size: 10px;
-            font-weight: 800;
-
-            letter-spacing: .4px;
-        }
-
         .settings-disabled {
             opacity: .55;
 
@@ -1530,7 +1459,7 @@
 
 
         /* =========================================================
-           MENU OVERLAY
+           MENU
         ========================================================= */
 
         .menu-overlay {
@@ -1561,6 +1490,9 @@
             bottom: 0;
 
             width: min(330px, 88vw);
+
+            display: flex;
+            flex-direction: column;
 
             padding:
                 18px
@@ -1696,81 +1628,18 @@
             font-size: 14px;
         }
 
-
-        /* =========================================================
-           BOTTOM NAVIGATION
-        ========================================================== */
-
-        .bottom-nav {
-            position: fixed;
-
-            left: 12px;
-            right: 12px;
-            bottom: 10px;
-
-            z-index: 50;
-
-            height: 61px;
-
-            display: grid;
-
-            grid-template-columns:
-                1fr 1fr 1fr 1fr;
-
-            gap: 4px;
-
-            padding: 5px;
-
-            border:
-                1px solid rgba(255,255,255,.09);
-
-            border-radius: 20px;
-
-            background:
-                rgba(16,16,16,.75);
-
-            backdrop-filter: blur(30px);
-            -webkit-backdrop-filter: blur(30px);
-
-            box-shadow:
-                0 18px 60px rgba(0,0,0,.45);
+        .menu-spacer {
+            flex: 1;
+            min-height: 25px;
         }
 
-        .nav-item {
-            border: 0;
-
-            border-radius: 15px;
-
-            background: transparent;
-
-            color: #666;
-
-            display: flex;
-
-            flex-direction: column;
-
-            align-items: center;
-
-            justify-content: center;
-
-            gap: 3px;
-
-            font-size: 9px;
-
-            transition:
-                background .2s ease,
-                color .2s ease;
+        .menu-logout {
+            color: #ff7373;
         }
 
-        .nav-icon {
-            font-size: 17px;
-        }
-
-        .nav-item.active {
-            background:
-                rgba(255,255,255,.075);
-
-            color: #f3f3f3;
+        .menu-logout .menu-icon {
+            color: #ff7373;
+            background: rgba(255,105,105,.07);
         }
 
 
@@ -1825,16 +1694,6 @@
                     1px solid rgba(255,255,255,.04);
             }
 
-            .bottom-nav {
-                left: 50%;
-
-                width: 536px;
-
-                right: auto;
-
-                transform: translateX(-50%);
-            }
-
             .chat-composer {
                 left: 20px;
                 right: 20px;
@@ -1867,8 +1726,8 @@
         <div class="auth-loading-inner">
 
             <div class="auth-loading-logo">
-                <div class="google-g">
-                    G
+                <div class="gmail-mark">
+                    <div class="gmail-m"></div>
                 </div>
             </div>
 
@@ -1890,9 +1749,11 @@
         <div class="brand-mini">
 
             <div class="brand-logo">
-                <div class="google-g">
-                    G
+
+                <div class="gmail-mark">
+                    <div class="gmail-m"></div>
                 </div>
+
             </div>
 
             <div class="brand-mini-name">
@@ -1906,10 +1767,18 @@
 
             <button
                 class="icon-button"
-                id="profileTopButton"
-                aria-label="Perfil"
+                id="menuButton"
+                aria-label="Abrir menú"
+                aria-controls="menuOverlay"
+                aria-expanded="false"
             >
-                ●
+
+                <span class="hamburger">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </span>
+
             </button>
 
         </div>
@@ -1944,9 +1813,11 @@
                 >
 
                     <div class="welcome-logo">
-                        <div class="google-g">
-                            G
+
+                        <div class="gmail-mark">
+                            <div class="gmail-m"></div>
                         </div>
+
                     </div>
 
                     <h1 class="welcome-title">
@@ -1954,8 +1825,8 @@
                     </h1>
 
                     <p class="welcome-description">
-                        Gestiona tus solicitudes y consulta
-                        tu actividad desde un solo lugar.
+                        Gestiona tus solicitudes desde
+                        un solo lugar.
                     </p>
 
                 </div>
@@ -1967,22 +1838,11 @@
                 >
 
                     <div class="bubble">
-
                         Bienvenido a
                         <strong>GmailAccounts.</strong>
                         <span class="emoji">👋</span>
-
-                        <br><br>
-
-                        Aquí puedes gestionar tus solicitudes
-                        y consultar el estado de tus
-                        operaciones.
-
-                        <br><br>
-
-                        Pulsa <strong>INICIAR</strong>
-                        para comenzar.
-
+                        <br>
+                        Pulsa <strong>INICIAR</strong> para comenzar.
                     </div>
 
                 </div>
@@ -2014,12 +1874,15 @@
                         id="chatInput"
                         type="text"
                         autocomplete="off"
+                        autocapitalize="none"
+                        spellcheck="false"
                         placeholder="Escribe un mensaje..."
                     >
 
                     <button
                         class="send-button"
                         type="submit"
+                        aria-label="Enviar"
                     >
                         ↑
                     </button>
@@ -2185,8 +2048,7 @@
 
                 <p class="page-subtitle">
                     Todo lo necesario para utilizar
-                    GmailAccounts y encontrar cada función
-                    sin tener que explorar a ciegas.
+                    GmailAccounts.
                 </p>
 
             </div>
@@ -2195,19 +2057,15 @@
             <div class="glass-card">
 
                 <p class="tutorial-intro">
-                    GmailAccounts está organizado alrededor
-                    de una interfaz principal. Desde el chat
-                    puedes iniciar solicitudes y desde la
-                    navegación inferior puedes consultar
-                    balance, tutorial y menú.
+                    GmailAccounts funciona desde una interfaz
+                    sencilla. El chat es el punto de inicio y
+                    el menú reúne el resto de las funciones.
                 </p>
 
 
                 <div class="tutorial-step">
 
-                    <div class="step-number">
-                        1
-                    </div>
+                    <div class="step-number">1</div>
 
                     <div class="step-content">
 
@@ -2216,11 +2074,10 @@
                         </h3>
 
                         <p>
-                            Desde la pantalla inicial utiliza
-                            el formulario de registro. Introduce
-                            un correo válido, un nombre de usuario
-                            y una contraseña que cumpla los
-                            requisitos indicados por el sistema.
+                            Regístrate desde la pantalla de acceso
+                            utilizando un correo válido, un nombre
+                            de usuario y una contraseña que cumpla
+                            los requisitos indicados.
                         </p>
 
                     </div>
@@ -2230,9 +2087,7 @@
 
                 <div class="tutorial-step">
 
-                    <div class="step-number">
-                        2
-                    </div>
+                    <div class="step-number">2</div>
 
                     <div class="step-content">
 
@@ -2241,11 +2096,10 @@
                         </h3>
 
                         <p>
-                            Después del registro puedes acceder
-                            con tu correo o nombre de usuario
-                            junto con tu contraseña. Si ya existe
+                            Puedes acceder con tu correo o nombre
+                            de usuario y tu contraseña. Si ya tienes
                             una sesión válida, la aplicación puede
-                            llevarte directamente a esta interfaz.
+                            abrir directamente esta pantalla.
                         </p>
 
                     </div>
@@ -2255,22 +2109,19 @@
 
                 <div class="tutorial-step">
 
-                    <div class="step-number">
-                        3
-                    </div>
+                    <div class="step-number">3</div>
 
                     <div class="step-content">
 
                         <h3>
-                            Conoce el Chat
+                            Pulsa INICIAR
                         </h3>
 
                         <p>
-                            El Chat es la pantalla principal.
-                            Pulsa INICIAR para activar el flujo
-                            de solicitudes. Las instrucciones
-                            aparecerán directamente dentro de
-                            la conversación.
+                            En el Chat encontrarás el botón
+                            INICIAR. Al tocarlo se activa el campo
+                            de escritura y aparece la instrucción
+                            para comenzar una solicitud.
                         </p>
 
                     </div>
@@ -2280,22 +2131,19 @@
 
                 <div class="tutorial-step">
 
-                    <div class="step-number">
-                        4
-                    </div>
+                    <div class="step-number">4</div>
 
                     <div class="step-content">
 
                         <h3>
-                            Envía una solicitud
+                            Escribe tu solicitud
                         </h3>
 
                         <p>
-                            Sigue las instrucciones mostradas
-                            por la interfaz y proporciona el
-                            identificador de cuenta solicitado.
-                            El sistema valida el formato antes
-                            de crear la solicitud.
+                            Utiliza el campo de texto inferior
+                            para enviar la información solicitada
+                            por la interfaz. El botón de flecha
+                            permite enviar el mensaje.
                         </p>
 
                     </div>
@@ -2305,21 +2153,19 @@
 
                 <div class="tutorial-step">
 
-                    <div class="step-number">
-                        5
-                    </div>
+                    <div class="step-number">5</div>
 
                     <div class="step-content">
 
                         <h3>
-                            Revisa tu solicitud
+                            Revisa el formato
                         </h3>
 
                         <p>
-                            Cuando una solicitud se crea,
-                            recibe un identificador y un estado.
-                            Inicialmente puede aparecer como
-                            Pendiente mientras espera revisión.
+                            Cuando el flujo solicite un correo,
+                            la aplicación comprueba que tenga
+                            un formato válido antes de crear
+                            la solicitud.
                         </p>
 
                     </div>
@@ -2329,9 +2175,7 @@
 
                 <div class="tutorial-step">
 
-                    <div class="step-number">
-                        6
-                    </div>
+                    <div class="step-number">6</div>
 
                     <div class="step-content">
 
@@ -2340,11 +2184,10 @@
                         </h3>
 
                         <p>
-                            En Mis cuentas encontrarás las
-                            solicitudes realizadas durante
-                            la sesión disponible en la aplicación.
-                            Cada registro muestra su identificador,
-                            fecha, dato enviado y estado.
+                            Desde el menú puedes entrar en
+                            Mis cuentas para consultar tus
+                            solicitudes, fechas, identificadores
+                            y estados.
                         </p>
 
                     </div>
@@ -2354,9 +2197,7 @@
 
                 <div class="tutorial-step">
 
-                    <div class="step-number">
-                        7
-                    </div>
+                    <div class="step-number">7</div>
 
                     <div class="step-content">
 
@@ -2366,9 +2207,9 @@
 
                         <p>
                             Pendiente significa que la solicitud
-                            todavía está esperando revisión.
-                            Aceptada indica que fue aprobada.
-                            Rechazada indica que no fue aprobada.
+                            espera revisión. Aceptada significa
+                            que fue aprobada y Rechazada indica
+                            que no fue aprobada.
                         </p>
 
                     </div>
@@ -2378,9 +2219,7 @@
 
                 <div class="tutorial-step">
 
-                    <div class="step-number">
-                        8
-                    </div>
+                    <div class="step-number">8</div>
 
                     <div class="step-content">
 
@@ -2390,10 +2229,8 @@
 
                         <p>
                             Balance muestra el saldo disponible
-                            asociado a tu cuenta y algunos
-                            indicadores de actividad. Los valores
-                            que aparecen aquí pertenecen al
-                            sistema de la aplicación.
+                            asociado a tu cuenta y los indicadores
+                            de actividad disponibles.
                         </p>
 
                     </div>
@@ -2403,21 +2240,18 @@
 
                 <div class="tutorial-step">
 
-                    <div class="step-number">
-                        9
-                    </div>
+                    <div class="step-number">9</div>
 
                     <div class="step-content">
 
                         <h3>
-                            Revisa los movimientos
+                            Revisa movimientos
                         </h3>
 
                         <p>
-                            En la sección Movimientos se mostrarán
-                            los registros relacionados con el
-                            balance cuando esa información esté
-                            disponible desde la base de datos.
+                            Los movimientos relacionados con el
+                            balance aparecerán en esta sección
+                            cuando existan registros disponibles.
                         </p>
 
                     </div>
@@ -2427,34 +2261,7 @@
 
                 <div class="tutorial-step">
 
-                    <div class="step-number">
-                        10
-                    </div>
-
-                    <div class="step-content">
-
-                        <h3>
-                            Retiros
-                        </h3>
-
-                        <p>
-                            La opción Retiro está preparada como
-                            punto de entrada para el futuro sistema
-                            de solicitudes de retiro. La validación,
-                            revisión y registro definitivo se
-                            conectarán posteriormente con el backend.
-                        </p>
-
-                    </div>
-
-                </div>
-
-
-                <div class="tutorial-step">
-
-                    <div class="step-number">
-                        11
-                    </div>
+                    <div class="step-number">10</div>
 
                     <div class="step-content">
 
@@ -2463,11 +2270,9 @@
                         </h3>
 
                         <p>
-                            Referidos será el espacio destinado a
-                            consultar invitaciones, registros y
-                            movimientos asociados a tu código o
-                            enlace personal cuando la función esté
-                            conectada a D1.
+                            Referidos será el espacio para consultar
+                            tu enlace y la actividad relacionada
+                            cuando la función esté conectada.
                         </p>
 
                     </div>
@@ -2477,21 +2282,18 @@
 
                 <div class="tutorial-step">
 
-                    <div class="step-number">
-                        12
-                    </div>
+                    <div class="step-number">11</div>
 
                     <div class="step-content">
 
                         <h3>
-                            Configura tu perfil
+                            Administra tu perfil
                         </h3>
 
                         <p>
-                            Desde Mi perfil puedes consultar tus
-                            datos de cuenta y acceder a las
-                            preferencias de la aplicación,
-                            incluyendo notificaciones y privacidad.
+                            Mi perfil muestra tus datos de cuenta
+                            y permite acceder a configuración,
+                            notificaciones y privacidad.
                         </p>
 
                     </div>
@@ -2501,58 +2303,7 @@
 
                 <div class="tutorial-step">
 
-                    <div class="step-number">
-                        13
-                    </div>
-
-                    <div class="step-content">
-
-                        <h3>
-                            Configuración de cuenta
-                        </h3>
-
-                        <p>
-                            Esta sección reunirá posteriormente
-                            las opciones relacionadas con tu
-                            cuenta, seguridad y otros ajustes
-                            que necesiten conexión directa con
-                            el backend.
-                        </p>
-
-                    </div>
-
-                </div>
-
-
-                <div class="tutorial-step">
-
-                    <div class="step-number">
-                        14
-                    </div>
-
-                    <div class="step-content">
-
-                        <h3>
-                            Privacidad
-                        </h3>
-
-                        <p>
-                            Aquí podrás revisar las preferencias
-                            relacionadas con el funcionamiento de
-                            la aplicación y controlar las opciones
-                            disponibles para tu cuenta.
-                        </p>
-
-                    </div>
-
-                </div>
-
-
-                <div class="tutorial-step">
-
-                    <div class="step-number">
-                        15
-                    </div>
+                    <div class="step-number">12</div>
 
                     <div class="step-content">
 
@@ -2561,11 +2312,10 @@
                         </h3>
 
                         <p>
-                            Desde Mi perfil puedes cerrar la
-                            sesión actual. La aplicación revoca
-                            la sesión en el servidor y elimina
-                            el token guardado localmente antes
-                            de volver a la pantalla de acceso.
+                            Abre el menú y utiliza Cerrar sesión.
+                            La sesión se revoca en el servidor,
+                            se elimina el token local y vuelves
+                            a la pantalla de acceso.
                         </p>
 
                     </div>
@@ -2574,10 +2324,9 @@
 
 
                 <div class="tutorial-note">
-                    💡 Consejo: no necesitas memorizar dónde
-                    está cada función. Chat, Balance y Tutorial
-                    están en la navegación inferior, mientras
-                    que Menú reúne las secciones adicionales.
+                    💡 El botón ☰ de la esquina superior derecha
+                    abre el menú completo. Desde ahí puedes acceder
+                    a todas las secciones de la aplicación.
                 </div>
 
             </div>
@@ -2594,8 +2343,8 @@
                 </div>
 
                 <p class="tutorial-intro">
-                    Crear y consultar solicitudes desde una
-                    conversación sencilla.
+                    Iniciar y gestionar solicitudes desde
+                    una conversación sencilla.
                 </p>
 
                 <div class="tutorial-mini-title">
@@ -2603,7 +2352,7 @@
                 </div>
 
                 <p class="tutorial-intro">
-                    Consultar balance, actividad y futuras
+                    Consultar saldo, actividad y futuras
                     funciones relacionadas con retiros.
                 </p>
 
@@ -2612,8 +2361,8 @@
                 </div>
 
                 <p class="tutorial-intro">
-                    Acceder rápidamente a Mis cuentas,
-                    Referidos y Mi perfil.
+                    Acceder a todas las funciones adicionales
+                    de la aplicación.
                 </p>
 
             </div>
@@ -2715,9 +2464,8 @@
                     "
                 >
                     Tu sistema de referidos mostrará
-                    aquí los registros y movimientos
-                    correspondientes cuando la función
-                    esté conectada a la base de datos.
+                    aquí los registros correspondientes
+                    cuando la función esté conectada.
                 </p>
 
             </div>
@@ -2726,7 +2474,7 @@
 
 
         <!-- =====================================================
-             HISTORIAL
+             HISTORIAL / MIS CUENTAS
         ====================================================== -->
 
         <section
@@ -2909,22 +2657,6 @@
 
                 </button>
 
-
-                <button
-                    class="profile-option danger"
-                    id="logoutButton"
-                >
-
-                    <span>
-                        Cerrar sesión
-                    </span>
-
-                    <span>
-                        ↗
-                    </span>
-
-                </button>
-
             </div>
 
 
@@ -2966,79 +2698,19 @@
 
 
     <!-- =========================================================
-         BOTTOM NAV
-    ========================================================== -->
-
-    <nav class="bottom-nav">
-
-        <button
-            class="nav-item active"
-            data-view="chatView"
-        >
-
-            <span class="nav-icon">
-                ◉
-            </span>
-
-            Chat
-
-        </button>
-
-
-        <button
-            class="nav-item"
-            data-view="balanceView"
-        >
-
-            <span class="nav-icon">
-                ◇
-            </span>
-
-            Balance
-
-        </button>
-
-
-        <button
-            class="nav-item"
-            data-view="tutorialView"
-        >
-
-            <span class="nav-icon">
-                ?
-            </span>
-
-            Tutorial
-
-        </button>
-
-
-        <button
-            class="nav-item"
-            id="menuButton"
-        >
-
-            <span class="nav-icon">
-                ☰
-            </span>
-
-            Menú
-
-        </button>
-
-    </nav>
-
-
-    <!-- =========================================================
          MENU
     ========================================================== -->
 
     <div
         class="menu-overlay"
         id="menuOverlay"
+        aria-hidden="true"
     >
 
-        <aside class="menu-panel">
+        <aside
+            class="menu-panel"
+            aria-label="Menú principal"
+        >
 
             <div class="menu-top">
 
@@ -3049,6 +2721,7 @@
                 <button
                     class="menu-close"
                     id="menuClose"
+                    aria-label="Cerrar menú"
                 >
                     ×
                 </button>
@@ -3151,6 +2824,23 @@
                 </span>
 
                 Mi perfil
+
+            </button>
+
+
+            <div class="menu-spacer"></div>
+
+
+            <button
+                class="menu-item menu-logout"
+                id="menuLogoutButton"
+            >
+
+                <span class="menu-icon">
+                    ↗
+                </span>
+
+                Cerrar sesión
 
             </button>
 
@@ -3321,10 +3011,6 @@
             document.querySelectorAll(".view");
 
 
-        const navItems =
-            document.querySelectorAll(".nav-item");
-
-
         const menuOverlay =
             document.getElementById(
                 "menuOverlay"
@@ -3398,1753 +3084,42 @@
 
 
         /* =====================================================
-           TOAST
+           REQUEST STORAGE
         ====================================================== */
 
-        let toastTimer = null;
+        function getRequestStorageKey() {
 
-
-        function showToast(message) {
-
-            clearTimeout(toastTimer);
-
-
-            toast.textContent =
-                message;
-
-
-            toast.classList.add(
-                "show"
-            );
-
-
-            toastTimer =
-                setTimeout(function() {
-
-                    toast.classList.remove(
-                        "show"
-                    );
-
-                }, 2200);
-
-        }
-
-
-        /* =====================================================
-           API REQUEST
-        ====================================================== */
-
-        async function apiRequest(
-            url,
-            options = {}
-        ) {
-
-            const token =
-                localStorage.getItem(
-                    SESSION_KEY
-                );
-
-
-            const headers = {
-                ...(options.headers || {})
-            };
-
-
-            if (
-                !headers["Content-Type"] &&
-                options.body
-            ) {
-
-                headers["Content-Type"] =
-                    "application/json";
-
+            if (!state.user.id) {
+                return null;
             }
 
-
-            if (token) {
-
-                headers["Authorization"] =
-                    "Bearer " + token;
-
-            }
-
-
-            return fetch(
-                url,
-                {
-                    ...options,
-                    headers
-                }
+            return (
+                "gmailaccounts_requests_" +
+                state.user.id
             );
 
         }
 
 
-        /* =====================================================
-           REDIRECT TO LOGIN
-        ====================================================== */
+        function loadLocalRequests() {
 
-        function redirectToLogin() {
-
-            localStorage.removeItem(
-                SESSION_KEY
-            );
+            const key =
+                getRequestStorageKey();
 
 
-            window.location.replace(
-                "index.html"
-            );
-
-        }
-
-
-        /* =====================================================
-           LOAD CURRENT USER
-        ====================================================== */
-
-        async function loadCurrentUser() {
-
-            const token =
-                localStorage.getItem(
-                    SESSION_KEY
-                );
-
-
-            if (!token) {
-
-                redirectToLogin();
-
-                return false;
-
+            if (!key) {
+                return;
             }
 
 
             try {
 
-                const response =
-                    await apiRequest(
-                        "/api/auth/me"
+                const saved =
+                    JSON.parse(
+                        localStorage.getItem(
+                            key
+                        ) || "[]"
                     );
 
 
-                if (!response.ok) {
-
-                    redirectToLogin();
-
-                    return false;
-
-                }
-
-
-                const data =
-                    await response.json();
-
-
-                if (
-                    !data.success ||
-                    !data.user
-                ) {
-
-                    redirectToLogin();
-
-                    return false;
-
-                }
-
-
-                state.user = {
-
-                    id:
-                        data.user.id || "",
-
-                    username:
-                        data.user.username ||
-                        "Usuario",
-
-                    email:
-                        data.user.email ||
-                        "usuario@email.com",
-
-                    role:
-                        data.user.role ||
-                        "user"
-
-                };
-
-
-                state.balance =
-                    Number(
-                        data.user.balance || 0
-                    );
-
-
-                renderProfile();
-
-                updateStats();
-
-
-                return true;
-
-            } catch (error) {
-
-                console.error(
-                    "Error comprobando la sesión:",
-                    error
-                );
-
-
-                redirectToLogin();
-
-                return false;
-
-            }
-
-        }
-
-
-        /* =====================================================
-           NAVIGATION
-        ====================================================== */
-
-        function showView(viewId) {
-
-            const target =
-                document.getElementById(
-                    viewId
-                );
-
-
-            if (!target) {
-                return;
-            }
-
-
-            /*
-             * Primero cerramos el menú y cualquier modal.
-             */
-
-            menuOverlay.classList.remove(
-                "open"
-            );
-
-            settingsModal.classList.remove(
-                "open"
-            );
-
-
-            /*
-             * Una sola vista visible.
-             */
-
-            views.forEach(function(view) {
-
-                view.classList.remove(
-                    "active"
-                );
-
-            });
-
-
-            /*
-             * Activamos únicamente la solicitada.
-             */
-
-            target.classList.add(
-                "active"
-            );
-
-
-            /*
-             * Actualizamos la navegación inferior.
-             */
-
-            navItems.forEach(function(item) {
-
-                item.classList.toggle(
-                    "active",
-                    item.dataset.view === viewId
-                );
-
-            });
-
-
-            /*
-             * Cada cambio comienza desde arriba.
-             */
-
-            target.scrollTop = 0;
-
-
-            if (viewId === "chatView") {
-
-                setTimeout(
-                    scrollChat,
-                    40
-                );
-
-            }
-
-        }
-
-
-        navItems.forEach(function(item) {
-
-            if (!item.dataset.view) {
-                return;
-            }
-
-
-            item.addEventListener(
-                "click",
-                function() {
-
-                    showView(
-                        item.dataset.view
-                    );
-
-                }
-            );
-
-        });
-
-
-        document
-            .querySelectorAll("[data-menu-view]")
-            .forEach(function(item) {
-
-                item.addEventListener(
-                    "click",
-                    function() {
-
-                        showView(
-                            item.dataset.menuView
-                        );
-
-                    }
-                );
-
-            });
-
-
-        /* =====================================================
-           MENU
-        ====================================================== */
-
-        menuButton.addEventListener(
-            "click",
-            function() {
-
-                menuOverlay.classList.add(
-                    "open"
-                );
-
-            }
-        );
-
-
-        menuClose.addEventListener(
-            "click",
-            function() {
-
-                menuOverlay.classList.remove(
-                    "open"
-                );
-
-            }
-        );
-
-
-        menuOverlay.addEventListener(
-            "click",
-            function(event) {
-
-                if (
-                    event.target === menuOverlay
-                ) {
-
-                    menuOverlay.classList.remove(
-                        "open"
-                    );
-
-                }
-
-            }
-        );
-
-
-        /* =====================================================
-           ADD SYSTEM MESSAGE
-        ====================================================== */
-
-        function addSystemMessage(text) {
-
-            const wrapper =
-                document.createElement("div");
-
-
-            wrapper.className =
-                "message system";
-
-
-            wrapper.innerHTML = `
-                <div class="bubble">
-                    ${text}
-                </div>
-            `;
-
-
-            chatScroll.appendChild(
-                wrapper
-            );
-
-
-            scrollChat();
-
-        }
-
-
-        /* =====================================================
-           ADD USER MESSAGE
-        ====================================================== */
-
-        function addUserMessage(text) {
-
-            const wrapper =
-                document.createElement("div");
-
-
-            wrapper.className =
-                "message user";
-
-
-            wrapper.innerHTML = `
-                <div class="bubble">
-                    ${escapeHtml(text)}
-                </div>
-            `;
-
-
-            chatScroll.appendChild(
-                wrapper
-            );
-
-
-            scrollChat();
-
-        }
-
-
-        /* =====================================================
-           ESCAPE HTML
-        ====================================================== */
-
-        function escapeHtml(text) {
-
-            const div =
-                document.createElement(
-                    "div"
-                );
-
-
-            div.textContent =
-                text;
-
-
-            return div.innerHTML;
-
-        }
-
-
-        /* =====================================================
-           SCROLL CHAT
-        ====================================================== */
-
-        function scrollChat() {
-
-            setTimeout(function() {
-
-                chatScroll.scrollTo({
-
-                    top:
-                        chatScroll.scrollHeight,
-
-                    behavior:
-                        "smooth"
-
-                });
-
-            }, 40);
-
-        }
-
-
-        /* =====================================================
-           START
-        ====================================================== */
-
-        startButton.addEventListener(
-            "click",
-            function() {
-
-                if (state.started) {
-                    return;
-                }
-
-
-                state.started = true;
-
-
-                startButton.style.display =
-                    "none";
-
-
-                chatForm.classList.add(
-                    "visible"
-                );
-
-
-                addSystemMessage(
-                    "Listo <span class=\"emoji\">✨</span> " +
-                    "Puedes comenzar a enviar tus solicitudes."
-                );
-
-
-                setTimeout(function() {
-
-                    addSystemMessage(
-                        "Para comenzar, escribe el " +
-                        "correo que quieres registrar " +
-                        "en una nueva solicitud."
-                    );
-
-                }, 500);
-
-
-                chatInput.focus();
-
-            }
-        );
-
-
-        /* =====================================================
-           CHAT
-        ====================================================== */
-
-        chatForm.addEventListener(
-            "submit",
-            function(event) {
-
-                event.preventDefault();
-
-
-                const value =
-                    chatInput.value.trim();
-
-
-                if (!value) {
-                    return;
-                }
-
-
-                addUserMessage(
-                    value
-                );
-
-
-                chatInput.value =
-                    "";
-
-
-                const emailPattern =
-                    /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-
-                if (
-                    !emailPattern.test(
-                        value
-                    )
-                ) {
-
-                    setTimeout(function() {
-
-                        addSystemMessage(
-                            "Ese formato no parece un " +
-                            "correo válido. <span class=\"emoji\">📧</span>" +
-                            "<br><br>" +
-                            "Ejemplo: micuenta@gmail.com"
-                        );
-
-                    }, 350);
-
-                    return;
-
-                }
-
-
-                setTimeout(function() {
-
-                    addSystemMessage(
-                        "Recibido <span class=\"emoji\">📨</span>" +
-                        "<br><br>" +
-                        "Tu solicitud está lista para " +
-                        "ser enviada a revisión."
-                    );
-
-
-                    createRequest(
-                        value
-                    );
-
-                }, 450);
-
-            }
-        );
-
-
-        /* =====================================================
-           CREATE REQUEST
-        ====================================================== */
-
-        function createRequest(email) {
-
-            const request = {
-
-                id:
-                    "REQ-" +
-                    Date.now()
-                        .toString()
-                        .slice(-7),
-
-                email:
-                    email,
-
-                status:
-                    "pending",
-
-                createdAt:
-                    new Date()
-
-            };
-
-
-            state.requests.push(
-                request
-            );
-
-
-            renderHistory();
-
-            updateStats();
-
-
-            setTimeout(function() {
-
-                addSystemMessage(
-                    "Solicitud creada correctamente. " +
-                    "<span class=\"emoji\">⏳</span>" +
-                    "<br><br>" +
-                    "Cuando sea revisada, su estado " +
-                    "aparecerá en <strong>Mis cuentas</strong>."
-                );
-
-            }, 650);
-
-        }
-
-
-        /* =====================================================
-           FORMAT DATE
-        ====================================================== */
-
-        function formatDate(date) {
-
-            if (
-                !(date instanceof Date) ||
-                Number.isNaN(
-                    date.getTime()
-                )
-            ) {
-
-                return "Fecha no disponible";
-
-            }
-
-
-            return date.toLocaleDateString(
-                "es-ES",
-                {
-                    day: "2-digit",
-                    month: "2-digit",
-                    year: "numeric"
-                }
-            );
-
-        }
-
-
-        /* =====================================================
-           RENDER HISTORY
-        ====================================================== */
-
-        function renderHistory() {
-
-            const container =
-                document.getElementById(
-                    "historyList"
-                );
-
-
-            if (!state.requests.length) {
-
-                container.innerHTML = `
-                    <div class="empty">
-
-                        <div class="empty-icon">
-                            ◌
-                        </div>
-
-                        <div class="empty-title">
-                            Todavía no hay solicitudes
-                        </div>
-
-                        <div class="empty-text">
-                            Cuando envíes una solicitud
-                            aparecerá aquí su estado.
-                        </div>
-
-                    </div>
-                `;
-
-                return;
-
-            }
-
-
-            container.innerHTML =
-                state.requests
-                    .slice()
-                    .reverse()
-                    .map(function(request) {
-
-                        const statusText =
-                            request.status === "approved"
-                                ? "Aceptada"
-                                : request.status === "rejected"
-                                    ? "Rechazada"
-                                    : "Pendiente";
-
-
-                        const date =
-                            formatDate(
-                                request.createdAt
-                            );
-
-
-                        return `
-                            <div class="history-item">
-
-                                <div class="history-main">
-
-                                    <div class="history-email">
-                                        ${escapeHtml(
-                                            request.email
-                                        )}
-                                    </div>
-
-                                    <div class="history-date">
-                                        ${date}
-                                    </div>
-
-                                    <div class="history-id">
-                                        ${escapeHtml(
-                                            request.id
-                                        )}
-                                    </div>
-
-                                </div>
-
-                                <div class="status ${request.status}">
-                                    ${statusText}
-                                </div>
-
-                            </div>
-                        `;
-
-                    })
-                    .join("");
-
-        }
-
-
-        /* =====================================================
-           UPDATE BALANCE TRANSACTIONS
-        ====================================================== */
-
-        function renderBalanceTransactions() {
-
-            const container =
-                document.getElementById(
-                    "balanceTransactions"
-                );
-
-
-            if (!state.requests.length) {
-
-                container.innerHTML = `
-                    <div class="empty">
-
-                        <div class="empty-icon">
-                            ◌
-                        </div>
-
-                        <div class="empty-title">
-                            Sin movimientos
-                        </div>
-
-                        <div class="empty-text">
-                            Tus movimientos aparecerán
-                            aquí cuando existan registros.
-                        </div>
-
-                    </div>
-                `;
-
-                return;
-
-            }
-
-
-            container.innerHTML =
-                state.requests
-                    .slice()
-                    .reverse()
-                    .map(function(request) {
-
-                        const statusText =
-                            request.status === "approved"
-                                ? "Aceptada"
-                                : request.status === "rejected"
-                                    ? "Rechazada"
-                                    : "Pendiente";
-
-
-                        return `
-                            <div class="history-item">
-
-                                <div class="history-main">
-
-                                    <div class="history-email">
-                                        Solicitud ${escapeHtml(
-                                            request.id
-                                        )}
-                                    </div>
-
-                                    <div class="history-date">
-                                        ${escapeHtml(
-                                            statusText
-                                        )}
-                                    </div>
-
-                                </div>
-
-                                <div class="status ${request.status}">
-                                    ${request.status === "approved"
-                                        ? "Registrada"
-                                        : statusText}
-                                </div>
-
-                            </div>
-                        `;
-
-                    })
-                    .join("");
-
-        }
-
-
-        /* =====================================================
-           UPDATE STATS
-        ====================================================== */
-
-        function updateStats() {
-
-            const accepted =
-                state.requests.filter(
-                    function(request) {
-
-                        return (
-                            request.status ===
-                            "approved"
-                        );
-
-                    }
-                ).length;
-
-
-            const pending =
-                state.requests.filter(
-                    function(request) {
-
-                        return (
-                            request.status ===
-                            "pending"
-                        );
-
-                    }
-                ).length;
-
-
-            document.getElementById(
-                "acceptedCount"
-            ).textContent =
-                accepted;
-
-
-            document.getElementById(
-                "pendingCount"
-            ).textContent =
-                pending;
-
-
-            document.getElementById(
-                "balanceValue"
-            ).innerHTML =
-                Number(
-                    state.balance || 0
-                ).toFixed(2) +
-                `
-                    <span class="balance-currency">
-                        USDT
-                    </span>
-                `;
-
-
-            renderBalanceTransactions();
-
-        }
-
-
-        /* =====================================================
-           TOP PROFILE
-        ====================================================== */
-
-        document
-            .getElementById(
-                "profileTopButton"
-            )
-            .addEventListener(
-                "click",
-                function() {
-
-                    showView(
-                        "profileView"
-                    );
-
-                }
-            );
-
-
-        /* =====================================================
-           PROFILE
-        ====================================================== */
-
-        function renderProfile() {
-
-            const username =
-                state.user.username ||
-                "Usuario";
-
-
-            const email =
-                state.user.email ||
-                "usuario@email.com";
-
-
-            const id =
-                state.user.id ||
-                "ID no disponible";
-
-
-            document.getElementById(
-                "profileName"
-            ).textContent =
-                username;
-
-
-            document.getElementById(
-                "profileEmail"
-            ).textContent =
-                email;
-
-
-            document.getElementById(
-                "profileId"
-            ).textContent =
-                "ID: " + id;
-
-
-            document.getElementById(
-                "profileAvatar"
-            ).textContent =
-                username
-                    .charAt(0)
-                    .toUpperCase();
-
-        }
-
-
-        /* =====================================================
-           MODAL
-        ====================================================== */
-
-        function openModal(
-            title,
-            content
-        ) {
-
-            modalTitle.textContent =
-                title;
-
-
-            modalContent.innerHTML =
-                content;
-
-
-            settingsModal.classList.add(
-                "open"
-            );
-
-        }
-
-
-        function closeModal() {
-
-            settingsModal.classList.remove(
-                "open"
-            );
-
-        }
-
-
-        document
-            .getElementById(
-                "modalClose"
-            )
-            .addEventListener(
-                "click",
-                closeModal
-            );
-
-
-        settingsModal.addEventListener(
-            "click",
-            function(event) {
-
-                if (
-                    event.target ===
-                    settingsModal
-                ) {
-
-                    closeModal();
-
-                }
-
-            }
-        );
-
-
-        /* =====================================================
-           EDIT PROFILE
-        ====================================================== */
-
-        document
-            .getElementById(
-                "editProfile"
-            )
-            .addEventListener(
-                "click",
-                function() {
-
-                    openModal(
-                        "Editar perfil",
-                        `
-                            <p class="modal-text">
-                                Estos datos proceden de tu cuenta
-                                autenticada. El correo y el ID no
-                                se pueden modificar desde esta
-                                interfaz.
-                            </p>
-
-                            <div class="settings-label">
-                                NOMBRE DE USUARIO
-                            </div>
-
-                            <input
-                                class="settings-input settings-disabled"
-                                type="text"
-                                value="${escapeHtml(
-                                    state.user.username
-                                )}"
-                                disabled
-                            >
-
-                            <div
-                                class="settings-label"
-                                style="display:block;margin-top:14px;"
-                            >
-                                CORREO
-                            </div>
-
-                            <input
-                                class="settings-input settings-disabled"
-                                type="email"
-                                value="${escapeHtml(
-                                    state.user.email
-                                )}"
-                                disabled
-                            >
-
-                            <div
-                                class="settings-label"
-                                style="display:block;margin-top:14px;"
-                            >
-                                ID DE CUENTA
-                            </div>
-
-                            <input
-                                class="settings-input settings-disabled"
-                                type="text"
-                                value="${escapeHtml(
-                                    state.user.id ||
-                                    "No disponible"
-                                )}"
-                                disabled
-                            >
-
-                            <p
-                                class="modal-text"
-                                style="margin-top:13px;margin-bottom:0;"
-                            >
-                                La modificación real de estos
-                                datos requerirá un endpoint
-                                específico en el Worker y una
-                                actualización segura en D1.
-                            </p>
-                        `
-                    );
-
-                }
-            );
-
-
-        /* =====================================================
-           ACCOUNT SETTINGS
-        ====================================================== */
-
-        document
-            .getElementById(
-                "accountSettings"
-            )
-            .addEventListener(
-                "click",
-                function() {
-
-                    openModal(
-                        "Configuración de cuenta",
-                        `
-                            <div class="setting-row">
-
-                                <div class="setting-info">
-
-                                    <div class="setting-title">
-                                        Cuenta autenticada
-                                    </div>
-
-                                    <div class="setting-description">
-                                        La aplicación comprueba tu
-                                        sesión con el servidor.
-                                    </div>
-
-                                </div>
-
-                                <div class="status approved">
-                                    Activa
-                                </div>
-
-                            </div>
-
-                            <div class="setting-row">
-
-                                <div class="setting-info">
-
-                                    <div class="setting-title">
-                                        Rol
-                                    </div>
-
-                                    <div class="setting-description">
-                                        Nivel de acceso actual
-                                        asociado a tu cuenta.
-                                    </div>
-
-                                </div>
-
-                                <div
-                                    class="status"
-                                    style="
-                                        color:#aaa;
-                                        background:rgba(255,255,255,.05);
-                                    "
-                                >
-                                    ${escapeHtml(
-                                        state.user.role ||
-                                        "user"
-                                    )}
-                                </div>
-
-                            </div>
-
-                            <p
-                                class="modal-text"
-                                style="margin-top:14px;margin-bottom:0;"
-                            >
-                                Las opciones de seguridad que
-                                modifiquen datos de la cuenta
-                                se conectarán posteriormente
-                                con el backend.
-                            </p>
-                        `
-                    );
-
-                }
-            );
-
-
-        /* =====================================================
-           NOTIFICATIONS
-        ====================================================== */
-
-        document
-            .getElementById(
-                "notificationsSettings"
-            )
-            .addEventListener(
-                "click",
-                function() {
-
-                    openModal(
-                        "Notificaciones",
-                        `
-                            <div class="setting-row">
-
-                                <div class="setting-info">
-
-                                    <div class="setting-title">
-                                        Notificaciones
-                                    </div>
-
-                                    <div class="setting-description">
-                                        Control general de avisos
-                                        dentro de la aplicación.
-                                    </div>
-
-                                </div>
-
-                                <button
-                                    class="toggle ${
-                                        settings.notifications
-                                            ? "active"
-                                            : ""
-                                    }"
-                                    id="toggleNotifications"
-                                    aria-label="Notificaciones"
-                                ></button>
-
-                            </div>
-
-
-                            <div class="setting-row">
-
-                                <div class="setting-info">
-
-                                    <div class="setting-title">
-                                        Actividad
-                                    </div>
-
-                                    <div class="setting-description">
-                                        Avisos relacionados con
-                                        cambios de estado.
-                                    </div>
-
-                                </div>
-
-                                <button
-                                    class="toggle ${
-                                        settings.activityNotifications
-                                            ? "active"
-                                            : ""
-                                    }"
-                                    id="toggleActivity"
-                                    aria-label="Actividad"
-                                ></button>
-
-                            </div>
-
-
-                            <p
-                                class="modal-text"
-                                style="margin-top:14px;margin-bottom:0;"
-                            >
-                                Estas preferencias se guardan
-                                localmente en este dispositivo.
-                                Las notificaciones push reales
-                                necesitarán conexión con el
-                                sistema de notificaciones.
-                            </p>
-                        `
-                    );
-
-
-                    document
-                        .getElementById(
-                            "toggleNotifications"
-                        )
-                        .addEventListener(
-                            "click",
-                            function() {
-
-                                settings.notifications =
-                                    !settings.notifications;
-
-
-                                this.classList.toggle(
-                                    "active",
-                                    settings.notifications
-                                );
-
-
-                                saveSettings();
-
-                            }
-                        );
-
-
-                    document
-                        .getElementById(
-                            "toggleActivity"
-                        )
-                        .addEventListener(
-                            "click",
-                            function() {
-
-                                settings.activityNotifications =
-                                    !settings.activityNotifications;
-
-
-                                this.classList.toggle(
-                                    "active",
-                                    settings.activityNotifications
-                                );
-
-
-                                saveSettings();
-
-                            }
-                        );
-
-                }
-            );
-
-
-        /* =====================================================
-           PRIVACY
-        ====================================================== */
-
-        document
-            .getElementById(
-                "privacySettings"
-            )
-            .addEventListener(
-                "click",
-                function() {
-
-                    openModal(
-                        "Privacidad",
-                        `
-                            <div class="setting-row">
-
-                                <div class="setting-info">
-
-                                    <div class="setting-title">
-                                        Modo de privacidad
-                                    </div>
-
-                                    <div class="setting-description">
-                                        Mantiene activada la
-                                        preferencia de privacidad
-                                        de la interfaz.
-                                    </div>
-
-                                </div>
-
-                                <button
-                                    class="toggle ${
-                                        settings.privacyMode
-                                            ? "active"
-                                            : ""
-                                    }"
-                                    id="togglePrivacy"
-                                    aria-label="Modo de privacidad"
-                                ></button>
-
-                            </div>
-
-
-                            <div
-                                class="glass-card"
-                                style="
-                                    margin-top:14px;
-                                    margin-bottom:0;
-                                    padding:13px;
-                                "
-                            >
-
-                                <div class="page-eyebrow">
-                                    DATOS DE SESIÓN
-                                </div>
-
-                                <p
-                                    style="
-                                        color:#777;
-                                        font-size:10px;
-                                        line-height:1.6;
-                                    "
-                                >
-                                    La sesión utiliza un token
-                                    almacenado localmente para
-                                    comunicarse con el Worker.
-                                    Al cerrar sesión, el token
-                                    local se elimina y se solicita
-                                    su eliminación en el servidor.
-                                </p>
-
-                            </div>
-                        `
-                    );
-
-
-                    document
-                        .getElementById(
-                            "togglePrivacy"
-                        )
-                        .addEventListener(
-                            "click",
-                            function() {
-
-                                settings.privacyMode =
-                                    !settings.privacyMode;
-
-
-                                this.classList.toggle(
-                                    "active",
-                                    settings.privacyMode
-                                );
-
-
-                                saveSettings();
-
-                            }
-                        );
-
-                }
-            );
-
-
-        /* =====================================================
-           LOGOUT
-        ====================================================== */
-
-        document
-            .getElementById(
-                "logoutButton"
-            )
-            .addEventListener(
-                "click",
-                async function() {
-
-                    const button =
-                        this;
-
-
-                    button.disabled =
-                        true;
-
-
-                    button.style.opacity =
-                        ".5";
-
-
-                    try {
-
-                        await apiRequest(
-                            "/api/auth/logout",
-                            {
-                                method: "POST"
-                            }
-                        );
-
-                    } catch (error) {
-
-                        console.error(
-                            "Error cerrando sesión:",
-                            error
-                        );
-
-                    }
-
-
-                    localStorage.removeItem(
-                        SESSION_KEY
-                    );
-
-
-                    window.location.replace(
-                        "index.html"
-                    );
-
-                }
-            );
-
-
-        /* =====================================================
-           REFERRAL
-        ====================================================== */
-
-        document
-            .getElementById(
-                "copyReferral"
-            )
-            .addEventListener(
-                "click",
-                async function() {
-
-                    const link =
-                        document.getElementById(
-                            "referralLink"
-                        ).textContent.trim();
-
-
-                    if (
-                        link ===
-                        "próximamente"
-                    ) {
-
-                        showToast(
-                            "El enlace de referidos todavía no está conectado."
-                        );
-
-                        return;
-
-                    }
-
-
-                    try {
-
-                        await navigator.clipboard
-                            .writeText(
-                                link
-                            );
-
-
-                        this.textContent =
-                            "COPIADO ✓";
-
-
-                        setTimeout(
-                            () => {
-
-                                this.textContent =
-                                    "COPIAR ENLACE";
-
-                            },
-                            1500
-                        );
-
-                    } catch {
-
-                        showToast(
-                            "No se pudo copiar el enlace."
-                        );
-
-                    }
-
-                }
-            );
-
-
-        /* =====================================================
-           BALANCE BUTTONS
-        ====================================================== */
-
-        document
-            .getElementById(
-                "withdrawButton"
-            )
-            .addEventListener(
-                "click",
-                function() {
-
-                    openModal(
-                        "Retiro",
-                        `
-                            <p class="modal-text">
-                                La interfaz de retiros está
-                                preparada, pero la creación y
-                                revisión de solicitudes todavía
-                                necesita conexión con el backend
-                                y D1.
-                            </p>
-
-                            <div
-                                class="glass-card"
-                                style="
-                                    margin-bottom:0;
-                                    padding:14px;
-                                "
-                            >
-
-                                <div class="page-eyebrow">
-                                    BALANCE DISPONIBLE
-                                </div>
-
-                                <div
-                                    style="
-                                        font-size:24px;
-                                        font-weight:750;
-                                        margin-top:5px;
-                                    "
-                                >
-                                    ${Number(
-                                        state.balance || 0
-                                    ).toFixed(2)}
-                                    <span
-                                        style="
-                                            color:#777;
-                                            font-size:11px;
-                                        "
-                                    >
-                                        USDT
-                                    </span>
-                                </div>
-
-                            </div>
-                        `
-                    );
-
-                }
-            );
-
-
-        document
-            .getElementById(
-                "transactionsButton"
-            )
-            .addEventListener(
-                "click",
-                function() {
-
-                    showView(
-                        "balanceView"
-                    );
-
-
-                    setTimeout(function() {
-
-                        document
-                            .getElementById(
-                                "balanceTransactions"
-                            )
-                            .scrollIntoView({
-                                behavior:
-                                    "smooth",
-                                block:
-                                    "start"
-                            });
-
-                    }, 80);
-
-                }
-            );
-
-
-        /* =====================================================
-           KEYBOARD / ESC
-        ====================================================== */
-
-        document.addEventListener(
-            "keydown",
-            function(event) {
-
-                if (
-                    event.key ===
-                    "Escape"
-                ) {
-
-                    menuOverlay.classList.remove(
-                        "open"
-                    );
-
-
-                    settingsModal.classList.remove(
-                        "open"
-                    );
-
-                }
-
-            }
-        );
-
-
-        /* =====================================================
-           INITIALIZE
-        ====================================================== */
-
-        async function initializeApp() {
-
-            const authenticated =
-                await loadCurrentUser();
-
-
-            if (!authenticated) {
-                return;
-            }
-
-
-            updateStats();
-
-            renderHistory();
-
-            renderProfile();
-
-
-            authLoading.classList.add(
-                "hidden"
-            );
-
-
-            setTimeout(function() {
-
-                authLoading.remove();
-
-            }, 250);
-
-        }
-
-
-        initializeApp();
-
-    </script>
-
-</div>
-
-</body>
-    </html>
+                if (Array.isArray(saved)) {
