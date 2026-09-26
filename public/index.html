@@ -868,14 +868,41 @@
 
         /*
          * =========================================
-         * IR A LA APP
+         * REDIRECCIÓN SEGÚN ROL
          * =========================================
          */
 
-        function goToApp() {
+        function goToUserApp() {
 
-            window.location.href =
-                "/app.html";
+            window.location.replace(
+                "/app.html"
+            );
+
+        }
+
+
+        function goToAdminPanel() {
+
+            window.location.replace(
+                "/admin.html"
+            );
+
+        }
+
+
+        function redirectByRole(user) {
+
+            if (
+                user &&
+                user.role === "admin"
+            ) {
+
+                goToAdminPanel();
+
+                return;
+            }
+
+            goToUserApp();
 
         }
 
@@ -913,6 +940,7 @@
                     !identifier ||
                     !password
                 ) {
+
                     showMessage(
                         loginMessage,
                         "Completa todos los campos.",
@@ -953,7 +981,11 @@
                     );
 
                     setTimeout(
-                        goToApp,
+                        function() {
+                            redirectByRole(
+                                data.user
+                            );
+                        },
                         350
                     );
 
@@ -1074,7 +1106,7 @@
                     );
 
                     setTimeout(
-                        goToApp,
+                        goToUserApp,
                         350
                     );
 
@@ -1128,7 +1160,9 @@
                             headers: {
                                 "Authorization":
                                     "Bearer " + token
-                            }
+                            },
+
+                            cache: "no-store"
                         }
                     );
 
@@ -1141,10 +1175,13 @@
 
                     if (
                         data.success &&
-                        data.authenticated
+                        data.authenticated &&
+                        data.user
                     ) {
 
-                        goToApp();
+                        redirectByRole(
+                            data.user
+                        );
 
                     }
 
@@ -1178,4 +1215,4 @@
     </script>
 
 </body>
-                    </html>
+    </html>
