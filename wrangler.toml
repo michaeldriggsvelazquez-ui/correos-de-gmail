@@ -1,4 +1,4 @@
-name = "correos-de-gmail"
+name = "gmailaccounts"
 
 main = "src/index.js"
 
