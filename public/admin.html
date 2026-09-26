@@ -977,11 +977,11 @@
       </nav>
 
       <div class="admin-user">
-        <div class="avatar">A</div>
+        <div class="avatar" id="adminAvatar">A</div>
 
         <div class="admin-user-info">
-          <strong>Administrador</strong>
-          <span>ADMINISTRATOR</span>
+          <strong id="adminName">Administrador</strong>
+          <span id="adminRole">ADMINISTRATOR</span>
         </div>
       </div>
 
@@ -1874,9 +1874,77 @@
 
   <script>
     /* =====================================================
+       ADMIN AUTH
+       Comprueba la sesión existente y exige role === admin.
+       No crea una pantalla de carga visible.
+    ===================================================== */
+
+    const SESSION_KEY = "gmailaccounts_session";
+
+    async function checkAdminSession() {
+
+      const token = localStorage.getItem(SESSION_KEY);
+
+      if (!token) {
+        window.location.replace("index.html");
+        return;
+      }
+
+      try {
+
+        const response = await fetch("/api/auth/me", {
+          method: "GET",
+          headers: {
+            "Authorization": `Bearer ${token}`
+          },
+          cache: "no-store"
+        });
+
+        if (!response.ok) {
+          throw new Error("unauthorized");
+        }
+
+        const data = await response.json();
+
+        if (!data.authenticated || !data.user) {
+          throw new Error("unauthorized");
+        }
+
+        if (data.user.role !== "admin") {
+          window.location.replace("app.html");
+          return;
+        }
+
+        const username =
+          data.user.username ||
+          data.user.email ||
+          "Administrador";
+
+        const avatarText =
+          username
+            .trim()
+            .charAt(0)
+            .toUpperCase() || "A";
+
+        document.getElementById("adminName").textContent = username;
+        document.getElementById("adminAvatar").textContent = avatarText;
+        document.getElementById("adminRole").textContent = "ADMINISTRATOR";
+
+      } catch (error) {
+
+        localStorage.removeItem(SESSION_KEY);
+        window.location.replace("index.html");
+
+      }
+    }
+
+
+    checkAdminSession();
+
+
+    /* =====================================================
        ADMIN PANEL
-       Primera versión: interfaz + navegación + demo.
-       La autorización real se conectará al backend después.
+       Interfaz + navegación + demo.
     ===================================================== */
 
     const views = document.querySelectorAll(".view");
@@ -2019,7 +2087,7 @@
 
     /* =========================
        USER SEARCH
-    ========================== */
+    ========================= */
 
     const userSearch = document.getElementById("userSearch");
     const userFilter = document.getElementById("userFilter");
@@ -2055,7 +2123,7 @@
 
     /* =========================
        USER ACTIONS
-    ========================== */
+    ========================= */
 
     document.querySelectorAll("[data-user]").forEach(button => {
 
@@ -2079,7 +2147,7 @@
 
     /* =========================
        REQUEST ACTIONS
-    ========================== */
+    ========================= */
 
     document.querySelectorAll("[data-action]").forEach(button => {
 
@@ -2114,7 +2182,7 @@
 
     /* =========================
        WITHDRAWALS
-    ========================== */
+    ========================= */
 
     document.querySelectorAll("[data-withdrawal]").forEach(button => {
 
@@ -2139,7 +2207,7 @@
 
     /* =========================
        BALANCE DEMO
-    ========================== */
+    ========================= */
 
     document.getElementById("balanceTestButton")
       .addEventListener("click", () => {
@@ -2171,7 +2239,7 @@
 
     /* =========================
        REFRESH
-    ========================== */
+    ========================= */
 
     document.getElementById("refreshButton")
       .addEventListener("click", event => {
@@ -2189,7 +2257,7 @@
 
     /* =========================
        LOGOUT
-    ========================== */
+    ========================= */
 
     document.getElementById("logoutButton")
       .addEventListener("click", () => {
@@ -2200,34 +2268,37 @@
           "Cerrar"
         );
 
-        modalConfirm.onclick = () => {
+        modalConfirm.onclick = async () => {
+
           closeModal();
 
-          /*
-            La implementación real será:
+          const token = localStorage.getItem(SESSION_KEY);
 
-            POST /api/auth/logout
+          try {
 
-            y después:
-            localStorage.removeItem("gmailaccounts_session");
-            location.replace("index.html");
-          */
+            await fetch("/api/auth/logout", {
+              method: "POST",
+              headers: token
+                ? {
+                    "Authorization": `Bearer ${token}`
+                  }
+                : {}
+            });
+
+          } catch (error) {
+            /* La sesión local se elimina igualmente. */
+          }
+
+          localStorage.removeItem(SESSION_KEY);
+          window.location.replace("index.html");
+
         };
 
       });
 
 
     /* =====================================================
-       NOTA IMPORTANTE
-
-       Este archivo NO modifica:
-       - index.html
-       - app.html
-       - src/index.js
-
-       Los datos mostrados son de demostración.
-       La conexión real con Cloudflare D1 y la autorización
-       administrativa se implementará posteriormente.
+       FIN
     ===================================================== */
   </script>
 
