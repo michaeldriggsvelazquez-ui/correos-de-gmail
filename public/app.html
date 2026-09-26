@@ -1,3125 +1,2480 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
-    >
-
-    <meta
-        name="theme-color"
-        content="#050505"
-    >
-
-    <title>GmailAccounts</title>
-
-    <style>
-
-        /* =========================================================
-           RESET
-        ========================================================= */
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        :root {
-            --bg: #050505;
-            --surface: rgba(18, 18, 18, 0.72);
-            --surface-strong: rgba(24, 24, 24, 0.92);
-            --surface-soft: rgba(255, 255, 255, 0.045);
-
-            --border: rgba(255, 255, 255, 0.09);
-            --border-soft: rgba(255, 255, 255, 0.06);
-
-            --text: #f5f5f5;
-            --secondary: #999;
-            --muted: #626262;
-
-            --green: #55d98a;
-            --red: #ff6969;
-            --blue: #6ea8ff;
-
-            --radius-xl: 26px;
-            --radius-lg: 20px;
-            --radius-md: 15px;
-            --radius-sm: 11px;
-        }
-
-        html,
-        body {
-            width: 100%;
-            min-height: 100%;
-            background: var(--bg);
-            color: var(--text);
-
-            font-family:
-                Inter,
-                -apple-system,
-                BlinkMacSystemFont,
-                "Segoe UI",
-                Roboto,
-                Helvetica,
-                Arial,
-                sans-serif;
-        }
-
-        body {
-            min-height: 100vh;
-            overflow: hidden;
-        }
-
-        button,
-        input {
-            font: inherit;
-        }
-
-        button {
-            cursor: pointer;
-        }
-
-        button,
-        input {
-            outline: none;
-        }
-
-
-        /* =========================================================
-           APP
-        ========================================================= */
-
-        .app {
-            width: 100%;
-            height: 100vh;
-            height: 100dvh;
-
-            display: flex;
-            flex-direction: column;
-
-            background:
-                radial-gradient(
-                    circle at 50% -10%,
-                    rgba(255,255,255,0.045),
-                    transparent 38%
-                ),
-                #050505;
-        }
-
-
-        /* =========================================================
-           AUTH LOADING
-        ========================================================= */
-
-        .auth-loading {
-            position: fixed;
-            inset: 0;
-
-            z-index: 500;
-
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
-            background: #050505;
-
-            transition:
-                opacity .2s ease,
-                visibility .2s ease;
-        }
-
-        .auth-loading.hidden {
-            opacity: 0;
-            visibility: hidden;
-            pointer-events: none;
-        }
-
-        .auth-loading-inner {
-            text-align: center;
-        }
-
-        .auth-loading-logo {
-            width: 48px;
-            height: 48px;
-
-            margin: 0 auto 13px;
-
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
-            border-radius: 15px;
-
-            background: #fff;
-        }
-
-        .gmail-mark {
-            width: 25px;
-            height: 20px;
-            position: relative;
-        }
-
-        .gmail-mark::before,
-        .gmail-mark::after {
-            content: "";
-            position: absolute;
-            top: 1px;
-            width: 5px;
-            height: 18px;
-            border-radius: 3px;
-        }
-
-        .gmail-mark::before {
-            left: 3px;
-            background: #ea4335;
-            transform: rotate(-34deg);
-        }
-
-        .gmail-mark::after {
-            right: 3px;
-            background: #4285f4;
-            transform: rotate(34deg);
-        }
-
-        .gmail-m {
-            position: absolute;
-            left: 4px;
-            right: 4px;
-            top: 3px;
-            height: 14px;
-
-            border-top: 4px solid #34a853;
-            border-radius: 2px;
-        }
-
-        .auth-loading-text {
-            color: #666;
-
-            font-size: 10px;
-            letter-spacing: .5px;
-        }
-
-
-        /* =========================================================
-           HEADER
-        ========================================================= */
-
-        .topbar {
-            height: 70px;
-
-            flex-shrink: 0;
-
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-
-            padding: 0 17px;
-
-            border-bottom: 1px solid var(--border-soft);
-
-            background:
-                rgba(5, 5, 5, 0.76);
-
-            backdrop-filter: blur(28px);
-            -webkit-backdrop-filter: blur(28px);
-        }
-
-        .brand-mini {
-            display: flex;
-            align-items: center;
-            gap: 11px;
-        }
-
-        .brand-logo {
-            width: 36px;
-            height: 36px;
-
-            border-radius: 11px;
-
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
-            background: #fff;
-        }
-
-        .brand-logo .gmail-mark {
-            transform: scale(.86);
-        }
-
-        .brand-mini-name {
-            font-size: 15px;
-            font-weight: 700;
-
-            letter-spacing: -0.3px;
-        }
-
-        .brand-mini-name span {
-            color: #777;
-        }
-
-        .top-actions {
-            display: flex;
-            align-items: center;
-            gap: 7px;
-        }
-
-        .icon-button {
-            width: 40px;
-            height: 40px;
-
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
-            border: 1px solid var(--border);
-
-            border-radius: 13px;
-
-            background: var(--surface-soft);
-
-            color: #ddd;
-
-            font-size: 21px;
-            line-height: 1;
-
-            transition:
-                background .2s ease,
-                transform .15s ease;
-        }
-
-        .icon-button:hover {
-            background: rgba(255,255,255,0.08);
-        }
-
-        .icon-button:active {
-            transform: scale(.95);
-        }
-
-        .hamburger {
-            width: 19px;
-            height: 15px;
-
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-
-        .hamburger span {
-            width: 100%;
-            height: 2px;
-
-            border-radius: 4px;
-
-            background: #ddd;
-        }
-
-
-        /* =========================================================
-           MAIN
-        ========================================================= */
-
-        .main {
-            flex: 1;
-            min-height: 0;
-
-            position: relative;
-
-            overflow: hidden;
-        }
-
-        .view {
-            position: absolute;
-            inset: 0;
-
-            display: none;
-
-            overflow-y: auto;
-
-            padding: 22px 17px 30px;
-
-            scrollbar-width: none;
-
-            background: #050505;
-        }
-
-        .view::-webkit-scrollbar {
-            display: none;
-        }
-
-        .view.active {
-            display: block;
-
-            animation: viewIn .22s ease;
-        }
-
-        #chatView {
-            display: none;
-
-            flex-direction: column;
-
-            padding:
-                18px
-                15px
-                86px;
-        }
-
-        #chatView.active {
-            display: flex;
-        }
-
-        @keyframes viewIn {
-
-            from {
-                opacity: 0;
-                transform: translateY(5px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-
-        }
-
-
-        /* =========================================================
-           CHAT
-        ========================================================= */
-
-        .chat-scroll {
-            flex: 1;
-
-            min-height: 0;
-
-            overflow-y: auto;
-
-            scrollbar-width: none;
-
-            padding: 5px 2px 20px;
-        }
-
-        .chat-scroll::-webkit-scrollbar {
-            display: none;
-        }
-
-        .chat-welcome {
-            padding: 17px 8px 15px;
-
-            text-align: center;
-        }
-
-        .welcome-logo {
-            width: 54px;
-            height: 54px;
-
-            margin: 0 auto 15px;
-
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
-            border-radius: 17px;
-
-            background: #fff;
-
-            box-shadow:
-                0 15px 45px rgba(0,0,0,.28);
-        }
-
-        .welcome-logo .gmail-mark {
-            transform: scale(1.12);
-        }
-
-        .welcome-title {
-            font-size: 25px;
-            font-weight: 750;
-
-            letter-spacing: -0.9px;
-
-            margin-bottom: 7px;
-        }
-
-        .welcome-title span {
-            color: #777;
-        }
-
-        .welcome-description {
-            max-width: 315px;
-
-            margin: 0 auto;
-
-            color: #858585;
-
-            font-size: 12px;
-
-            line-height: 1.55;
-        }
-
-
-        /* =========================================================
-           MESSAGES
-        ========================================================= */
-
-        .message {
-            display: flex;
-
-            margin: 10px 0;
-        }
-
-        .message.system {
-            justify-content: flex-start;
-        }
-
-        .message.user {
-            justify-content: flex-end;
-        }
-
-        .bubble {
-            max-width: 84%;
-
-            padding: 12px 15px;
-
-            border-radius: 22px;
-
-            border: 1px solid var(--border);
-
-            font-size: 13px;
-
-            line-height: 1.5;
-
-            white-space: pre-line;
-
-            overflow-wrap: anywhere;
-
-            backdrop-filter: blur(18px);
-            -webkit-backdrop-filter: blur(18px);
-        }
-
-        .message.system .bubble {
-            background:
-                linear-gradient(
-                    135deg,
-                    rgba(255,255,255,.065),
-                    rgba(255,255,255,.025)
-                );
-
-            border-bottom-left-radius: 10px;
-        }
-
-        .message.user .bubble {
-            background:
-                rgba(255,255,255,.095);
-
-            border-color:
-                rgba(255,255,255,.12);
-
-            border-bottom-right-radius: 10px;
-        }
-
-        .bubble strong {
-            color: #fff;
-        }
-
-        .bubble .emoji {
-            display: inline-block;
-            margin-left: 3px;
-        }
-
-
-        /* =========================================================
-           BOTTOM COMPOSER
-        ========================================================= */
-
-        .chat-composer {
-            position: absolute;
-
-            left: 15px;
-            right: 15px;
-            bottom: 13px;
-
-            z-index: 20;
-
-            padding: 6px;
-
-            border:
-                1px solid rgba(255,255,255,.09);
-
-            border-radius: 19px;
-
-            background:
-                rgba(18,18,18,.72);
-
-            backdrop-filter: blur(30px);
-            -webkit-backdrop-filter: blur(30px);
-
-            box-shadow:
-                0 15px 50px rgba(0,0,0,.35);
-        }
-
-        .start-button {
-            width: 100%;
-            height: 48px;
-
-            border: 0;
-
-            border-radius: 14px;
-
-            background: #f3f3f3;
-
-            color: #080808;
-
-            font-size: 11px;
-            font-weight: 850;
-
-            letter-spacing: .6px;
-        }
-
-        .start-button:active {
-            transform: scale(.99);
-        }
-
-        .chat-form {
-            display: none;
-
-            align-items: center;
-
-            gap: 7px;
-        }
-
-        .chat-form.visible {
-            display: flex;
-        }
-
-        .chat-input {
-            flex: 1;
-
-            min-width: 0;
-
-            height: 45px;
-
-            border: 0;
-
-            background: transparent;
-
-            color: #fff;
-
-            padding: 0 10px;
-
-            font-size: 13px;
-        }
-
-        .chat-input::placeholder {
-            color: #555;
-        }
-
-        .send-button {
-            width: 39px;
-            height: 39px;
-
-            flex-shrink: 0;
-
-            border: 0;
-
-            border-radius: 12px;
-
-            background: #f1f1f1;
-
-            color: #050505;
-
-            font-size: 17px;
-            font-weight: 700;
-        }
-
-        .send-button:active {
-            transform: scale(.94);
-        }
-
-
-        /* =========================================================
-           PAGE HEADERS
-        ========================================================= */
-
-        .page-header {
-            margin-bottom: 19px;
-        }
-
-        .page-eyebrow {
-            color: #626262;
-
-            font-size: 9px;
-            font-weight: 800;
-
-            letter-spacing: 1.5px;
-
-            margin-bottom: 7px;
-        }
-
-        .page-title {
-            font-size: 26px;
-
-            letter-spacing: -.9px;
-
-            font-weight: 750;
-        }
-
-        .page-subtitle {
-            margin-top: 6px;
-
-            color: #777;
-
-            font-size: 12px;
-
-            line-height: 1.5;
-        }
-
-
-        /* =========================================================
-           GLASS CARDS
-        ========================================================= */
-
-        .glass-card {
-            padding: 17px;
-
-            margin-bottom: 12px;
-
-            border-radius: var(--radius-lg);
-
-            border:
-                1px solid rgba(255,255,255,.085);
-
-            background:
-                linear-gradient(
-                    145deg,
-                    rgba(255,255,255,.065),
-                    rgba(255,255,255,.022)
-                );
-
-            backdrop-filter: blur(28px);
-            -webkit-backdrop-filter: blur(28px);
-
-            box-shadow:
-                inset 0 1px rgba(255,255,255,.025),
-                0 14px 45px rgba(0,0,0,.18);
-        }
-
-
-        /* =========================================================
-           BALANCE
-        ========================================================= */
-
-        .balance-card {
-            padding: 23px;
-
-            border-radius: 24px;
-
-            margin-bottom: 13px;
-
-            background:
-                radial-gradient(
-                    circle at 90% 0%,
-                    rgba(110,168,255,.12),
-                    transparent 35%
-                ),
-                linear-gradient(
-                    145deg,
-                    rgba(255,255,255,.075),
-                    rgba(255,255,255,.025)
-                );
-
-            border:
-                1px solid rgba(255,255,255,.10);
-
-            backdrop-filter: blur(30px);
-            -webkit-backdrop-filter: blur(30px);
-        }
-
-        .balance-label {
-            color: #777;
-
-            font-size: 10px;
-
-            margin-bottom: 8px;
-        }
-
-        .balance-value {
-            font-size: 36px;
-
-            font-weight: 750;
-
-            letter-spacing: -1.5px;
-        }
-
-        .balance-currency {
-            color: #777;
-
-            font-size: 12px;
-
-            margin-left: 5px;
-        }
-
-        .balance-actions {
-            display: grid;
-
-            grid-template-columns: 1fr 1fr;
-
-            gap: 8px;
-
-            margin-top: 18px;
-        }
-
-        .secondary-button {
-            height: 42px;
-
-            border:
-                1px solid var(--border);
-
-            border-radius: 12px;
-
-            background:
-                rgba(255,255,255,.045);
-
-            color: #ddd;
-
-            font-size: 11px;
-            font-weight: 650;
-        }
-
-        .secondary-button:active {
-            transform: scale(.98);
-        }
-
-
-        /* =========================================================
-           STATS
-        ========================================================= */
-
-        .stats-grid {
-            display: grid;
-
-            grid-template-columns: 1fr 1fr;
-
-            gap: 10px;
-
-            margin-bottom: 13px;
-        }
-
-        .stat {
-            padding: 15px;
-
-            border:
-                1px solid var(--border);
-
-            border-radius: 17px;
-
-            background:
-                rgba(255,255,255,.035);
-        }
-
-        .stat-label {
-            color: #696969;
-
-            font-size: 10px;
-
-            margin-bottom: 7px;
-        }
-
-        .stat-value {
-            font-size: 19px;
-
-            font-weight: 700;
-        }
-
-
-        /* =========================================================
-           TUTORIAL
-        ========================================================= */
-
-        .tutorial-intro {
-            color: #858585;
-
-            font-size: 11px;
-
-            line-height: 1.65;
-
-            margin-bottom: 3px;
-        }
-
-        .tutorial-step {
-            display: flex;
-
-            gap: 13px;
-
-            padding: 16px 0;
-
-            border-bottom:
-                1px solid rgba(255,255,255,.055);
-        }
-
-        .tutorial-step:last-child {
-            border-bottom: 0;
-            padding-bottom: 0;
-        }
-
-        .step-number {
-            width: 30px;
-            height: 30px;
-
-            flex-shrink: 0;
-
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
-            border-radius: 10px;
-
-            background:
-                rgba(255,255,255,.075);
-
-            color: #ddd;
-
-            font-size: 11px;
-            font-weight: 800;
-        }
-
-        .step-content {
-            min-width: 0;
-        }
-
-        .step-content h3 {
-            font-size: 12px;
-
-            margin-bottom: 5px;
-        }
-
-        .step-content p {
-            color: #777;
-
-            font-size: 11px;
-
-            line-height: 1.6;
-        }
-
-        .tutorial-mini-title {
-            color: #ddd;
-
-            font-size: 10px;
-            font-weight: 800;
-
-            letter-spacing: .6px;
-
-            margin:
-                18px 0 3px;
-        }
-
-        .tutorial-note {
-            margin-top: 17px;
-
-            padding: 13px;
-
-            border-radius: 12px;
-
-            background:
-                rgba(110,168,255,.055);
-
-            border:
-                1px solid rgba(110,168,255,.10);
-
-            color: #8ea9d5;
-
-            font-size: 10px;
-
-            line-height: 1.6;
-        }
-
-
-        /* =========================================================
-           REFERRALS
-        ========================================================= */
-
-        .referral-link {
-            padding: 13px;
-
-            border-radius: 13px;
-
-            background:
-                rgba(0,0,0,.20);
-
-            border:
-                1px solid var(--border);
-
-            color: #aaa;
-
-            font-size: 11px;
-
-            word-break: break-all;
-
-            margin-top: 10px;
-        }
-
-        .copy-button {
-            width: 100%;
-
-            height: 42px;
-
-            margin-top: 9px;
-
-            border: 1px solid var(--border);
-
-            border-radius: 12px;
-
-            background:
-                rgba(255,255,255,.045);
-
-            color: #ddd;
-
-            font-size: 11px;
-        }
-
-
-        /* =========================================================
-           HISTORY
-        ========================================================= */
-
-        .history-item {
-            display: flex;
-
-            align-items: center;
-
-            justify-content: space-between;
-
-            gap: 12px;
-
-            padding: 14px 0;
-
-            border-bottom:
-                1px solid rgba(255,255,255,.055);
-        }
-
-        .history-item:last-child {
-            border-bottom: 0;
-        }
-
-        .history-main {
-            min-width: 0;
-        }
-
-        .history-email {
-            overflow: hidden;
-
-            white-space: nowrap;
-
-            text-overflow: ellipsis;
-
-            font-size: 12px;
-        }
-
-        .history-date {
-            color: #606060;
-
-            font-size: 9px;
-
-            margin-top: 4px;
-        }
-
-        .history-id {
-            color: #4f4f4f;
-
-            font-size: 8px;
-
-            margin-top: 3px;
-        }
-
-        .status {
-            flex-shrink: 0;
-
-            padding: 6px 9px;
-
-            border-radius: 9px;
-
-            font-size: 9px;
-            font-weight: 700;
-        }
-
-        .status.pending {
-            color: #d9b66e;
-            background: rgba(217,182,110,.09);
-        }
-
-        .status.approved {
-            color: var(--green);
-            background: rgba(85,217,138,.09);
-        }
-
-        .status.rejected {
-            color: var(--red);
-            background: rgba(255,105,105,.08);
-        }
-
-
-        /* =========================================================
-           PROFILE
-        ========================================================= */
-
-        .profile-head {
-            display: flex;
-
-            align-items: center;
-
-            gap: 13px;
-
-            margin-bottom: 17px;
-        }
-
-        .profile-avatar {
-            width: 56px;
-            height: 56px;
-
-            flex-shrink: 0;
-
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
-            border-radius: 18px;
-
-            background:
-                linear-gradient(
-                    145deg,
-                    #292929,
-                    #111
-                );
-
-            border:
-                1px solid var(--border);
-
-            font-size: 20px;
-            font-weight: 700;
-        }
-
-        .profile-name {
-            font-size: 15px;
-
-            font-weight: 700;
-        }
-
-        .profile-email {
-            color: #666;
-
-            font-size: 10px;
-
-            margin-top: 4px;
-        }
-
-        .profile-id {
-            color: #4d4d4d;
-
-            font-size: 9px;
-
-            margin-top: 4px;
-
-            word-break: break-all;
-        }
-
-        .profile-option {
-            width: 100%;
-
-            min-height: 48px;
-
-            display: flex;
-            align-items: center;
-
-            justify-content: space-between;
-
-            border: 0;
-
-            border-bottom:
-                1px solid rgba(255,255,255,.05);
-
-            background: transparent;
-
-            color: #ddd;
-
-            text-align: left;
-
-            font-size: 12px;
-        }
-
-        .profile-option:last-child {
-            border-bottom: 0;
-        }
-
-        .profile-option span:last-child {
-            color: #555;
-
-            font-size: 14px;
-        }
-
-        .danger {
-            color: #ff7373;
-        }
-
-
-        /* =========================================================
-           SETTINGS
-        ========================================================= */
-
-        .setting-row {
-            min-height: 58px;
-
-            display: flex;
-
-            align-items: center;
-
-            justify-content: space-between;
-
-            gap: 14px;
-
-            border-bottom:
-                1px solid rgba(255,255,255,.055);
-        }
-
-        .setting-row:last-child {
-            border-bottom: 0;
-        }
-
-        .setting-info {
-            min-width: 0;
-        }
-
-        .setting-title {
-            font-size: 12px;
-        }
-
-        .setting-description {
-            color: #666;
-
-            font-size: 9px;
-
-            line-height: 1.45;
-
-            margin-top: 3px;
-        }
-
-        .toggle {
-            position: relative;
-
-            width: 42px;
-            height: 24px;
-
-            flex-shrink: 0;
-
-            border: 0;
-
-            border-radius: 20px;
-
-            background: #292929;
-        }
-
-        .toggle::after {
-            content: "";
-
-            position: absolute;
-
-            top: 4px;
-            left: 4px;
-
-            width: 16px;
-            height: 16px;
-
-            border-radius: 50%;
-
-            background: #777;
-
-            transition:
-                transform .2s ease,
-                background .2s ease;
-        }
-
-        .toggle.active {
-            background: rgba(85,217,138,.18);
-        }
-
-        .toggle.active::after {
-            transform: translateX(18px);
-
-            background: var(--green);
-        }
-
-        .settings-input {
-            width: 100%;
-            height: 44px;
-
-            margin-top: 7px;
-
-            padding: 0 12px;
-
-            border: 1px solid var(--border);
-
-            border-radius: 12px;
-
-            background: rgba(0,0,0,.22);
-
-            color: #fff;
-
-            font-size: 12px;
-        }
-
-        .settings-input:focus {
-            border-color: rgba(255,255,255,.22);
-        }
-
-        .settings-label {
-            color: #666;
-
-            font-size: 9px;
-            font-weight: 700;
-
-            letter-spacing: .8px;
-        }
-
-        .settings-disabled {
-            opacity: .55;
-
-            cursor: default;
-        }
-
-
-        /* =========================================================
-           MODAL
-        ========================================================= */
-
-        .modal-overlay {
-            position: fixed;
-
-            inset: 0;
-
-            z-index: 200;
-
-            display: none;
-
-            align-items: flex-end;
-            justify-content: center;
-
-            padding: 12px;
-
-            background:
-                rgba(0,0,0,.58);
-
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-        }
-
-        .modal-overlay.open {
-            display: flex;
-        }
-
-        .modal {
-            width: min(560px, 100%);
-
-            max-height: 88vh;
-
-            overflow-y: auto;
-
-            padding: 18px;
-
-            border:
-                1px solid rgba(255,255,255,.10);
-
-            border-radius: 24px;
-
-            background:
-                linear-gradient(
-                    160deg,
-                    rgba(25,25,25,.98),
-                    rgba(9,9,9,.99)
-                );
-
-            box-shadow:
-                0 25px 80px rgba(0,0,0,.55);
-
-            animation: modalIn .2s ease;
-        }
-
-        @keyframes modalIn {
-
-            from {
-                opacity: 0;
-                transform: translateY(18px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-
-        }
-
-        .modal-head {
-            display: flex;
-
-            align-items: center;
-
-            justify-content: space-between;
-
-            margin-bottom: 16px;
-        }
-
-        .modal-title {
-            font-size: 17px;
-
-            font-weight: 750;
-
-            letter-spacing: -.3px;
-        }
-
-        .modal-close {
-            width: 36px;
-            height: 36px;
-
-            border:
-                1px solid var(--border);
-
-            border-radius: 11px;
-
-            background:
-                rgba(255,255,255,.04);
-
-            color: #bbb;
-
-            font-size: 17px;
-        }
-
-        .modal-text {
-            color: #777;
-
-            font-size: 11px;
-
-            line-height: 1.6;
-
-            margin-bottom: 13px;
-        }
-
-
-        /* =========================================================
-           TOAST
-        ========================================================= */
-
-        .toast {
-            position: fixed;
-
-            left: 50%;
-
-            bottom: 84px;
-
-            z-index: 300;
-
-            max-width: calc(100vw - 34px);
-
-            padding: 11px 14px;
-
-            border:
-                1px solid rgba(255,255,255,.10);
-
-            border-radius: 13px;
-
-            background:
-                rgba(22,22,22,.94);
-
-            color: #ddd;
-
-            font-size: 10px;
-
-            line-height: 1.4;
-
-            box-shadow:
-                0 15px 45px rgba(0,0,0,.4);
-
-            transform:
-                translate(-50%, 15px);
-
-            opacity: 0;
-
-            pointer-events: none;
-
-            transition:
-                opacity .2s ease,
-                transform .2s ease;
-        }
-
-        .toast.show {
-            opacity: 1;
-
-            transform:
-                translate(-50%, 0);
-        }
-
-
-        /* =========================================================
-           MENU
-        ========================================================= */
-
-        .menu-overlay {
-            position: fixed;
-
-            inset: 0;
-
-            z-index: 100;
-
-            display: none;
-
-            background:
-                rgba(0,0,0,.52);
-
-            backdrop-filter: blur(7px);
-            -webkit-backdrop-filter: blur(7px);
-        }
-
-        .menu-overlay.open {
-            display: block;
-        }
-
-        .menu-panel {
-            position: absolute;
-
-            top: 0;
-            left: 0;
-            bottom: 0;
-
-            width: min(330px, 88vw);
-
-            display: flex;
-            flex-direction: column;
-
-            padding:
-                18px
-                16px
-                25px;
-
-            overflow-y: auto;
-
-            background:
-                linear-gradient(
-                    160deg,
-                    rgba(24,24,24,.96),
-                    rgba(10,10,10,.97)
-                );
-
-            border-right:
-                1px solid rgba(255,255,255,.09);
-
-            backdrop-filter: blur(35px);
-            -webkit-backdrop-filter: blur(35px);
-
-            animation: menuIn .22s ease;
-        }
-
-        @keyframes menuIn {
-
-            from {
-                transform: translateX(-100%);
-            }
-
-            to {
-                transform: translateX(0);
-            }
-
-        }
-
-        .menu-top {
-            display: flex;
-
-            align-items: center;
-
-            justify-content: space-between;
-
-            margin-bottom: 25px;
-        }
-
-        .menu-title {
-            font-size: 19px;
-
-            font-weight: 750;
-
-            letter-spacing: -.4px;
-        }
-
-        .menu-close {
-            width: 37px;
-            height: 37px;
-
-            border:
-                1px solid var(--border);
-
-            border-radius: 11px;
-
-            background:
-                rgba(255,255,255,.04);
-
-            color: #bbb;
-
-            font-size: 17px;
-        }
-
-        .menu-section-title {
-            color: #555;
-
-            font-size: 9px;
-            font-weight: 800;
-
-            letter-spacing: 1.3px;
-
-            margin:
-                18px 6px 7px;
-        }
-
-        .menu-item {
-            width: 100%;
-
-            height: 48px;
-
-            display: flex;
-            align-items: center;
-
-            gap: 12px;
-
-            border: 0;
-
-            border-radius: 13px;
-
-            padding: 0 12px;
-
-            background: transparent;
-
-            color: #bbb;
-
-            text-align: left;
-
-            font-size: 12px;
-
-            transition:
-                background .2s ease,
-                color .2s ease;
-        }
-
-        .menu-item:hover {
-            background:
-                rgba(255,255,255,.055);
-
-            color: #fff;
-        }
-
-        .menu-icon {
-            width: 29px;
-            height: 29px;
-
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
-            border-radius: 9px;
-
-            background:
-                rgba(255,255,255,.055);
-
-            font-size: 14px;
-        }
-
-        .menu-spacer {
-            flex: 1;
-            min-height: 25px;
-        }
-
-        .menu-logout {
-            color: #ff7373;
-        }
-
-        .menu-logout .menu-icon {
-            color: #ff7373;
-            background: rgba(255,105,105,.07);
-        }
-
-
-        /* =========================================================
-           EMPTY STATE
-        ========================================================= */
-
-        .empty {
-            padding: 35px 15px;
-
-            text-align: center;
-
-            color: #606060;
-        }
-
-        .empty-icon {
-            font-size: 27px;
-
-            margin-bottom: 10px;
-        }
-
-        .empty-title {
-            color: #888;
-
-            font-size: 12px;
-
-            margin-bottom: 5px;
-        }
-
-        .empty-text {
-            font-size: 10px;
-
-            line-height: 1.5;
-        }
-
-
-        /* =========================================================
-           RESPONSIVE
-        ========================================================= */
-
-        @media (min-width: 700px) {
-
-            .app {
-                max-width: 560px;
-
-                margin: 0 auto;
-
-                border-left:
-                    1px solid rgba(255,255,255,.04);
-
-                border-right:
-                    1px solid rgba(255,255,255,.04);
-            }
-
-            .chat-composer {
-                left: 20px;
-                right: 20px;
-            }
-
-            .modal-overlay {
-                align-items: center;
-            }
-
-        }
-
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="theme-color" content="#050505">
+<title>GmailAccounts</title>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+    --bg:#050505;
+    --surface:rgba(18,18,18,.72);
+    --surface-soft:rgba(255,255,255,.045);
+    --border:rgba(255,255,255,.09);
+    --text:#f5f5f5;
+    --green:#55d98a;
+    --red:#ff6969;
+    --blue:#6ea8ff;
+}
+
+html,body{
+    width:100%;
+    height:100%;
+    background:#050505;
+    color:var(--text);
+    font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+}
+
+body{
+    overflow:hidden;
+}
+
+button,input{
+    font:inherit;
+    outline:none;
+}
+
+button{
+    cursor:pointer;
+}
+
+/* APP */
+
+.app{
+    width:100%;
+    height:100vh;
+    height:100dvh;
+    display:flex;
+    flex-direction:column;
+    background:
+        radial-gradient(circle at 50% -10%,rgba(255,255,255,.045),transparent 38%),
+        #050505;
+}
+
+/* HEADER */
+
+.topbar{
+    height:70px;
+    flex-shrink:0;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 17px;
+    border-bottom:1px solid rgba(255,255,255,.06);
+    background:rgba(5,5,5,.76);
+    backdrop-filter:blur(28px);
+    -webkit-backdrop-filter:blur(28px);
+}
+
+.brand-mini{
+    display:flex;
+    align-items:center;
+    gap:11px;
+}
+
+.brand-logo,
+.welcome-logo{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:#fff;
+}
+
+.brand-logo{
+    width:36px;
+    height:36px;
+    border-radius:11px;
+}
+
+.welcome-logo{
+    width:54px;
+    height:54px;
+    margin:0 auto 15px;
+    border-radius:17px;
+    box-shadow:0 15px 45px rgba(0,0,0,.28);
+}
+
+.gmail-mark{
+    width:25px;
+    height:20px;
+    position:relative;
+}
+
+.gmail-mark:before,
+.gmail-mark:after{
+    content:"";
+    position:absolute;
+    top:1px;
+    width:5px;
+    height:18px;
+    border-radius:3px;
+}
+
+.gmail-mark:before{
+    left:3px;
+    background:#ea4335;
+    transform:rotate(-34deg);
+}
+
+.gmail-mark:after{
+    right:3px;
+    background:#4285f4;
+    transform:rotate(34deg);
+}
+
+.gmail-m{
+    position:absolute;
+    left:4px;
+    right:4px;
+    top:3px;
+    height:14px;
+    border-top:4px solid #34a853;
+    border-radius:2px;
+}
+
+.brand-logo .gmail-mark{
+    transform:scale(.86);
+}
+
+.welcome-logo .gmail-mark{
+    transform:scale(1.12);
+}
+
+.brand-mini-name{
+    font-size:15px;
+    font-weight:700;
+    letter-spacing:-.3px;
+}
+
+.brand-mini-name span,
+.welcome-title span{
+    color:#777;
+}
+
+.top-actions{
+    display:flex;
+    align-items:center;
+}
+
+.icon-button{
+    width:40px;
+    height:40px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border:1px solid var(--border);
+    border-radius:13px;
+    background:var(--surface-soft);
+    color:#ddd;
+}
+
+.icon-button:active{
+    transform:scale(.95);
+}
+
+.hamburger{
+    width:19px;
+    height:15px;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+}
+
+.hamburger span{
+    width:100%;
+    height:2px;
+    border-radius:4px;
+    background:#ddd;
+}
+
+/* MAIN */
+
+.main{
+    flex:1;
+    min-height:0;
+    position:relative;
+    overflow:hidden;
+}
+
+.view{
+    position:absolute;
+    inset:0;
+    display:none;
+    overflow-y:auto;
+    padding:22px 17px 30px;
+    scrollbar-width:none;
+    background:#050505;
+}
+
+.view::-webkit-scrollbar{
+    display:none;
+}
+
+.view.active{
+    display:block;
+    animation:viewIn .22s ease;
+}
+
+#chatView{
+    padding:18px 15px 20px;
+    flex-direction:column;
+}
+
+#chatView.active{
+    display:flex;
+}
+
+@keyframes viewIn{
+    from{opacity:0;transform:translateY(5px)}
+    to{opacity:1;transform:translateY(0)}
+}
+
+/* CHAT */
+
+.chat-scroll{
+    flex:1;
+    min-height:0;
+    overflow-y:auto;
+    scrollbar-width:none;
+    padding:5px 2px 20px;
+}
+
+.chat-scroll::-webkit-scrollbar{
+    display:none;
+}
+
+.chat-welcome{
+    padding:17px 8px 15px;
+    text-align:center;
+}
+
+.welcome-title{
+    font-size:25px;
+    font-weight:750;
+    letter-spacing:-.9px;
+    margin-bottom:7px;
+}
+
+.welcome-description{
+    max-width:315px;
+    margin:0 auto;
+    color:#858585;
+    font-size:12px;
+    line-height:1.55;
+}
+
+.message{
+    display:flex;
+    margin:10px 0;
+}
+
+.message.system{
+    justify-content:flex-start;
+}
+
+.message.user{
+    justify-content:flex-end;
+}
+
+.bubble{
+    max-width:84%;
+    padding:12px 15px;
+    border-radius:22px;
+    border:1px solid var(--border);
+    font-size:13px;
+    line-height:1.5;
+    white-space:pre-line;
+    overflow-wrap:anywhere;
+    backdrop-filter:blur(18px);
+    -webkit-backdrop-filter:blur(18px);
+}
+
+.message.system .bubble{
+    background:linear-gradient(135deg,rgba(255,255,255,.065),rgba(255,255,255,.025));
+    border-bottom-left-radius:10px;
+}
+
+.message.user .bubble{
+    background:rgba(255,255,255,.095);
+    border-color:rgba(255,255,255,.12);
+    border-bottom-right-radius:10px;
+}
+
+/* CHAT CONTROLS
+   SIN BARRA VISUAL */
+
+.chat-controls{
+    flex-shrink:0;
+    width:100%;
+    padding:8px 0 2px;
+}
+
+.start-button{
+    display:block;
+    width:100%;
+    height:48px;
+    border:0;
+    border-radius:15px;
+    background:#f3f3f3;
+    color:#080808;
+    font-size:11px;
+    font-weight:850;
+    letter-spacing:.6px;
+    box-shadow:0 10px 30px rgba(0,0,0,.18);
+}
+
+.start-button:active{
+    transform:scale(.99);
+}
+
+.chat-form{
+    display:none;
+    align-items:center;
+    gap:7px;
+    width:100%;
+    padding:5px;
+    border:1px solid rgba(255,255,255,.09);
+    border-radius:17px;
+    background:rgba(18,18,18,.72);
+    backdrop-filter:blur(30px);
+    -webkit-backdrop-filter:blur(30px);
+}
+
+.chat-form.visible{
+    display:flex;
+}
+
+.chat-input{
+    flex:1;
+    min-width:0;
+    height:43px;
+    border:0;
+    background:transparent;
+    color:#fff;
+    padding:0 10px;
+    font-size:13px;
+}
+
+.chat-input::placeholder{
+    color:#555;
+}
+
+.send-button{
+    width:39px;
+    height:39px;
+    flex-shrink:0;
+    border:0;
+    border-radius:12px;
+    background:#f1f1f1;
+    color:#050505;
+    font-size:17px;
+    font-weight:700;
+}
+
+/* PAGE */
+
+.page-header{
+    margin-bottom:19px;
+}
+
+.page-eyebrow{
+    color:#626262;
+    font-size:9px;
+    font-weight:800;
+    letter-spacing:1.5px;
+    margin-bottom:7px;
+}
+
+.page-title{
+    font-size:26px;
+    letter-spacing:-.9px;
+    font-weight:750;
+}
+
+.page-subtitle{
+    margin-top:6px;
+    color:#777;
+    font-size:12px;
+    line-height:1.5;
+}
+
+/* CARDS */
+
+.glass-card{
+    padding:17px;
+    margin-bottom:12px;
+    border-radius:20px;
+    border:1px solid rgba(255,255,255,.085);
+    background:linear-gradient(145deg,rgba(255,255,255,.065),rgba(255,255,255,.022));
+    backdrop-filter:blur(28px);
+    -webkit-backdrop-filter:blur(28px);
+}
+
+/* BALANCE */
+
+.balance-card{
+    padding:23px;
+    border-radius:24px;
+    margin-bottom:13px;
+    background:
+        radial-gradient(circle at 90% 0%,rgba(110,168,255,.12),transparent 35%),
+        linear-gradient(145deg,rgba(255,255,255,.075),rgba(255,255,255,.025));
+    border:1px solid rgba(255,255,255,.10);
+}
+
+.balance-label{
+    color:#777;
+    font-size:10px;
+    margin-bottom:8px;
+}
+
+.balance-value{
+    font-size:36px;
+    font-weight:750;
+    letter-spacing:-1.5px;
+}
+
+.balance-currency{
+    color:#777;
+    font-size:12px;
+    margin-left:5px;
+}
+
+.balance-actions{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+    margin-top:18px;
+}
+
+.secondary-button{
+    height:42px;
+    border:1px solid var(--border);
+    border-radius:12px;
+    background:rgba(255,255,255,.045);
+    color:#ddd;
+    font-size:11px;
+    font-weight:650;
+}
+
+/* STATS */
+
+.stats-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+    margin-bottom:13px;
+}
+
+.stat{
+    padding:15px;
+    border:1px solid var(--border);
+    border-radius:17px;
+    background:rgba(255,255,255,.035);
+}
+
+.stat-label{
+    color:#696969;
+    font-size:10px;
+    margin-bottom:7px;
+}
+
+.stat-value{
+    font-size:19px;
+    font-weight:700;
+}
+
+/* TUTORIAL */
+
+.tutorial-intro{
+    color:#858585;
+    font-size:11px;
+    line-height:1.65;
+}
+
+.tutorial-step{
+    display:flex;
+    gap:13px;
+    padding:16px 0;
+    border-bottom:1px solid rgba(255,255,255,.055);
+}
+
+.tutorial-step:last-child{
+    border-bottom:0;
+    padding-bottom:0;
+}
+
+.step-number{
+    width:30px;
+    height:30px;
+    flex-shrink:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:10px;
+    background:rgba(255,255,255,.075);
+    color:#ddd;
+    font-size:11px;
+    font-weight:800;
+}
+
+.step-content{
+    min-width:0;
+}
+
+.step-content h3{
+    font-size:12px;
+    margin-bottom:5px;
+}
+
+.step-content p{
+    color:#777;
+    font-size:11px;
+    line-height:1.6;
+}
+
+.tutorial-note{
+    margin-top:17px;
+    padding:13px;
+    border-radius:12px;
+    background:rgba(110,168,255,.055);
+    border:1px solid rgba(110,168,255,.10);
+    color:#8ea9d5;
+    font-size:10px;
+    line-height:1.6;
+}
+
+/* REFERRALS / HISTORY */
+
+.referral-link{
+    padding:13px;
+    border-radius:13px;
+    background:rgba(0,0,0,.20);
+    border:1px solid var(--border);
+    color:#aaa;
+    font-size:11px;
+    word-break:break-all;
+    margin-top:10px;
+}
+
+.copy-button{
+    width:100%;
+    height:42px;
+    margin-top:9px;
+    border:1px solid var(--border);
+    border-radius:12px;
+    background:rgba(255,255,255,.045);
+    color:#ddd;
+    font-size:11px;
+}
+
+.history-item{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    padding:14px 0;
+    border-bottom:1px solid rgba(255,255,255,.055);
+}
+
+.history-item:last-child{
+    border-bottom:0;
+}
+
+.history-main{
+    min-width:0;
+}
+
+.history-email{
+    overflow:hidden;
+    white-space:nowrap;
+    text-overflow:ellipsis;
+    font-size:12px;
+}
+
+.history-date{
+    color:#606060;
+    font-size:9px;
+    margin-top:4px;
+}
+
+.history-id{
+    color:#4f4f4f;
+    font-size:8px;
+    margin-top:3px;
+}
+
+.status{
+    flex-shrink:0;
+    padding:6px 9px;
+    border-radius:9px;
+    font-size:9px;
+    font-weight:700;
+}
+
+.status.pending{
+    color:#d9b66e;
+    background:rgba(217,182,110,.09);
+}
+
+.status.approved{
+    color:var(--green);
+    background:rgba(85,217,138,.09);
+}
+
+.status.rejected{
+    color:var(--red);
+    background:rgba(255,105,105,.08);
+}
+
+/* PROFILE */
+
+.profile-head{
+    display:flex;
+    align-items:center;
+    gap:13px;
+    margin-bottom:17px;
+}
+
+.profile-avatar{
+    width:56px;
+    height:56px;
+    flex-shrink:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:18px;
+    background:linear-gradient(145deg,#292929,#111);
+    border:1px solid var(--border);
+    font-size:20px;
+    font-weight:700;
+}
+
+.profile-name{
+    font-size:15px;
+    font-weight:700;
+}
+
+.profile-email{
+    color:#666;
+    font-size:10px;
+    margin-top:4px;
+}
+
+.profile-id{
+    color:#4d4d4d;
+    font-size:9px;
+    margin-top:4px;
+    word-break:break-all;
+}
+
+.profile-option{
+    width:100%;
+    min-height:48px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    border:0;
+    border-bottom:1px solid rgba(255,255,255,.05);
+    background:transparent;
+    color:#ddd;
+    text-align:left;
+    font-size:12px;
+}
+
+.profile-option:last-child{
+    border-bottom:0;
+}
+
+.profile-option span:last-child{
+    color:#555;
+    font-size:14px;
+}
+
+/* SETTINGS */
+
+.setting-row{
+    min-height:58px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:14px;
+    border-bottom:1px solid rgba(255,255,255,.055);
+}
+
+.setting-row:last-child{
+    border-bottom:0;
+}
+
+.setting-info{
+    min-width:0;
+}
+
+.setting-title{
+    font-size:12px;
+}
+
+.setting-description{
+    color:#666;
+    font-size:9px;
+    line-height:1.45;
+    margin-top:3px;
+}
+
+.toggle{
+    position:relative;
+    width:42px;
+    height:24px;
+    flex-shrink:0;
+    border:0;
+    border-radius:20px;
+    background:#292929;
+}
+
+.toggle:after{
+    content:"";
+    position:absolute;
+    top:4px;
+    left:4px;
+    width:16px;
+    height:16px;
+    border-radius:50%;
+    background:#777;
+    transition:.2s ease;
+}
+
+.toggle.active{
+    background:rgba(85,217,138,.18);
+}
+
+.toggle.active:after{
+    transform:translateX(18px);
+    background:var(--green);
+}
+
+/* MENU */
+
+.menu-overlay{
+    position:fixed;
+    inset:0;
+    z-index:100;
+    display:none;
+    background:rgba(0,0,0,.52);
+    backdrop-filter:blur(7px);
+    -webkit-backdrop-filter:blur(7px);
+}
+
+.menu-overlay.open{
+    display:block;
+}
+
+.menu-panel{
+    position:absolute;
+    top:0;
+    left:0;
+    bottom:0;
+    width:min(330px,88vw);
+    display:flex;
+    flex-direction:column;
+    padding:18px 16px 25px;
+    overflow-y:auto;
+    background:linear-gradient(160deg,rgba(24,24,24,.96),rgba(10,10,10,.97));
+    border-right:1px solid rgba(255,255,255,.09);
+    backdrop-filter:blur(35px);
+    -webkit-backdrop-filter:blur(35px);
+    animation:menuIn .22s ease;
+}
+
+@keyframes menuIn{
+    from{transform:translateX(-100%)}
+    to{transform:translateX(0)}
+}
+
+.menu-top{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:25px;
+}
+
+.menu-title{
+    font-size:19px;
+    font-weight:750;
+}
+
+.menu-close{
+    width:37px;
+    height:37px;
+    border:1px solid var(--border);
+    border-radius:11px;
+    background:rgba(255,255,255,.04);
+    color:#bbb;
+    font-size:17px;
+}
+
+.menu-section-title{
+    color:#555;
+    font-size:9px;
+    font-weight:800;
+    letter-spacing:1.3px;
+    margin:18px 6px 7px;
+}
+
+.menu-item{
+    width:100%;
+    height:48px;
+    display:flex;
+    align-items:center;
+    gap:12px;
+    border:0;
+    border-radius:13px;
+    padding:0 12px;
+    background:transparent;
+    color:#bbb;
+    text-align:left;
+    font-size:12px;
+}
+
+.menu-item:active{
+    background:rgba(255,255,255,.055);
+    color:#fff;
+}
+
+.menu-icon{
+    width:29px;
+    height:29px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:9px;
+    background:rgba(255,255,255,.055);
+    font-size:14px;
+}
+
+.menu-spacer{
+    flex:1;
+    min-height:25px;
+}
+
+.menu-logout{
+    color:#ff7373;
+}
+
+/* EMPTY */
+
+.empty{
+    padding:35px 15px;
+    text-align:center;
+    color:#606060;
+}
+
+.empty-icon{
+    font-size:27px;
+    margin-bottom:10px;
+}
+
+.empty-title{
+    color:#888;
+    font-size:12px;
+    margin-bottom:5px;
+}
+
+.empty-text{
+    font-size:10px;
+    line-height:1.5;
+}
+
+/* MODAL */
+
+.modal-overlay{
+    position:fixed;
+    inset:0;
+    z-index:200;
+    display:none;
+    align-items:flex-end;
+    justify-content:center;
+    padding:12px;
+    background:rgba(0,0,0,.58);
+    backdrop-filter:blur(8px);
+}
+
+.modal-overlay.open{
+    display:flex;
+}
+
+.modal{
+    width:min(560px,100%);
+    max-height:88vh;
+    overflow-y:auto;
+    padding:18px;
+    border:1px solid rgba(255,255,255,.10);
+    border-radius:24px;
+    background:linear-gradient(160deg,rgba(25,25,25,.98),rgba(9,9,9,.99));
+    box-shadow:0 25px 80px rgba(0,0,0,.55);
+}
+
+.modal-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:16px;
+}
+
+.modal-title{
+    font-size:17px;
+    font-weight:750;
+}
+
+.modal-close{
+    width:36px;
+    height:36px;
+    border:1px solid var(--border);
+    border-radius:11px;
+    background:rgba(255,255,255,.04);
+    color:#bbb;
+    font-size:17px;
+}
+
+.modal-text{
+    color:#777;
+    font-size:11px;
+    line-height:1.6;
+    margin-bottom:13px;
+}
+
+/* TOAST */
+
+.toast{
+    position:fixed;
+    left:50%;
+    bottom:20px;
+    z-index:300;
+    max-width:calc(100vw - 34px);
+    padding:11px 14px;
+    border:1px solid rgba(255,255,255,.10);
+    border-radius:13px;
+    background:rgba(22,22,22,.94);
+    color:#ddd;
+    font-size:10px;
+    line-height:1.4;
+    box-shadow:0 15px 45px rgba(0,0,0,.4);
+    transform:translate(-50%,15px);
+    opacity:0;
+    pointer-events:none;
+    transition:.2s ease;
+}
+
+.toast.show{
+    opacity:1;
+    transform:translate(-50%,0);
+}
+
+@media(min-width:700px){
+    .app{
+        max-width:560px;
+        margin:0 auto;
+        border-left:1px solid rgba(255,255,255,.04);
+        border-right:1px solid rgba(255,255,255,.04);
+    }
+
+    .modal-overlay{
+        align-items:center;
+    }
+}
+</style>
 </head>
-
 
 <body>
 
 <div class="app">
 
+<header class="topbar">
 
-    <!-- =========================================================
-         AUTH LOADING
-    ========================================================== -->
-
-    <div
-        class="auth-loading"
-        id="authLoading"
-    >
-
-        <div class="auth-loading-inner">
-
-            <div class="auth-loading-logo">
-                <div class="gmail-mark">
-                    <div class="gmail-m"></div>
-                </div>
+    <div class="brand-mini">
+        <div class="brand-logo">
+            <div class="gmail-mark">
+                <div class="gmail-m"></div>
             </div>
-
-            <div class="auth-loading-text">
-                Comprobando sesión...
-            </div>
-
         </div>
 
+        <div class="brand-mini-name">
+            Gmail<span>Accounts</span>
+        </div>
     </div>
 
+    <div class="top-actions">
+        <button class="icon-button" id="menuButton" aria-label="Abrir menú">
+            <span class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </span>
+        </button>
+    </div>
 
-    <!-- =========================================================
-         TOP BAR
-    ========================================================== -->
+</header>
 
-    <header class="topbar">
+<main class="main">
 
-        <div class="brand-mini">
+<!-- CHAT -->
 
-            <div class="brand-logo">
+<section class="view active" id="chatView">
 
+    <div class="chat-scroll" id="chatScroll">
+
+        <div class="chat-welcome" id="chatWelcome">
+
+            <div class="welcome-logo">
                 <div class="gmail-mark">
                     <div class="gmail-m"></div>
                 </div>
-
             </div>
 
-            <div class="brand-mini-name">
+            <h1 class="welcome-title">
                 Gmail<span>Accounts</span>
+            </h1>
+
+            <p class="welcome-description">
+                Gestiona tus solicitudes desde un solo lugar.
+            </p>
+
+        </div>
+
+        <div class="message system" id="initialMessage">
+            <div class="bubble">
+                Bienvenido a <strong>GmailAccounts.</strong> 👋<br>
+                Pulsa <strong>INICIAR</strong> para comenzar.
+            </div>
+        </div>
+
+    </div>
+
+    <div class="chat-controls">
+
+        <button class="start-button" id="startButton">
+            INICIAR
+        </button>
+
+        <form class="chat-form" id="chatForm">
+
+            <input
+                class="chat-input"
+                id="chatInput"
+                type="text"
+                autocomplete="off"
+                autocapitalize="none"
+                spellcheck="false"
+                placeholder="Escribe un mensaje..."
+            >
+
+            <button class="send-button" type="submit">
+                ↑
+            </button>
+
+        </form>
+
+    </div>
+
+</section>
+
+<!-- BALANCE -->
+
+<section class="view" id="balanceView">
+
+    <div class="page-header">
+        <div class="page-eyebrow">CUENTA</div>
+        <h2 class="page-title">Balance</h2>
+        <p class="page-subtitle">
+            Consulta tu balance y el movimiento registrado en tu cuenta.
+        </p>
+    </div>
+
+    <div class="balance-card">
+
+        <div class="balance-label">BALANCE DISPONIBLE</div>
+
+        <div class="balance-value">
+            <span id="balanceValue">0.00</span>
+            <span class="balance-currency">USDT</span>
+        </div>
+
+        <div class="balance-actions">
+            <button class="secondary-button" id="withdrawButton">
+                Retiro
+            </button>
+
+            <button class="secondary-button" id="transactionsButton">
+                Historial
+            </button>
+        </div>
+
+    </div>
+
+    <div class="stats-grid">
+
+        <div class="stat">
+            <div class="stat-label">CUENTAS ACEPTADAS</div>
+            <div class="stat-value" id="acceptedCount">0</div>
+        </div>
+
+        <div class="stat">
+            <div class="stat-label">PENDIENTES</div>
+            <div class="stat-value" id="pendingCount">0</div>
+        </div>
+
+    </div>
+
+    <div class="glass-card">
+
+        <div class="page-eyebrow">MOVIMIENTOS</div>
+
+        <div id="balanceTransactions">
+            <div class="empty">
+                <div class="empty-icon">◌</div>
+                <div class="empty-title">Sin movimientos</div>
+                <div class="empty-text">
+                    Tus movimientos aparecerán aquí cuando existan registros.
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</section>
+
+<!-- TUTORIAL -->
+
+<section class="view" id="tutorialView">
+
+    <div class="page-header">
+        <div class="page-eyebrow">GUÍA COMPLETA</div>
+        <h2 class="page-title">Cómo funciona</h2>
+        <p class="page-subtitle">
+            Todo lo necesario para utilizar GmailAccounts.
+        </p>
+    </div>
+
+    <div class="glass-card">
+
+        <p class="tutorial-intro">
+            GmailAccounts funciona desde una interfaz sencilla.
+            El chat es el punto de inicio y el menú reúne el resto
+            de las funciones.
+        </p>
+
+        <div class="tutorial-step">
+            <div class="step-number">1</div>
+            <div class="step-content">
+                <h3>Crea tu cuenta</h3>
+                <p>
+                    Regístrate desde la pantalla de acceso utilizando
+                    un correo válido, un nombre de usuario y una
+                    contraseña que cumpla los requisitos indicados.
+                </p>
+            </div>
+        </div>
+
+        <div class="tutorial-step">
+            <div class="step-number">2</div>
+            <div class="step-content">
+                <h3>Inicia sesión</h3>
+                <p>
+                    Puedes acceder con tu correo o nombre de usuario
+                    y tu contraseña.
+                </p>
+            </div>
+        </div>
+
+        <div class="tutorial-step">
+            <div class="step-number">3</div>
+            <div class="step-content">
+                <h3>Abre el Chat</h3>
+                <p>
+                    Después de iniciar sesión entrarás directamente
+                    a la interfaz principal del chat.
+                </p>
+            </div>
+        </div>
+
+        <div class="tutorial-step">
+            <div class="step-number">4</div>
+            <div class="step-content">
+                <h3>Pulsa INICIAR</h3>
+                <p>
+                    El botón INICIAR activa el campo de escritura
+                    para comenzar una conversación.
+                </p>
+            </div>
+        </div>
+
+        <div class="tutorial-step">
+            <div class="step-number">5</div>
+            <div class="step-content">
+                <h3>Escribe tu solicitud</h3>
+                <p>
+                    Introduce el mensaje en el campo inferior y
+                    utiliza la flecha para enviarlo.
+                </p>
+            </div>
+        </div>
+
+        <div class="tutorial-step">
+            <div class="step-number">6</div>
+            <div class="step-content">
+                <h3>Consulta Mis cuentas</h3>
+                <p>
+                    Desde el menú puedes consultar tus solicitudes,
+                    identificadores, fechas y estados.
+                </p>
+            </div>
+        </div>
+
+        <div class="tutorial-step">
+            <div class="step-number">7</div>
+            <div class="step-content">
+                <h3>Revisa los estados</h3>
+                <p>
+                    Las solicitudes pueden aparecer como pendientes,
+                    aceptadas o rechazadas según su estado.
+                </p>
+            </div>
+        </div>
+
+        <div class="tutorial-step">
+            <div class="step-number">8</div>
+            <div class="step-content">
+                <h3>Consulta Balance</h3>
+                <p>
+                    Balance muestra la información disponible
+                    relacionada con el saldo de la cuenta.
+                </p>
+            </div>
+        </div>
+
+        <div class="tutorial-step">
+            <div class="step-number">9</div>
+            <div class="step-content">
+                <h3>Consulta Referidos</h3>
+                <p>
+                    Esta sección estará preparada para mostrar
+                    el sistema de referidos cuando sea conectado.
+                </p>
+            </div>
+        </div>
+
+        <div class="tutorial-step">
+            <div class="step-number">10</div>
+            <div class="step-content">
+                <h3>Administra tu perfil</h3>
+                <p>
+                    Mi perfil contiene la información de tu cuenta
+                    y las preferencias disponibles.
+                </p>
+            </div>
+        </div>
+
+        <div class="tutorial-step">
+            <div class="step-number">11</div>
+            <div class="step-content">
+                <h3>Configuración</h3>
+                <p>
+                    Puedes administrar las preferencias locales
+                    de notificaciones y privacidad desde tu perfil.
+                </p>
+            </div>
+        </div>
+
+        <div class="tutorial-step">
+            <div class="step-number">12</div>
+            <div class="step-content">
+                <h3>Cerrar sesión</h3>
+                <p>
+                    Utiliza Cerrar sesión desde el menú para revocar
+                    tu sesión y volver a la pantalla de acceso.
+                </p>
+            </div>
+        </div>
+
+        <div class="tutorial-note">
+            💡 El botón ☰ abre el menú principal. Desde ahí puedes
+            cambiar entre las distintas secciones.
+        </div>
+
+    </div>
+
+</section>
+
+<!-- REFERIDOS -->
+
+<section class="view" id="referralsView">
+
+    <div class="page-header">
+        <div class="page-eyebrow">INVITACIONES</div>
+        <h2 class="page-title">Referidos</h2>
+        <p class="page-subtitle">
+            Consulta tus referidos y tu enlace personal.
+        </p>
+    </div>
+
+    <div class="glass-card">
+
+        <div class="stats-grid">
+
+            <div class="stat">
+                <div class="stat-label">REFERIDOS</div>
+                <div class="stat-value">0</div>
+            </div>
+
+            <div class="stat">
+                <div class="stat-label">GANADO</div>
+                <div class="stat-value">0.00</div>
             </div>
 
         </div>
 
+        <div class="page-eyebrow">TU ENLACE</div>
 
-        <div class="top-actions">
+        <div class="referral-link" id="referralLink">
+            próximamente
+        </div>
 
-            <button
-                class="icon-button"
-                id="menuButton"
-                aria-label="Abrir menú"
-                aria-controls="menuOverlay"
-                aria-expanded="false"
-            >
+        <button class="copy-button" id="copyReferral">
+            COPIAR ENLACE
+        </button>
 
-                <span class="hamburger">
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                </span>
+    </div>
 
+</section>
+
+<!-- HISTORIAL -->
+
+<section class="view" id="historyView">
+
+    <div class="page-header">
+        <div class="page-eyebrow">ACTIVIDAD</div>
+        <h2 class="page-title">Mis cuentas</h2>
+        <p class="page-subtitle">
+            Aquí aparecerán las solicitudes que hayas enviado.
+        </p>
+    </div>
+
+    <div class="glass-card">
+
+        <div id="historyList">
+
+            <div class="empty">
+                <div class="empty-icon">◌</div>
+                <div class="empty-title">
+                    Todavía no hay solicitudes
+                </div>
+                <div class="empty-text">
+                    Cuando envíes una solicitud aparecerá aquí su estado.
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- PERFIL -->
+
+<section class="view" id="profileView">
+
+    <div class="page-header">
+        <div class="page-eyebrow">CUENTA</div>
+        <h2 class="page-title">Mi perfil</h2>
+        <p class="page-subtitle">
+            Consulta tu información y administra tus preferencias.
+        </p>
+    </div>
+
+    <div class="glass-card">
+
+        <div class="profile-head">
+
+            <div class="profile-avatar" id="profileAvatar">
+                U
+            </div>
+
+            <div>
+
+                <div class="profile-name" id="profileName">
+                    Usuario
+                </div>
+
+                <div class="profile-email" id="profileEmail">
+                    usuario@email.com
+                </div>
+
+                <div class="profile-id" id="profileId">
+                    ID no disponible
+                </div>
+
+            </div>
+
+        </div>
+
+        <button class="profile-option" id="editProfile">
+            <span>Editar perfil</span>
+            <span>›</span>
+        </button>
+
+        <button class="profile-option" id="accountSettings">
+            <span>Configuración de cuenta</span>
+            <span>›</span>
+        </button>
+
+        <button class="profile-option" id="notificationsSettings">
+            <span>Notificaciones</span>
+            <span>›</span>
+        </button>
+
+        <button class="profile-option" id="privacySettings">
+            <span>Privacidad</span>
+            <span>›</span>
+        </button>
+
+    </div>
+
+    <div class="glass-card">
+
+        <div class="page-eyebrow">ESTADO</div>
+
+        <div class="setting-row">
+
+            <div class="setting-info">
+
+                <div class="setting-title">
+                    Sesión
+                </div>
+
+                <div class="setting-description">
+                    Tu sesión actual está protegida por el sistema
+                    de autenticación.
+                </div>
+
+            </div>
+
+            <div class="status approved">
+                Activa
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+</main>
+
+<!-- MENU -->
+
+<div class="menu-overlay" id="menuOverlay">
+
+    <aside class="menu-panel">
+
+        <div class="menu-top">
+
+            <div class="menu-title">
+                Menú
+            </div>
+
+            <button class="menu-close" id="menuClose">
+                ×
             </button>
 
         </div>
 
-    </header>
+        <div class="menu-section-title">
+            PRINCIPAL
+        </div>
 
+        <button class="menu-item" data-menu-view="chatView">
+            <span class="menu-icon">◉</span>
+            Chat
+        </button>
 
-    <!-- =========================================================
-         MAIN
-    ========================================================== -->
+        <button class="menu-item" data-menu-view="balanceView">
+            <span class="menu-icon">◇</span>
+            Balance
+        </button>
 
-    <main class="main">
+        <button class="menu-item" data-menu-view="tutorialView">
+            <span class="menu-icon">?</span>
+            Tutorial
+        </button>
 
+        <div class="menu-section-title">
+            ACTIVIDAD
+        </div>
 
-        <!-- =====================================================
-             CHAT
-        ====================================================== -->
+        <button class="menu-item" data-menu-view="historyView">
+            <span class="menu-icon">≡</span>
+            Mis cuentas
+        </button>
 
-        <section
-            class="view active"
-            id="chatView"
-        >
+        <button class="menu-item" data-menu-view="referralsView">
+            <span class="menu-icon">♧</span>
+            Referidos
+        </button>
 
-            <div
-                class="chat-scroll"
-                id="chatScroll"
-            >
+        <div class="menu-section-title">
+            CUENTA
+        </div>
 
-                <div
-                    class="chat-welcome"
-                    id="chatWelcome"
-                >
+        <button class="menu-item" data-menu-view="profileView">
+            <span class="menu-icon">●</span>
+            Mi perfil
+        </button>
 
-                    <div class="welcome-logo">
+        <div class="menu-spacer"></div>
 
-                        <div class="gmail-mark">
-                            <div class="gmail-m"></div>
-                        </div>
+        <button class="menu-item menu-logout" id="menuLogoutButton">
+            <span class="menu-icon">↗</span>
+            Cerrar sesión
+        </button>
 
-                    </div>
+    </aside>
 
-                    <h1 class="welcome-title">
-                        Gmail<span>Accounts</span>
-                    </h1>
+</div>
 
-                    <p class="welcome-description">
-                        Gestiona tus solicitudes desde
-                        un solo lugar.
-                    </p>
+<!-- MODAL -->
 
-                </div>
+<div class="modal-overlay" id="settingsModal">
 
+    <div class="modal">
 
-                <div
-                    class="message system"
-                    id="initialMessage"
-                >
+        <div class="modal-head">
 
-                    <div class="bubble">
-                        Bienvenido a
-                        <strong>GmailAccounts.</strong>
-                        <span class="emoji">👋</span>
-                        <br>
-                        Pulsa <strong>INICIAR</strong> para comenzar.
-                    </div>
-
-                </div>
-
+            <div class="modal-title" id="modalTitle">
+                Configuración
             </div>
 
+            <button class="modal-close" id="modalClose">
+                ×
+            </button>
 
-            <!-- =================================================
-                 COMPOSER
-            ================================================== -->
+        </div>
 
-            <div class="chat-composer">
+        <div id="modalContent"></div>
 
-                <button
-                    class="start-button"
-                    id="startButton"
-                >
-                    INICIAR
-                </button>
+    </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+
+/* =========================================================
+   SESSION
+========================================================= */
+
+const SESSION_KEY = "gmailaccounts_session";
+
+const state = {
+    started:false,
+    requests:[],
+    balance:0,
+    user:{
+        id:"",
+        username:"Usuario",
+        email:"usuario@email.com",
+        role:"user"
+    }
+};
 
 
-                <form
-                    class="chat-form"
-                    id="chatForm"
-                >
+/* =========================================================
+   ELEMENTS
+========================================================= */
 
-                    <input
-                        class="chat-input"
-                        id="chatInput"
-                        type="text"
-                        autocomplete="off"
-                        autocapitalize="none"
-                        spellcheck="false"
-                        placeholder="Escribe un mensaje..."
-                    >
+const views = document.querySelectorAll(".view");
 
-                    <button
-                        class="send-button"
-                        type="submit"
-                        aria-label="Enviar"
-                    >
-                        ↑
-                    </button>
+const menuOverlay = document.getElementById("menuOverlay");
+const menuButton = document.getElementById("menuButton");
+const menuClose = document.getElementById("menuClose");
 
-                </form>
+const startButton = document.getElementById("startButton");
+const chatForm = document.getElementById("chatForm");
+const chatInput = document.getElementById("chatInput");
+const chatScroll = document.getElementById("chatScroll");
 
+const toast = document.getElementById("toast");
+
+const settingsModal = document.getElementById("settingsModal");
+const modalTitle = document.getElementById("modalTitle");
+const modalContent = document.getElementById("modalContent");
+
+
+/* =========================================================
+   TOAST
+========================================================= */
+
+let toastTimer = null;
+
+function showToast(message){
+
+    toast.textContent = message;
+    toast.classList.add("show");
+
+    clearTimeout(toastTimer);
+
+    toastTimer = setTimeout(()=>{
+        toast.classList.remove("show");
+    },2200);
+}
+
+
+/* =========================================================
+   VIEWS
+========================================================= */
+
+function showView(id){
+
+    views.forEach(view=>{
+        view.classList.remove("active");
+    });
+
+    const target = document.getElementById(id);
+
+    if(target){
+        target.classList.add("active");
+    }
+
+    closeMenu();
+}
+
+
+/* =========================================================
+   MENU
+========================================================= */
+
+function openMenu(){
+
+    menuOverlay.classList.add("open");
+    menuButton.setAttribute("aria-expanded","true");
+}
+
+function closeMenu(){
+
+    menuOverlay.classList.remove("open");
+    menuButton.setAttribute("aria-expanded","false");
+}
+
+menuButton.addEventListener("click",openMenu);
+menuClose.addEventListener("click",closeMenu);
+
+menuOverlay.addEventListener("click",event=>{
+    if(event.target === menuOverlay){
+        closeMenu();
+    }
+});
+
+document.querySelectorAll("[data-menu-view]").forEach(button=>{
+
+    button.addEventListener("click",()=>{
+
+        showView(button.dataset.menuView);
+
+    });
+
+});
+
+
+/* =========================================================
+   CHAT START
+========================================================= */
+
+startButton.addEventListener("click",()=>{
+
+    state.started = true;
+
+    startButton.style.display = "none";
+    chatForm.classList.add("visible");
+
+    addSystemMessage(
+        "Listo. Escribe tu mensaje para comenzar."
+    );
+
+    chatInput.focus();
+
+    requestAnimationFrame(()=>{
+        chatScroll.scrollTop = chatScroll.scrollHeight;
+    });
+
+});
+
+
+/* =========================================================
+   CHAT MESSAGES
+========================================================= */
+
+function addMessage(text,type){
+
+    const message = document.createElement("div");
+
+    message.className =
+        "message " +
+        (type === "user" ? "user" : "system");
+
+    const bubble = document.createElement("div");
+
+    bubble.className = "bubble";
+
+    bubble.textContent = text;
+
+    message.appendChild(bubble);
+
+    chatScroll.appendChild(message);
+
+    chatScroll.scrollTop = chatScroll.scrollHeight;
+}
+
+function addSystemMessage(text){
+    addMessage(text,"system");
+}
+
+function addUserMessage(text){
+    addMessage(text,"user");
+}
+
+
+/* =========================================================
+   REQUESTS
+========================================================= */
+
+function requestStorageKey(){
+
+    if(!state.user.id){
+        return null;
+    }
+
+    return "gmailaccounts_requests_" + state.user.id;
+}
+
+function loadRequests(){
+
+    const key = requestStorageKey();
+
+    if(!key){
+        return;
+    }
+
+    try{
+
+        const saved =
+            JSON.parse(localStorage.getItem(key) || "[]");
+
+        if(Array.isArray(saved)){
+            state.requests = saved;
+        }
+
+    }catch{
+        state.requests = [];
+    }
+
+    renderHistory();
+    renderStats();
+}
+
+function saveRequests(){
+
+    const key = requestStorageKey();
+
+    if(!key){
+        return;
+    }
+
+    localStorage.setItem(
+        key,
+        JSON.stringify(state.requests)
+    );
+}
+
+function createRequest(text){
+
+    const request = {
+        id:
+            "REQ-" +
+            Date.now().toString(36).toUpperCase(),
+
+        text:text,
+
+        status:"pending",
+
+        date:new Date().toLocaleString("es-ES")
+
+    };
+
+    state.requests.push(request);
+
+    saveRequests();
+
+    renderHistory();
+    renderStats();
+
+    return request;
+}
+
+
+/* =========================================================
+   CHAT FORM
+========================================================= */
+
+chatForm.addEventListener("submit",event=>{
+
+    event.preventDefault();
+
+    const text = chatInput.value.trim();
+
+    if(!text){
+        return;
+    }
+
+    addUserMessage(text);
+
+    createRequest(text);
+
+    chatInput.value = "";
+
+    setTimeout(()=>{
+
+        addSystemMessage(
+            "Solicitud recibida. Quedará registrada como pendiente mientras el sistema correspondiente procesa la información."
+        );
+
+    },350);
+
+});
+
+
+/* =========================================================
+   HISTORY
+========================================================= */
+
+function renderHistory(){
+
+    const container =
+        document.getElementById("historyList");
+
+    if(!container){
+        return;
+    }
+
+    if(state.requests.length === 0){
+
+        container.innerHTML = `
+            <div class="empty">
+                <div class="empty-icon">◌</div>
+                <div class="empty-title">
+                    Todavía no hay solicitudes
+                </div>
+                <div class="empty-text">
+                    Cuando envíes una solicitud aparecerá aquí su estado.
+                </div>
+            </div>
+        `;
+
+        return;
+    }
+
+    container.innerHTML = "";
+
+    [...state.requests]
+        .reverse()
+        .forEach(request=>{
+
+            const item =
+                document.createElement("div");
+
+            item.className = "history-item";
+
+            const main =
+                document.createElement("div");
+
+            main.className = "history-main";
+
+            const email =
+                document.createElement("div");
+
+            email.className = "history-email";
+            email.textContent = request.text;
+
+            const date =
+                document.createElement("div");
+
+            date.className = "history-date";
+            date.textContent = request.date;
+
+            const id =
+                document.createElement("div");
+
+            id.className = "history-id";
+            id.textContent = request.id;
+
+            main.appendChild(email);
+            main.appendChild(date);
+            main.appendChild(id);
+
+            const status =
+                document.createElement("div");
+
+            status.className =
+                "status " +
+                (
+                    request.status === "approved"
+                    ? "approved"
+                    : request.status === "rejected"
+                    ? "rejected"
+                    : "pending"
+                );
+
+            status.textContent =
+                request.status === "approved"
+                ? "Aceptada"
+                : request.status === "rejected"
+                ? "Rechazada"
+                : "Pendiente";
+
+            item.appendChild(main);
+            item.appendChild(status);
+
+            container.appendChild(item);
+
+        });
+}
+
+
+/* =========================================================
+   STATS
+========================================================= */
+
+function renderStats(){
+
+    const pending =
+        state.requests.filter(
+            item=>item.status === "pending"
+        ).length;
+
+    const accepted =
+        state.requests.filter(
+            item=>item.status === "approved"
+        ).length;
+
+    document.getElementById("pendingCount").textContent =
+        pending;
+
+    document.getElementById("acceptedCount").textContent =
+        accepted;
+
+    document.getElementById("balanceValue").textContent =
+        Number(state.balance || 0).toFixed(2);
+}
+
+
+/* =========================================================
+   PROFILE
+========================================================= */
+
+function renderProfile(){
+
+    const username =
+        state.user.username || "Usuario";
+
+    const email =
+        state.user.email || "usuario@email.com";
+
+    document.getElementById("profileName").textContent =
+        username;
+
+    document.getElementById("profileEmail").textContent =
+        email;
+
+    document.getElementById("profileId").textContent =
+        state.user.id
+        ? "ID: " + state.user.id
+        : "ID no disponible";
+
+    document.getElementById("profileAvatar").textContent =
+        username.charAt(0).toUpperCase();
+
+}
+
+
+/* =========================================================
+   MODAL
+========================================================= */
+
+function openModal(title,content){
+
+    modalTitle.textContent = title;
+    modalContent.innerHTML = content;
+    settingsModal.classList.add("open");
+
+}
+
+function closeModal(){
+
+    settingsModal.classList.remove("open");
+
+}
+
+document.getElementById("modalClose")
+    .addEventListener("click",closeModal);
+
+settingsModal.addEventListener("click",event=>{
+
+    if(event.target === settingsModal){
+        closeModal();
+    }
+
+});
+
+
+/* =========================================================
+   PROFILE ACTIONS
+========================================================= */
+
+document.getElementById("editProfile")
+    .addEventListener("click",()=>{
+
+        openModal(
+            "Editar perfil",
+            `
+            <div class="modal-text">
+                Estos son los datos asociados actualmente
+                a tu cuenta.
             </div>
 
-        </section>
+            <div class="page-eyebrow">USUARIO</div>
 
-
-        <!-- =====================================================
-             BALANCE
-        ====================================================== -->
-
-        <section
-            class="view"
-            id="balanceView"
-        >
-
-            <div class="page-header">
-
-                <div class="page-eyebrow">
-                    CUENTA
-                </div>
-
-                <h2 class="page-title">
-                    Balance
-                </h2>
-
-                <p class="page-subtitle">
-                    Consulta tu balance y el movimiento
-                    registrado en tu cuenta.
-                </p>
-
+            <div class="settings-input"
+                 style="display:flex;align-items:center;">
+                ${escapeHTML(state.user.username)}
             </div>
 
-
-            <div class="balance-card">
-
-                <div class="balance-label">
-                    BALANCE DISPONIBLE
-                </div>
-
-                <div
-                    class="balance-value"
-                    id="balanceValue"
-                >
-                    0.00
-                    <span class="balance-currency">
-                        USDT
-                    </span>
-                </div>
-
-
-                <div class="balance-actions">
-
-                    <button
-                        class="secondary-button"
-                        id="withdrawButton"
-                    >
-                        Retiro
-                    </button>
-
-                    <button
-                        class="secondary-button"
-                        id="transactionsButton"
-                    >
-                        Historial
-                    </button>
-
-                </div>
-
+            <div class="page-eyebrow" style="margin-top:14px;">
+                CORREO
             </div>
 
-
-            <div class="stats-grid">
-
-                <div class="stat">
-
-                    <div class="stat-label">
-                        CUENTAS ACEPTADAS
-                    </div>
-
-                    <div
-                        class="stat-value"
-                        id="acceptedCount"
-                    >
-                        0
-                    </div>
-
-                </div>
-
-
-                <div class="stat">
-
-                    <div class="stat-label">
-                        PENDIENTES
-                    </div>
-
-                    <div
-                        class="stat-value"
-                        id="pendingCount"
-                    >
-                        0
-                    </div>
-
-                </div>
-
+            <div class="settings-input"
+                 style="display:flex;align-items:center;">
+                ${escapeHTML(state.user.email)}
             </div>
 
+            <div class="modal-text" style="margin-top:14px;">
+                Los datos principales de autenticación
+                son administrados por el servidor.
+            </div>
+            `
+        );
 
-            <div class="glass-card">
+    });
 
-                <div class="page-eyebrow">
-                    MOVIMIENTOS
-                </div>
 
-                <div id="balanceTransactions">
+document.getElementById("accountSettings")
+    .addEventListener("click",()=>{
 
-                    <div class="empty">
-
-                        <div class="empty-icon">
-                            ◌
-                        </div>
-
-                        <div class="empty-title">
-                            Sin movimientos
-                        </div>
-
-                        <div class="empty-text">
-                            Tus movimientos aparecerán
-                            aquí cuando existan registros.
-                        </div>
-
+        openModal(
+            "Configuración de cuenta",
+            `
+            <div class="setting-row">
+                <div class="setting-info">
+                    <div class="setting-title">Estado</div>
+                    <div class="setting-description">
+                        Estado de la cuenta actual.
                     </div>
-
                 </div>
 
+                <div class="status approved">
+                    Activa
+                </div>
             </div>
 
-        </section>
-
-
-        <!-- =====================================================
-             TUTORIAL
-        ====================================================== -->
-
-        <section
-            class="view"
-            id="tutorialView"
-        >
-
-            <div class="page-header">
-
-                <div class="page-eyebrow">
-                    GUÍA COMPLETA
+            <div class="setting-row">
+                <div class="setting-info">
+                    <div class="setting-title">Rol</div>
+                    <div class="setting-description">
+                        Nivel de acceso de la cuenta.
+                    </div>
                 </div>
 
-                <h2 class="page-title">
-                    Cómo funciona
-                </h2>
-
-                <p class="page-subtitle">
-                    Todo lo necesario para utilizar
-                    GmailAccounts.
-                </p>
-
+                <div style="font-size:10px;color:#777;">
+                    ${escapeHTML(state.user.role)}
+                </div>
             </div>
+            `
+        );
 
+    });
 
-            <div class="glass-card">
 
-                <p class="tutorial-intro">
-                    GmailAccounts funciona desde una interfaz
-                    sencilla. El chat es el punto de inicio y
-                    el menú reúne el resto de las funciones.
-                </p>
+document.getElementById("notificationsSettings")
+    .addEventListener("click",()=>{
 
-
-                <div class="tutorial-step">
-
-                    <div class="step-number">1</div>
-
-                    <div class="step-content">
-
-                        <h3>
-                            Crea tu cuenta
-                        </h3>
-
-                        <p>
-                            Regístrate desde la pantalla de acceso
-                            utilizando un correo válido, un nombre
-                            de usuario y una contraseña que cumpla
-                            los requisitos indicados.
-                        </p>
-
-                    </div>
-
-                </div>
-
-
-                <div class="tutorial-step">
-
-                    <div class="step-number">2</div>
-
-                    <div class="step-content">
-
-                        <h3>
-                            Inicia sesión
-                        </h3>
-
-                        <p>
-                            Puedes acceder con tu correo o nombre
-                            de usuario y tu contraseña. Si ya tienes
-                            una sesión válida, la aplicación puede
-                            abrir directamente esta pantalla.
-                        </p>
-
-                    </div>
-
-                </div>
-
-
-                <div class="tutorial-step">
-
-                    <div class="step-number">3</div>
-
-                    <div class="step-content">
-
-                        <h3>
-                            Pulsa INICIAR
-                        </h3>
-
-                        <p>
-                            En el Chat encontrarás el botón
-                            INICIAR. Al tocarlo se activa el campo
-                            de escritura y aparece la instrucción
-                            para comenzar una solicitud.
-                        </p>
-
-                    </div>
-
-                </div>
-
-
-                <div class="tutorial-step">
-
-                    <div class="step-number">4</div>
-
-                    <div class="step-content">
-
-                        <h3>
-                            Escribe tu solicitud
-                        </h3>
-
-                        <p>
-                            Utiliza el campo de texto inferior
-                            para enviar la información solicitada
-                            por la interfaz. El botón de flecha
-                            permite enviar el mensaje.
-                        </p>
-
-                    </div>
-
-                </div>
-
-
-                <div class="tutorial-step">
-
-                    <div class="step-number">5</div>
-
-                    <div class="step-content">
-
-                        <h3>
-                            Revisa el formato
-                        </h3>
-
-                        <p>
-                            Cuando el flujo solicite un correo,
-                            la aplicación comprueba que tenga
-                            un formato válido antes de crear
-                            la solicitud.
-                        </p>
-
-                    </div>
-
-                </div>
-
-
-                <div class="tutorial-step">
-
-                    <div class="step-number">6</div>
-
-                    <div class="step-content">
-
-                        <h3>
-                            Consulta Mis cuentas
-                        </h3>
-
-                        <p>
-                            Desde el menú puedes entrar en
-                            Mis cuentas para consultar tus
-                            solicitudes, fechas, identificadores
-                            y estados.
-                        </p>
-
-                    </div>
-
-                </div>
-
-
-                <div class="tutorial-step">
-
-                    <div class="step-number">7</div>
-
-                    <div class="step-content">
-
-                        <h3>
-                            Entiende los estados
-                        </h3>
-
-                        <p>
-                            Pendiente significa que la solicitud
-                            espera revisión. Aceptada significa
-                            que fue aprobada y Rechazada indica
-                            que no fue aprobada.
-                        </p>
-
-                    </div>
-
-                </div>
-
-
-                <div class="tutorial-step">
-
-                    <div class="step-number">8</div>
-
-                    <div class="step-content">
-
-                        <h3>
-                            Consulta tu Balance
-                        </h3>
-
-                        <p>
-                            Balance muestra el saldo disponible
-                            asociado a tu cuenta y los indicadores
-                            de actividad disponibles.
-                        </p>
-
-                    </div>
-
-                </div>
-
-
-                <div class="tutorial-step">
-
-                    <div class="step-number">9</div>
-
-                    <div class="step-content">
-
-                        <h3>
-                            Revisa movimientos
-                        </h3>
-
-                        <p>
-                            Los movimientos relacionados con el
-                            balance aparecerán en esta sección
-                            cuando existan registros disponibles.
-                        </p>
-
-                    </div>
-
-                </div>
-
-
-                <div class="tutorial-step">
-
-                    <div class="step-number">10</div>
-
-                    <div class="step-content">
-
-                        <h3>
-                            Utiliza Referidos
-                        </h3>
-
-                        <p>
-                            Referidos será el espacio para consultar
-                            tu enlace y la actividad relacionada
-                            cuando la función esté conectada.
-                        </p>
-
-                    </div>
-
-                </div>
-
-
-                <div class="tutorial-step">
-
-                    <div class="step-number">11</div>
-
-                    <div class="step-content">
-
-                        <h3>
-                            Administra tu perfil
-                        </h3>
-
-                        <p>
-                            Mi perfil muestra tus datos de cuenta
-                            y permite acceder a configuración,
-                            notificaciones y privacidad.
-                        </p>
-
-                    </div>
-
-                </div>
-
-
-                <div class="tutorial-step">
-
-                    <div class="step-number">12</div>
-
-                    <div class="step-content">
-
-                        <h3>
-                            Cerrar sesión
-                        </h3>
-
-                        <p>
-                            Abre el menú y utiliza Cerrar sesión.
-                            La sesión se revoca en el servidor,
-                            se elimina el token local y vuelves
-                            a la pantalla de acceso.
-                        </p>
-
-                    </div>
-
-                </div>
-
-
-                <div class="tutorial-note">
-                    💡 El botón ☰ de la esquina superior derecha
-                    abre el menú completo. Desde ahí puedes acceder
-                    a todas las secciones de la aplicación.
-                </div>
-
-            </div>
-
-
-            <div class="glass-card">
-
-                <div class="page-eyebrow">
-                    ESTRUCTURA
-                </div>
-
-                <div class="tutorial-mini-title">
-                    CHAT
-                </div>
-
-                <p class="tutorial-intro">
-                    Iniciar y gestionar solicitudes desde
-                    una conversación sencilla.
-                </p>
-
-                <div class="tutorial-mini-title">
-                    BALANCE
-                </div>
-
-                <p class="tutorial-intro">
-                    Consultar saldo, actividad y futuras
-                    funciones relacionadas con retiros.
-                </p>
-
-                <div class="tutorial-mini-title">
-                    MENÚ
-                </div>
-
-                <p class="tutorial-intro">
-                    Acceder a todas las funciones adicionales
-                    de la aplicación.
-                </p>
-
-            </div>
-
-        </section>
-
-
-        <!-- =====================================================
-             REFERIDOS
-        ====================================================== -->
-
-        <section
-            class="view"
-            id="referralsView"
-        >
-
-            <div class="page-header">
-
-                <div class="page-eyebrow">
-                    INVITACIONES
-                </div>
-
-                <h2 class="page-title">
-                    Referidos
-                </h2>
-
-                <p class="page-subtitle">
-                    Consulta tus referidos y tu enlace
-                    personal.
-                </p>
-
-            </div>
-
-
-            <div class="glass-card">
-
-                <div class="stats-grid">
-
-                    <div class="stat">
-
-                        <div class="stat-label">
-                            REFERIDOS
-                        </div>
-
-                        <div class="stat-value">
-                            0
-                        </div>
-
-                    </div>
-
-
-                    <div class="stat">
-
-                        <div class="stat-label">
-                            GANADO
-                        </div>
-
-                        <div class="stat-value">
-                            0.00
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-                <div class="page-eyebrow">
-                    TU ENLACE
-                </div>
-
-                <div
-                    class="referral-link"
-                    id="referralLink"
-                >
-                    próximamente
-                </div>
-
-                <button
-                    class="copy-button"
-                    id="copyReferral"
-                >
-                    COPIAR ENLACE
-                </button>
-
-            </div>
-
-
-            <div class="glass-card">
-
-                <div class="page-eyebrow">
-                    INFORMACIÓN
-                </div>
-
-                <p
-                    style="
-                        color:#777;
-                        font-size:11px;
-                        line-height:1.6;
-                    "
-                >
-                    Tu sistema de referidos mostrará
-                    aquí los registros correspondientes
-                    cuando la función esté conectada.
-                </p>
-
-            </div>
-
-        </section>
-
-
-        <!-- =====================================================
-             HISTORIAL / MIS CUENTAS
-        ====================================================== -->
-
-        <section
-            class="view"
-            id="historyView"
-        >
-
-            <div class="page-header">
-
-                <div class="page-eyebrow">
-                    ACTIVIDAD
-                </div>
-
-                <h2 class="page-title">
-                    Mis cuentas
-                </h2>
-
-                <p class="page-subtitle">
-                    Aquí aparecerán las solicitudes
-                    que hayas enviado.
-                </p>
-
-            </div>
-
-
-            <div class="glass-card">
-
-                <div id="historyList">
-
-                    <div class="empty">
-
-                        <div class="empty-icon">
-                            ◌
-                        </div>
-
-                        <div class="empty-title">
-                            Todavía no hay solicitudes
-                        </div>
-
-                        <div class="empty-text">
-                            Cuando envíes una solicitud
-                            aparecerá aquí su estado.
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </section>
-
-
-        <!-- =====================================================
-             PERFIL
-        ====================================================== -->
-
-        <section
-            class="view"
-            id="profileView"
-        >
-
-            <div class="page-header">
-
-                <div class="page-eyebrow">
-                    CUENTA
-                </div>
-
-                <h2 class="page-title">
-                    Mi perfil
-                </h2>
-
-                <p class="page-subtitle">
-                    Consulta tu información y administra
-                    tus preferencias.
-                </p>
-
-            </div>
-
-
-            <div class="glass-card">
-
-                <div class="profile-head">
-
-                    <div
-                        class="profile-avatar"
-                        id="profileAvatar"
-                    >
-                        M
-                    </div>
-
-                    <div>
-
-                        <div
-                            class="profile-name"
-                            id="profileName"
-                        >
-                            Usuario
-                        </div>
-
-                        <div
-                            class="profile-email"
-                            id="profileEmail"
-                        >
-                            usuario@email.com
-                        </div>
-
-                        <div
-                            class="profile-id"
-                            id="profileId"
-                        >
-                            ID no disponible
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-                <button
-                    class="profile-option"
-                    id="editProfile"
-                >
-
-                    <span>
-                        Editar perfil
-                    </span>
-
-                    <span>
-                        ›
-                    </span>
-
-                </button>
-
-
-                <button
-                    class="profile-option"
-                    id="accountSettings"
-                >
-
-                    <span>
-                        Configuración de cuenta
-                    </span>
-
-                    <span>
-                        ›
-                    </span>
-
-                </button>
-
-
-                <button
-                    class="profile-option"
-                    id="notificationsSettings"
-                >
-
-                    <span>
+        openModal(
+            "Notificaciones",
+            `
+            <div class="setting-row">
+                <div class="setting-info">
+                    <div class="setting-title">
                         Notificaciones
-                    </span>
-
-                    <span>
-                        ›
-                    </span>
-
-                </button>
-
-
-                <button
-                    class="profile-option"
-                    id="privacySettings"
-                >
-
-                    <span>
-                        Privacidad
-                    </span>
-
-                    <span>
-                        ›
-                    </span>
-
-                </button>
-
-            </div>
-
-
-            <div class="glass-card">
-
-                <div class="page-eyebrow">
-                    ESTADO
-                </div>
-
-                <div class="setting-row">
-
-                    <div class="setting-info">
-
-                        <div class="setting-title">
-                            Sesión
-                        </div>
-
-                        <div class="setting-description">
-                            Tu sesión actual está protegida
-                            por el sistema de autenticación.
-                        </div>
-
                     </div>
-
-                    <div
-                        class="status approved"
-                        id="sessionStatus"
-                    >
-                        Activa
+                    <div class="setting-description">
+                        Mostrar avisos de la aplicación.
                     </div>
-
-                </div>
-
-            </div>
-
-        </section>
-
-    </main>
-
-
-    <!-- =========================================================
-         MENU
-    ========================================================== -->
-
-    <div
-        class="menu-overlay"
-        id="menuOverlay"
-        aria-hidden="true"
-    >
-
-        <aside
-            class="menu-panel"
-            aria-label="Menú principal"
-        >
-
-            <div class="menu-top">
-
-                <div class="menu-title">
-                    Menú
                 </div>
 
                 <button
-                    class="menu-close"
-                    id="menuClose"
-                    aria-label="Cerrar menú"
-                >
-                    ×
+                    class="toggle ${getSetting("notifications") ? "active" : ""}"
+                    id="notificationsToggle">
                 </button>
-
             </div>
 
-
-            <div class="menu-section-title">
-                PRINCIPAL
-            </div>
-
-
-            <button
-                class="menu-item"
-                data-menu-view="chatView"
-            >
-
-                <span class="menu-icon">
-                    ◉
-                </span>
-
-                Chat
-
-            </button>
-
-
-            <button
-                class="menu-item"
-                data-menu-view="balanceView"
-            >
-
-                <span class="menu-icon">
-                    ◇
-                </span>
-
-                Balance
-
-            </button>
-
-
-            <button
-                class="menu-item"
-                data-menu-view="tutorialView"
-            >
-
-                <span class="menu-icon">
-                    ?
-                </span>
-
-                Tutorial
-
-            </button>
-
-
-            <div class="menu-section-title">
-                ACTIVIDAD
-            </div>
-
-
-            <button
-                class="menu-item"
-                data-menu-view="historyView"
-            >
-
-                <span class="menu-icon">
-                    ≡
-                </span>
-
-                Mis cuentas
-
-            </button>
-
-
-            <button
-                class="menu-item"
-                data-menu-view="referralsView"
-            >
-
-                <span class="menu-icon">
-                    ♧
-                </span>
-
-                Referidos
-
-            </button>
-
-
-            <div class="menu-section-title">
-                CUENTA
-            </div>
-
-
-            <button
-                class="menu-item"
-                data-menu-view="profileView"
-            >
-
-                <span class="menu-icon">
-                    ●
-                </span>
-
-                Mi perfil
-
-            </button>
-
-
-            <div class="menu-spacer"></div>
-
-
-            <button
-                class="menu-item menu-logout"
-                id="menuLogoutButton"
-            >
-
-                <span class="menu-icon">
-                    ↗
-                </span>
-
-                Cerrar sesión
-
-            </button>
-
-        </aside>
-
-    </div>
-
-
-    <!-- =========================================================
-         SETTINGS MODAL
-    ========================================================== -->
-
-    <div
-        class="modal-overlay"
-        id="settingsModal"
-    >
-
-        <div
-            class="modal"
-            role="dialog"
-            aria-modal="true"
-        >
-
-            <div class="modal-head">
-
-                <div
-                    class="modal-title"
-                    id="modalTitle"
-                >
-                    Configuración
+            <div class="setting-row">
+                <div class="setting-info">
+                    <div class="setting-title">
+                        Actividad
+                    </div>
+                    <div class="setting-description">
+                        Avisos relacionados con solicitudes.
+                    </div>
                 </div>
 
                 <button
-                    class="modal-close"
-                    id="modalClose"
-                    aria-label="Cerrar"
-                >
-                    ×
+                    class="toggle ${getSetting("activityNotifications") ? "active" : ""}"
+                    id="activityToggle">
                 </button>
-
             </div>
+            `
+        );
+
+        document.getElementById("notificationsToggle")
+            .addEventListener("click",event=>{
+
+                toggleSetting("notifications");
+                event.currentTarget.classList.toggle("active");
+
+            });
+
+        document.getElementById("activityToggle")
+            .addEventListener("click",event=>{
+
+                toggleSetting("activityNotifications");
+                event.currentTarget.classList.toggle("active");
+
+            });
+
+    });
 
 
-            <div id="modalContent"></div>
+document.getElementById("privacySettings")
+    .addEventListener("click",()=>{
 
-        </div>
+        openModal(
+            "Privacidad",
+            `
+            <div class="setting-row">
+                <div class="setting-info">
+                    <div class="setting-title">
+                        Modo privado
+                    </div>
+                    <div class="setting-description">
+                        Preferencia local para proteger información
+                        mostrada dentro de la interfaz.
+                    </div>
+                </div>
 
-    </div>
+                <button
+                    class="toggle ${getSetting("privacyMode") ? "active" : ""}"
+                    id="privacyToggle">
+                </button>
+            </div>
+            `
+        );
 
+        document.getElementById("privacyToggle")
+            .addEventListener("click",event=>{
 
-    <!-- =========================================================
-         TOAST
-    ========================================================== -->
+                toggleSetting("privacyMode");
+                event.currentTarget.classList.toggle("active");
 
-    <div
-        class="toast"
-        id="toast"
-    ></div>
+            });
 
-
-    <!-- =========================================================
-         JAVASCRIPT
-    ========================================================== -->
-
-    <script>
-
-        /* =====================================================
-           SESSION
-        ====================================================== */
-
-        const SESSION_KEY =
-            "gmailaccounts_session";
-
-
-        /* =====================================================
-           LOCAL SETTINGS
-        ====================================================== */
-
-        const SETTINGS_KEY =
-            "gmailaccounts_settings";
+    });
 
 
-        const defaultSettings = {
+/* =========================================================
+   LOCAL SETTINGS
+========================================================= */
 
-            notifications: true,
+const SETTINGS_KEY = "gmailaccounts_settings";
 
-            activityNotifications: true,
+const defaultSettings = {
+    notifications:true,
+    activityNotifications:true,
+    privacyMode:true
+};
 
-            privacyMode: true
+function getSettings(){
 
+    try{
+
+        return {
+            ...defaultSettings,
+            ...JSON.parse(
+                localStorage.getItem(SETTINGS_KEY) || "{}"
+            )
         };
 
+    }catch{
 
-        function getSettings() {
+        return {...defaultSettings};
 
-            try {
+    }
 
-                const saved =
-                    JSON.parse(
-                        localStorage.getItem(
-                            SETTINGS_KEY
-                        ) || "{}"
-                    );
+}
+
+let settings = getSettings();
+
+function saveSettings(){
+
+    localStorage.setItem(
+        SETTINGS_KEY,
+        JSON.stringify(settings)
+    );
+
+}
+
+function getSetting(name){
+
+    return !!settings[name];
+
+}
+
+function toggleSetting(name){
+
+    settings[name] = !settings[name];
+
+    saveSettings();
+
+    showToast(
+        settings[name]
+        ? "Opción activada"
+        : "Opción desactivada"
+    );
+
+}
 
 
-                return {
-                    ...defaultSettings,
-                    ...saved
-                };
+/* =========================================================
+   BUTTONS
+========================================================= */
 
-            } catch {
+document.getElementById("withdrawButton")
+    .addEventListener("click",()=>{
 
-                return {
-                    ...defaultSettings
-                };
+        showToast("La función de retiro todavía no está conectada.");
 
-            }
+    });
 
-        }
+document.getElementById("transactionsButton")
+    .addEventListener("click",()=>{
+
+        showView("historyView");
+
+    });
+
+document.getElementById("copyReferral")
+    .addEventListener("click",()=>{
+
+        showToast("El enlace de referidos estará disponible próximamente.");
+
+    });
 
 
-        let settings =
-            getSettings();
+/* =========================================================
+   LOGOUT
+========================================================= */
 
+async function logout(){
 
-        function saveSettings() {
+    const token =
+        localStorage.getItem(SESSION_KEY);
 
-            localStorage.setItem(
-                SETTINGS_KEY,
-                JSON.stringify(settings)
+    try{
+
+        if(token){
+
+            await fetch(
+                "/api/auth/logout",
+                {
+                    method:"POST",
+                    headers:{
+                        "Authorization":
+                            "Bearer " + token
+                    }
+                }
             );
 
         }
 
+    }catch{}
 
-        /* =====================================================
-           STATE
-        ====================================================== */
+    localStorage.removeItem(SESSION_KEY);
 
-        const state = {
+    window.location.replace("index.html");
 
-            started: false,
+}
 
-            requests: [],
+document.getElementById("menuLogoutButton")
+    .addEventListener("click",logout);
 
-            balance: 0,
 
-            user: {
+/* =========================================================
+   HTML ESCAPE
+========================================================= */
 
-                id: "",
+function escapeHTML(value){
 
-                username: "Usuario",
+    return String(value)
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
 
-                email: "usuario@email.com",
+}
 
-                role: "user"
 
-            }
+/* =========================================================
+   AUTHENTICATION
+   SILENCIOSA
+========================================================= */
 
+async function checkSession(){
+
+    const token =
+        localStorage.getItem(SESSION_KEY);
+
+    if(!token){
+
+        window.location.replace("index.html");
+        return false;
+
+    }
+
+    try{
+
+        const response =
+            await fetch(
+                "/api/auth/me",
+                {
+                    method:"GET",
+                    headers:{
+                        "Authorization":
+                            "Bearer " + token
+                    },
+                    cache:"no-store"
+                }
+            );
+
+        if(!response.ok){
+
+            localStorage.removeItem(SESSION_KEY);
+
+            window.location.replace("index.html");
+
+            return false;
+
+        }
+
+        const data =
+            await response.json();
+
+        if(!data.user){
+
+            localStorage.removeItem(SESSION_KEY);
+
+            window.location.replace("index.html");
+
+            return false;
+
+        }
+
+        state.user = {
+            id:data.user.id || "",
+            username:data.user.username || "Usuario",
+            email:data.user.email || "usuario@email.com",
+            role:data.user.role || "user"
         };
 
+        state.balance =
+            Number(data.user.balance || 0);
 
-        /* =====================================================
-           ELEMENTS
-        ====================================================== */
+        renderProfile();
+        loadRequests();
+        renderStats();
 
-        const views =
-            document.querySelectorAll(".view");
+        return true;
 
+    }catch(error){
 
-        const menuOverlay =
-            document.getElementById(
-                "menuOverlay"
-            );
+        console.error(
+            "Error comprobando sesión:",
+            error
+        );
 
+        localStorage.removeItem(SESSION_KEY);
 
-        const menuButton =
-            document.getElementById(
-                "menuButton"
-            );
+        window.location.replace("index.html");
 
+        return false;
 
-        const menuClose =
-            document.getElementById(
-                "menuClose"
-            );
+    }
 
-
-        const startButton =
-            document.getElementById(
-                "startButton"
-            );
+}
 
 
-        const chatForm =
-            document.getElementById(
-                "chatForm"
-            );
+/* =========================================================
+   START
+   NO LOADING SCREEN
+========================================================= */
+
+document.addEventListener("keydown",event=>{
+
+    if(event.key === "Escape"){
+
+        closeMenu();
+        closeModal();
+
+    }
+
+});
 
 
-        const chatInput =
-            document.getElementById(
-                "chatInput"
-            );
+/*
+    IMPORTANTE:
 
+    La comprobación ocurre aquí, pero NO existe ninguna
+    pantalla "Comprobando sesión".
 
-        const chatScroll =
-            document.getElementById(
-                "chatScroll"
-            );
+    Mientras se realiza la petición, el navegador mantiene
+    la página cargando internamente. Si la sesión es válida,
+    el usuario permanece directamente en Chat.
+*/
 
+checkSession();
+</script>
 
-        const settingsModal =
-            document.getElementById(
-                "settingsModal"
-            );
+</div>
 
-
-        const modalTitle =
-            document.getElementById(
-                "modalTitle"
-            );
-
-
-        const modalContent =
-            document.getElementById(
-                "modalContent"
-            );
-
-
-        const toast =
-            document.getElementById(
-                "toast"
-            );
-
-
-        const authLoading =
-            document.getElementById(
-                "authLoading"
-            );
-
-
-        /* =====================================================
-           REQUEST STORAGE
-        ====================================================== */
-
-        function getRequestStorageKey() {
-
-            if (!state.user.id) {
-                return null;
-            }
-
-            return (
-                "gmailaccounts_requests_" +
-                state.user.id
-            );
-
-        }
-
-
-        function loadLocalRequests() {
-
-            const key =
-                getRequestStorageKey();
-
-
-            if (!key) {
-                return;
-            }
-
-
-            try {
-
-                const saved =
-                    JSON.parse(
-                        localStorage.getItem(
-                            key
-                        ) || "[]"
-                    );
-
-
-                if (Array.isArray(saved)) {
+</body>
+    </html>
