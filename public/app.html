@@ -399,7 +399,8 @@
 
             padding: 13px 15px;
 
-            border-radius: 18px;
+            /* Ligeramente más redondeado */
+            border-radius: 21px;
 
             border: 1px solid var(--border);
 
@@ -422,7 +423,7 @@
                     rgba(255,255,255,.025)
                 );
 
-            border-bottom-left-radius: 7px;
+            border-bottom-left-radius: 9px;
         }
 
 
@@ -433,7 +434,7 @@
             border-color:
                 rgba(255,255,255,.12);
 
-            border-bottom-right-radius: 7px;
+            border-bottom-right-radius: 9px;
         }
 
 
@@ -1330,7 +1331,7 @@
 
         /* =========================================================
            BOTTOM NAVIGATION
-        ========================================================= */
+        ========================================================== */
 
         .bottom-nav {
             position: fixed;
@@ -1524,7 +1525,7 @@
 
     <!-- =========================================================
          MAIN
-    ========================================================== -->
+    ========================================================= -->
 
     <main class="main">
 
@@ -2421,6 +2422,14 @@
     <script>
 
         /* =====================================================
+           SESSION
+        ====================================================== */
+
+        const SESSION_KEY =
+            "gmailaccounts_session";
+
+
+        /* =====================================================
            STATE
         ====================================================== */
 
@@ -2433,8 +2442,15 @@
             balance: 0,
 
             user: {
+
+                id: "",
+
                 username: "Usuario",
-                email: "usuario@email.com"
+
+                email: "usuario@email.com",
+
+                role: "user"
+
             }
 
         };
@@ -2470,6 +2486,178 @@
 
         const chatScroll =
             document.getElementById("chatScroll");
+
+
+        /* =====================================================
+           API REQUEST
+        ====================================================== */
+
+        async function apiRequest(
+            url,
+            options = {}
+        ) {
+
+            const token =
+                localStorage.getItem(
+                    SESSION_KEY
+                );
+
+
+            const headers = {
+                ...(options.headers || {})
+            };
+
+
+            if (
+                !headers["Content-Type"] &&
+                options.body
+            ) {
+
+                headers["Content-Type"] =
+                    "application/json";
+
+            }
+
+
+            if (token) {
+
+                headers["Authorization"] =
+                    "Bearer " + token;
+
+            }
+
+
+            return fetch(
+                url,
+                {
+                    ...options,
+                    headers
+                }
+            );
+
+        }
+
+
+        /* =====================================================
+           LOAD CURRENT USER
+        ====================================================== */
+
+        async function loadCurrentUser() {
+
+            const token =
+                localStorage.getItem(
+                    SESSION_KEY
+                );
+
+
+            if (!token) {
+
+                window.location.href =
+                    "index.html";
+
+                return false;
+
+            }
+
+
+            try {
+
+                const response =
+                    await apiRequest(
+                        "/api/auth/me"
+                    );
+
+
+                if (!response.ok) {
+
+                    localStorage.removeItem(
+                        SESSION_KEY
+                    );
+
+                    window.location.href =
+                        "index.html";
+
+                    return false;
+
+                }
+
+
+                const data =
+                    await response.json();
+
+
+                if (
+                    !data.success ||
+                    !data.user
+                ) {
+
+                    localStorage.removeItem(
+                        SESSION_KEY
+                    );
+
+                    window.location.href =
+                        "index.html";
+
+                    return false;
+
+                }
+
+
+                state.user = {
+
+                    id:
+                        data.user.id || "",
+
+                    username:
+                        data.user.username ||
+                        "Usuario",
+
+                    email:
+                        data.user.email ||
+                        "usuario@email.com",
+
+                    role:
+                        data.user.role ||
+                        "user"
+
+                };
+
+
+                state.balance =
+                    Number(
+                        data.user.balance || 0
+                    );
+
+
+                renderProfile();
+
+                updateStats();
+
+
+                return true;
+
+            } catch (error) {
+
+                console.error(
+                    "Error comprobando la sesión:",
+                    error
+                );
+
+
+                localStorage.removeItem(
+                    SESSION_KEY
+                );
+
+
+                window.location.href =
+                    "index.html";
+
+
+                return false;
+
+            }
+
+        }
 
 
         /* =====================================================
@@ -2513,7 +2701,9 @@
                 "click",
                 function() {
 
-                    showView(item.dataset.view);
+                    showView(
+                        item.dataset.view
+                    );
 
                 }
             );
@@ -2739,7 +2929,7 @@
 
 
                 const emailPattern =
-                    /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;
+                    /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 
                 if (!emailPattern.test(value)) {
@@ -2950,7 +3140,9 @@
             document.querySelector(
                 ".balance-value"
             ).innerHTML =
-                state.balance.toFixed(2) +
+                Number(
+                    state.balance || 0
+                ).toFixed(2) +
                 `
                 <span class="balance-currency">
                     USDT
@@ -3010,9 +3202,6 @@
                     .toUpperCase();
 
         }
-
-
-        renderProfile();
 
 
         /* =====================================================
@@ -3097,12 +3286,38 @@
             .getElementById("logoutButton")
             .addEventListener(
                 "click",
-                function() {
+                async function() {
 
-                    /*
-                     * La sesión real se conectará
-                     * posteriormente con nuestro Worker.
-                     */
+                    const button =
+                        this;
+
+
+                    button.disabled = true;
+
+
+                    try {
+
+                        await apiRequest(
+                            "/api/auth/logout",
+                            {
+                                method: "POST"
+                            }
+                        );
+
+                    } catch (error) {
+
+                        console.error(
+                            "Error cerrando sesión:",
+                            error
+                        );
+
+                    }
+
+
+                    localStorage.removeItem(
+                        SESSION_KEY
+                    );
+
 
                     window.location.href =
                         "index.html";
@@ -3212,11 +3427,27 @@
            INITIALIZE
         ====================================================== */
 
-        updateStats();
+        async function initializeApp() {
 
-        renderHistory();
+            const authenticated =
+                await loadCurrentUser();
 
-        renderProfile();
+
+            if (!authenticated) {
+                return;
+            }
+
+
+            updateStats();
+
+            renderHistory();
+
+            renderProfile();
+
+        }
+
+
+        initializeApp();
 
     </script>
 
