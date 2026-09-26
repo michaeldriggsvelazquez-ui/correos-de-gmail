@@ -1,649 +1,914 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  />
+    <meta charset="UTF-8">
 
-  <title>Gmail Accounts</title>
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-  <meta
-    name="description"
-    content="Gmail Accounts - Sistema privado"
-  />
+    <title>GmailAccounts</title>
 
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    <meta
+        name="description"
+        content="GmailAccounts - Acceso a tu cuenta"
+    >
 
-    html {
-      scroll-behavior: smooth;
-    }
+    <style>
 
-    body {
-      min-height: 100vh;
-      background: #050505;
-      color: #ffffff;
-      font-family:
-        Inter,
-        -apple-system,
-        BlinkMacSystemFont,
-        "Segoe UI",
-        sans-serif;
-      overflow-x: hidden;
-    }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
-    button,
-    input {
-      font: inherit;
-    }
+        :root {
+            --background: #050505;
+            --surface: #0d0d0d;
+            --surface-hover: #151515;
+            --border: rgba(255, 255, 255, 0.10);
+            --border-focus: rgba(255, 255, 255, 0.22);
+            --text: #f5f5f5;
+            --secondary: #999;
+            --muted: #666;
+            --button: #f2f2f2;
+            --button-text: #080808;
+        }
 
-    button {
-      cursor: pointer;
-    }
+        html,
+        body {
+            width: 100%;
+            min-height: 100%;
+            background: var(--background);
+            color: var(--text);
+            font-family:
+                Inter,
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                Roboto,
+                Helvetica,
+                Arial,
+                sans-serif;
+        }
 
-    .page {
-      min-height: 100vh;
-      background:
-        radial-gradient(
-          circle at 50% 20%,
-          rgba(255, 255, 255, 0.055),
-          transparent 32%
-        ),
-        #050505;
-    }
+        body {
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
 
-    /* =========================
-       WELCOME
-    ========================= */
+        button,
+        input {
+            font: inherit;
+        }
 
-    .welcome {
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 32px 22px;
-      position: relative;
-    }
+        button {
+            cursor: pointer;
+        }
 
-    .welcome-content {
-      width: 100%;
-      max-width: 560px;
-      text-align: center;
-      animation: welcomeIn 0.8s ease forwards;
-    }
 
-    .brand {
-      font-size: clamp(38px, 11vw, 72px);
-      font-weight: 800;
-      letter-spacing: -3px;
-      line-height: 0.95;
-      margin-bottom: 22px;
-    }
+        /* =========================================
+           MAIN
+        ========================================= */
 
-    .brand span {
-      color: #8b8b8b;
-    }
+        .page {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px 18px;
 
-    .description {
-      max-width: 430px;
-      margin: 0 auto;
-      color: #a1a1a1;
-      font-size: 16px;
-      line-height: 1.7;
-    }
+            background:
+                radial-gradient(
+                    circle at 50% 0%,
+                    rgba(255,255,255,0.045),
+                    transparent 34%
+                ),
+                #050505;
+        }
 
-    .scroll-indicator {
-      position: absolute;
-      bottom: 34px;
-      left: 50%;
-      transform: translateX(-50%);
-      color: #777;
-      font-size: 13px;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-      animation: pulse 2s infinite;
-    }
 
-    .scroll-arrow {
-      display: block;
-      margin-top: 10px;
-      font-size: 20px;
-    }
+        .container {
+            width: 100%;
+            max-width: 390px;
+            animation: pageIn 0.55s ease;
+        }
 
-    /* =========================
-       AUTH
-    ========================= */
 
-    .auth-section {
-      min-height: 100vh;
-      padding: 80px 22px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
+        /* =========================================
+           BRAND
+        ========================================= */
 
-    .auth-container {
-      width: 100%;
-      max-width: 430px;
-    }
+        .brand {
+            text-align: center;
+            margin-bottom: 34px;
+        }
 
-    .auth-header {
-      margin-bottom: 28px;
-    }
 
-    .auth-header h2 {
-      font-size: 32px;
-      letter-spacing: -1.2px;
-      margin-bottom: 8px;
-    }
+        .logo {
+            width: 58px;
+            height: 58px;
 
-    .auth-header p {
-      color: #858585;
-      line-height: 1.6;
-      font-size: 14px;
-    }
+            margin: 0 auto 17px;
 
-    .auth-card {
-      border: 1px solid #1d1d1d;
-      background: #0a0a0a;
-      border-radius: 22px;
-      padding: 24px;
-      box-shadow:
-        0 20px 70px rgba(0, 0, 0, 0.45);
-    }
+            border-radius: 18px;
 
-    .tabs {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 5px;
-      background: #111111;
-      border-radius: 12px;
-      padding: 4px;
-      margin-bottom: 24px;
-    }
+            display: flex;
+            align-items: center;
+            justify-content: center;
 
-    .tab {
-      border: 0;
-      border-radius: 9px;
-      background: transparent;
-      color: #777;
-      padding: 11px;
-      transition: 0.2s ease;
-    }
+            background: #ffffff;
 
-    .tab.active {
-      background: #202020;
-      color: #fff;
-    }
+            box-shadow:
+                0 10px 40px rgba(0,0,0,0.35);
+        }
 
-    .form {
-      display: none;
-    }
 
-    .form.active {
-      display: block;
-      animation: formIn 0.25s ease;
-    }
+        /*
+         * Logo de Google simplificado.
+         * No depende de una imagen externa.
+         */
 
-    .field {
-      margin-bottom: 17px;
-    }
+        .google-logo {
+            position: relative;
 
-    .field label {
-      display: block;
-      margin-bottom: 8px;
-      color: #b7b7b7;
-      font-size: 13px;
-    }
+            width: 28px;
+            height: 28px;
 
-    .field input {
-      width: 100%;
-      border: 1px solid #242424;
-      background: #111111;
-      color: #fff;
-      border-radius: 12px;
-      padding: 14px 15px;
-      outline: none;
-      transition: border-color 0.2s ease;
-    }
+            border-radius: 50%;
 
-    .field input:focus {
-      border-color: #555;
-    }
+            background:
+                conic-gradient(
+                    from -45deg,
+                    #4285f4 0deg 90deg,
+                    #34a853 90deg 180deg,
+                    #fbbc05 180deg 270deg,
+                    #ea4335 270deg 360deg
+                );
+        }
 
-    .submit-button {
-      width: 100%;
-      border: 0;
-      border-radius: 12px;
-      background: #ffffff;
-      color: #050505;
-      padding: 14px;
-      font-weight: 700;
-      margin-top: 4px;
-      transition:
-        transform 0.2s ease,
-        opacity 0.2s ease;
-    }
 
-    .submit-button:hover {
-      transform: translateY(-1px);
-    }
+        .google-logo::before {
+            content: "";
 
-    .submit-button:active {
-      transform: translateY(0);
-    }
+            position: absolute;
 
-    .message {
-      display: none;
-      margin-top: 15px;
-      padding: 12px 14px;
-      border-radius: 10px;
-      background: #151515;
-      color: #aaa;
-      font-size: 13px;
-      line-height: 1.5;
-    }
+            inset: 6px;
 
-    .message.show {
-      display: block;
-    }
+            background: #fff;
 
-    .auth-note {
-      text-align: center;
-      margin-top: 18px;
-      color: #5e5e5e;
-      font-size: 12px;
-      line-height: 1.5;
-    }
+            border-radius: 50%;
+        }
 
-    @keyframes welcomeIn {
-      from {
-        opacity: 0;
-        transform: translateY(18px);
-      }
 
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
+        .google-logo::after {
+            content: "";
 
-    @keyframes formIn {
-      from {
-        opacity: 0;
-        transform: translateY(5px);
-      }
+            position: absolute;
 
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
+            width: 13px;
+            height: 6px;
 
-    @keyframes pulse {
-      0%,
-      100% {
-        opacity: 0.45;
-      }
+            right: 1px;
+            top: 11px;
 
-      50% {
-        opacity: 1;
-      }
-    }
+            background: #4285f4;
 
-    @media (max-width: 480px) {
-      .welcome {
-        padding: 24px 18px;
-      }
+            border-radius: 0 4px 4px 0;
+        }
 
-      .brand {
-        letter-spacing: -2px;
-      }
 
-      .auth-section {
-        padding: 60px 18px;
-      }
+        .brand-title {
+            font-size: 29px;
+            line-height: 1;
 
-      .auth-card {
-        padding: 18px;
-        border-radius: 18px;
-      }
-    }
-  </style>
+            font-weight: 700;
+
+            letter-spacing: -1.1px;
+        }
+
+
+        .brand-title span {
+            color: #888;
+        }
+
+
+        .brand-subtitle {
+            margin-top: 9px;
+
+            color: var(--secondary);
+
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+
+        /* =========================================
+           AUTH CARD
+        ========================================= */
+
+        .auth-card {
+            width: 100%;
+
+            padding: 23px;
+
+            border: 1px solid var(--border);
+
+            border-radius: 23px;
+
+            background:
+                linear-gradient(
+                    145deg,
+                    rgba(255,255,255,0.045),
+                    rgba(255,255,255,0.015)
+                );
+
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+
+            box-shadow:
+                0 30px 80px rgba(0,0,0,0.35);
+        }
+
+
+        /* =========================================
+           TABS
+        ========================================= */
+
+        .tabs {
+            display: grid;
+
+            grid-template-columns: 1fr 1fr;
+
+            gap: 4px;
+
+            padding: 4px;
+
+            margin-bottom: 25px;
+
+            background: #0a0a0a;
+
+            border: 1px solid rgba(255,255,255,0.055);
+
+            border-radius: 13px;
+        }
+
+
+        .tab {
+            height: 40px;
+
+            border: 0;
+
+            border-radius: 9px;
+
+            background: transparent;
+
+            color: #707070;
+
+            font-size: 12px;
+            font-weight: 600;
+
+            transition:
+                color 0.2s ease,
+                background 0.2s ease;
+        }
+
+
+        .tab.active {
+            background: #1b1b1b;
+
+            color: #f5f5f5;
+
+            box-shadow:
+                0 2px 8px rgba(0,0,0,0.25);
+        }
+
+
+        /* =========================================
+           FORMS
+        ========================================= */
+
+        .form {
+            display: none;
+        }
+
+
+        .form.active {
+            display: block;
+
+            animation: formIn 0.25s ease;
+        }
+
+
+        .form-title {
+            margin-bottom: 5px;
+
+            font-size: 19px;
+            font-weight: 700;
+
+            letter-spacing: -0.4px;
+        }
+
+
+        .form-description {
+            margin-bottom: 22px;
+
+            color: var(--secondary);
+
+            font-size: 12px;
+
+            line-height: 1.55;
+        }
+
+
+        /* =========================================
+           INPUTS
+        ========================================= */
+
+        .field {
+            margin-bottom: 14px;
+        }
+
+
+        .field label {
+            display: block;
+
+            margin-bottom: 7px;
+
+            color: #bcbcbc;
+
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+
+        .input {
+            width: 100%;
+
+            height: 48px;
+
+            padding: 0 14px;
+
+            border: 1px solid var(--border);
+
+            border-radius: 12px;
+
+            outline: none;
+
+            background:
+                rgba(255,255,255,0.035);
+
+            color: #fff;
+
+            font-size: 13px;
+
+            transition:
+                border-color 0.2s ease,
+                background 0.2s ease,
+                box-shadow 0.2s ease;
+        }
+
+
+        .input::placeholder {
+            color: #555;
+        }
+
+
+        .input:focus {
+            border-color: var(--border-focus);
+
+            background:
+                rgba(255,255,255,0.055);
+
+            box-shadow:
+                0 0 0 3px rgba(255,255,255,0.025);
+        }
+
+
+        /* =========================================
+           SUBMIT
+        ========================================= */
+
+        .submit-button {
+            width: 100%;
+
+            height: 48px;
+
+            margin-top: 7px;
+
+            border: 0;
+
+            border-radius: 13px;
+
+            background: var(--button);
+
+            color: var(--button-text);
+
+            font-size: 12px;
+            font-weight: 800;
+
+            letter-spacing: 0.4px;
+
+            transition:
+                transform 0.15s ease,
+                opacity 0.2s ease;
+        }
+
+
+        .submit-button:hover {
+            opacity: 0.92;
+        }
+
+
+        .submit-button:active {
+            transform: scale(0.985);
+        }
+
+
+        /* =========================================
+           MESSAGE
+        ========================================= */
+
+        .message {
+            display: none;
+
+            margin-top: 13px;
+
+            padding: 11px 13px;
+
+            border-radius: 11px;
+
+            background: rgba(255,255,255,0.045);
+
+            border: 1px solid var(--border);
+
+            color: #999;
+
+            font-size: 11px;
+
+            line-height: 1.5;
+        }
+
+
+        .message.show {
+            display: block;
+        }
+
+
+        /* =========================================
+           FOOTER
+        ========================================= */
+
+        .footer {
+            margin-top: 20px;
+
+            text-align: center;
+
+            color: #4f4f4f;
+
+            font-size: 10px;
+
+            line-height: 1.5;
+        }
+
+
+        /* =========================================
+           ANIMATIONS
+        ========================================= */
+
+        @keyframes pageIn {
+
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+
+        }
+
+
+        @keyframes formIn {
+
+            from {
+                opacity: 0;
+                transform: translateY(5px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+
+        }
+
+
+        /* =========================================
+           SMALL SCREENS
+        ========================================= */
+
+        @media (max-width: 420px) {
+
+            .page {
+                padding: 20px 15px;
+            }
+
+            .brand {
+                margin-bottom: 27px;
+            }
+
+            .logo {
+                width: 54px;
+                height: 54px;
+                border-radius: 17px;
+            }
+
+            .brand-title {
+                font-size: 27px;
+            }
+
+            .auth-card {
+                padding: 19px;
+                border-radius: 20px;
+            }
+
+        }
+
+    </style>
 </head>
 
+
 <body>
-  <main class="page">
 
-    <!-- =========================
-         PANTALLA DE BIENVENIDA
-    ========================== -->
+    <main class="page">
 
-    <section class="welcome" id="welcome">
-
-      <div class="welcome-content">
-
-        <h1 class="brand">
-          Gmail<span>Accounts</span>
-        </h1>
-
-        <p class="description">
-          Sistema privado para gestionar tu cuenta,
-          solicitudes, historial y actividad desde una
-          interfaz sencilla.
-        </p>
-
-      </div>
-
-      <div class="scroll-indicator">
-        Desliza para continuar
-        <span class="scroll-arrow">↓</span>
-      </div>
-
-    </section>
+        <div class="container">
 
 
-    <!-- =========================
-         AUTENTICACIÓN
-    ========================== -->
+            <!-- =====================================
+                 BRAND
+            ====================================== -->
 
-    <section class="auth-section" id="auth">
+            <section class="brand">
 
-      <div class="auth-container">
+                <div class="logo">
 
-        <div class="auth-header">
+                    <div class="google-logo"></div>
 
-          <h2>Tu cuenta</h2>
+                </div>
 
-          <p>
-            Inicia sesión o crea una cuenta para
-            continuar.
-          </p>
+
+                <h1 class="brand-title">
+                    Gmail<span>Accounts</span>
+                </h1>
+
+
+                <p class="brand-subtitle">
+                    Gestiona tu cuenta desde un solo lugar.
+                </p>
+
+            </section>
+
+
+            <!-- =====================================
+                 AUTH
+            ====================================== -->
+
+            <section class="auth-card">
+
+
+                <!-- TABS -->
+
+                <div class="tabs">
+
+                    <button
+                        type="button"
+                        class="tab active"
+                        id="loginTab"
+                    >
+                        Iniciar sesión
+                    </button>
+
+
+                    <button
+                        type="button"
+                        class="tab"
+                        id="registerTab"
+                    >
+                        Registrarse
+                    </button>
+
+                </div>
+
+
+                <!-- =================================
+                     LOGIN
+                ================================== -->
+
+                <form
+                    class="form active"
+                    id="loginForm"
+                >
+
+                    <h2 class="form-title">
+                        Bienvenido de nuevo
+                    </h2>
+
+
+                    <p class="form-description">
+                        Inicia sesión para continuar
+                        utilizando GmailAccounts.
+                    </p>
+
+
+                    <div class="field">
+
+                        <label for="loginIdentifier">
+                            Correo o usuario
+                        </label>
+
+                        <input
+                            class="input"
+                            id="loginIdentifier"
+                            type="text"
+                            placeholder="correo o usuario"
+                            autocomplete="username"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="field">
+
+                        <label for="loginPassword">
+                            Contraseña
+                        </label>
+
+                        <input
+                            class="input"
+                            id="loginPassword"
+                            type="password"
+                            placeholder="Contraseña"
+                            autocomplete="current-password"
+                            required
+                        >
+
+                    </div>
+
+
+                    <button
+                        type="submit"
+                        class="submit-button"
+                    >
+                        CONTINUAR
+                    </button>
+
+
+                    <div
+                        class="message"
+                        id="loginMessage"
+                    ></div>
+
+                </form>
+
+
+                <!-- =================================
+                     REGISTER
+                ================================== -->
+
+                <form
+                    class="form"
+                    id="registerForm"
+                >
+
+                    <h2 class="form-title">
+                        Crear cuenta
+                    </h2>
+
+
+                    <p class="form-description">
+                        Crea tu cuenta para comenzar.
+                    </p>
+
+
+                    <div class="field">
+
+                        <label for="registerUsername">
+                            Usuario
+                        </label>
+
+                        <input
+                            class="input"
+                            id="registerUsername"
+                            type="text"
+                            placeholder="Elige un usuario"
+                            autocomplete="username"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="field">
+
+                        <label for="registerEmail">
+                            Correo electrónico
+                        </label>
+
+                        <input
+                            class="input"
+                            id="registerEmail"
+                            type="email"
+                            placeholder="tucorreo@email.com"
+                            autocomplete="email"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="field">
+
+                        <label for="registerPassword">
+                            Contraseña
+                        </label>
+
+                        <input
+                            class="input"
+                            id="registerPassword"
+                            type="password"
+                            placeholder="Crea una contraseña"
+                            autocomplete="new-password"
+                            required
+                        >
+
+                    </div>
+
+
+                    <button
+                        type="submit"
+                        class="submit-button"
+                    >
+                        CREAR CUENTA
+                    </button>
+
+
+                    <div
+                        class="message"
+                        id="registerMessage"
+                    ></div>
+
+                </form>
+
+            </section>
+
+
+            <!-- =====================================
+                 FOOTER
+            ====================================== -->
+
+            <footer class="footer">
+
+                GmailAccounts · Sistema privado
+
+            </footer>
 
         </div>
 
+    </main>
 
-        <div class="auth-card">
 
-          <div class="tabs">
+    <script>
 
-            <button
-              type="button"
-              class="tab active"
-              id="loginTab"
-            >
-              Iniciar sesión
-            </button>
+        /* =========================================
+           ELEMENTOS
+        ========================================= */
 
-            <button
-              type="button"
-              class="tab"
-              id="registerTab"
-            >
-              Registrarse
-            </button>
+        const loginTab =
+            document.getElementById("loginTab");
 
-          </div>
+        const registerTab =
+            document.getElementById("registerTab");
 
+        const loginForm =
+            document.getElementById("loginForm");
 
-          <!-- LOGIN -->
+        const registerForm =
+            document.getElementById("registerForm");
 
-          <form
-            class="form active"
-            id="loginForm"
-          >
+        const loginMessage =
+            document.getElementById("loginMessage");
 
-            <div class="field">
+        const registerMessage =
+            document.getElementById("registerMessage");
 
-              <label for="loginIdentifier">
-                Correo o usuario
-              </label>
 
-              <input
-                id="loginIdentifier"
-                type="text"
-                autocomplete="username"
-                placeholder="Tu correo o usuario"
-                required
-              />
+        /* =========================================
+           CAMBIAR A LOGIN
+        ========================================= */
 
-            </div>
+        function showLogin() {
 
+            loginTab.classList.add("active");
+            registerTab.classList.remove("active");
 
-            <div class="field">
+            loginForm.classList.add("active");
+            registerForm.classList.remove("active");
 
-              <label for="loginPassword">
-                Contraseña
-              </label>
+            loginMessage.classList.remove("show");
+            registerMessage.classList.remove("show");
 
-              <input
-                id="loginPassword"
-                type="password"
-                autocomplete="current-password"
-                placeholder="Tu contraseña"
-                required
-              />
+        }
 
-            </div>
 
+        /* =========================================
+           CAMBIAR A REGISTRO
+        ========================================= */
 
-            <button
-              type="submit"
-              class="submit-button"
-            >
-              INICIAR SESIÓN
-            </button>
+        function showRegister() {
 
-            <div
-              class="message"
-              id="loginMessage"
-            ></div>
+            registerTab.classList.add("active");
+            loginTab.classList.remove("active");
 
-          </form>
+            registerForm.classList.add("active");
+            loginForm.classList.remove("active");
 
+            loginMessage.classList.remove("show");
+            registerMessage.classList.remove("show");
 
-          <!-- REGISTRO -->
+        }
 
-          <form
-            class="form"
-            id="registerForm"
-          >
 
-            <div class="field">
+        loginTab.addEventListener(
+            "click",
+            showLogin
+        );
 
-              <label for="registerUsername">
-                Usuario
-              </label>
 
-              <input
-                id="registerUsername"
-                type="text"
-                autocomplete="username"
-                placeholder="Crea un usuario"
-                required
-              />
+        registerTab.addEventListener(
+            "click",
+            showRegister
+        );
 
-            </div>
 
+        /* =========================================
+           LOGIN TEMPORAL
+        ========================================= */
 
-            <div class="field">
+        loginForm.addEventListener(
+            "submit",
+            function(event) {
 
-              <label for="registerEmail">
-                Correo electrónico
-              </label>
+                event.preventDefault();
 
-              <input
-                id="registerEmail"
-                type="email"
-                autocomplete="email"
-                placeholder="tucorreo@email.com"
-                required
-              />
+                /*
+                 * TEMPORAL
+                 *
+                 * Aquí conectaremos posteriormente
+                 * la autenticación real con nuestro
+                 * Worker + D1.
+                 */
 
-            </div>
+                loginMessage.textContent =
+                    "La autenticación se conectará al sistema de cuentas.";
 
+                loginMessage.classList.add("show");
 
-            <div class="field">
+            }
+        );
 
-              <label for="registerPassword">
-                Contraseña
-              </label>
 
-              <input
-                id="registerPassword"
-                type="password"
-                autocomplete="new-password"
-                placeholder="Crea una contraseña"
-                required
-              />
+        /* =========================================
+           REGISTRO TEMPORAL
+        ========================================= */
 
-            </div>
+        registerForm.addEventListener(
+            "submit",
+            function(event) {
 
+                event.preventDefault();
 
-            <button
-              type="submit"
-              class="submit-button"
-            >
-              CREAR CUENTA
-            </button>
+                /*
+                 * TEMPORAL
+                 *
+                 * Aquí conectaremos posteriormente
+                 * el registro con Cloudflare D1.
+                 */
 
-            <div
-              class="message"
-              id="registerMessage"
-            ></div>
+                registerMessage.textContent =
+                    "El registro se conectará al sistema de cuentas.";
 
-          </form>
+                registerMessage.classList.add("show");
 
-        </div>
+            }
+        );
 
-
-        <p class="auth-note">
-          La autenticación real se conectará posteriormente
-          con el sistema de usuarios.
-        </p>
-
-      </div>
-
-    </section>
-
-  </main>
-
-
-  <script>
-    const loginTab =
-      document.getElementById("loginTab");
-
-    const registerTab =
-      document.getElementById("registerTab");
-
-    const loginForm =
-      document.getElementById("loginForm");
-
-    const registerForm =
-      document.getElementById("registerForm");
-
-    const loginMessage =
-      document.getElementById("loginMessage");
-
-    const registerMessage =
-      document.getElementById("registerMessage");
-
-
-    function showLogin() {
-      loginTab.classList.add("active");
-      registerTab.classList.remove("active");
-
-      loginForm.classList.add("active");
-      registerForm.classList.remove("active");
-
-      loginMessage.classList.remove("show");
-      registerMessage.classList.remove("show");
-    }
-
-
-    function showRegister() {
-      registerTab.classList.add("active");
-      loginTab.classList.remove("active");
-
-      registerForm.classList.add("active");
-      loginForm.classList.remove("active");
-
-      loginMessage.classList.remove("show");
-      registerMessage.classList.remove("show");
-    }
-
-
-    loginTab.addEventListener(
-      "click",
-      showLogin
-    );
-
-
-    registerTab.addEventListener(
-      "click",
-      showRegister
-    );
-
-
-    loginForm.addEventListener(
-      "submit",
-      function (event) {
-
-        event.preventDefault();
-
-        /*
-          TEMPORAL
-
-          La autenticación real se conectará
-          posteriormente con Cloudflare D1.
-
-          Por ahora solamente mostramos
-          el estado de la interfaz.
-        */
-
-        loginMessage.textContent =
-          "La conexión con el sistema de cuentas todavía no está configurada.";
-
-        loginMessage.classList.add("show");
-
-      }
-    );
-
-
-    registerForm.addEventListener(
-      "submit",
-      function (event) {
-
-        event.preventDefault();
-
-        /*
-          TEMPORAL
-
-          El registro real se conectará
-          posteriormente con Cloudflare D1.
-        */
-
-        registerMessage.textContent =
-          "El registro estará disponible cuando conectemos la base de datos.";
-
-        registerMessage.classList.add("show");
-
-      }
-    );
-
-
-    /*
-      Si posteriormente existe una sesión válida,
-      aquí podremos redirigir automáticamente
-      hacia app.html.
-    */
-  </script>
+    </script>
 
 </body>
-  </html>
+                  </html>
