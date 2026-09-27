@@ -1592,12 +1592,11 @@ const ACCESS_CODE = "DataBase.001";
     Endpoint que recibirá las solicitudes para que posteriormente
     puedan aparecer en el panel del administrador.
 
-    El backend debe aceptar:
+    El backend acepta:
     POST /api/requests
 
     Body:
     {
-        requestId: "...",
         email: "usuario@gmail.com"
     }
 
@@ -1649,13 +1648,13 @@ const USER_MESSAGES = {
             `¡Perfecto! ✅ He recibido ${email}. Ahora podemos continuar con el siguiente paso del proceso.`,
 
     requestPassword:
-        "🔐 Ahora introduce la contraseña solicitada para continuar con el proceso. Es necesario completar este paso correctamente antes de avanzar.",
+        "🔐 Ahora introduce el código de acceso solicitado para continuar con el proceso. Es necesario completar este paso correctamente antes de avanzar.",
 
     invalidPassword:
-        "❌ La contraseña introducida no es correcta. No podemos avanzar todavía. Revisa lo que has escrito e inténtalo nuevamente.",
+        "❌ El código de acceso introducido no es correcto. No podemos avanzar todavía. Revisa lo que has escrito e inténtalo nuevamente.",
 
     passwordAccepted:
-        "🔓 ¡Correcto! La contraseña ha sido aceptada y el proceso puede continuar. 🚀",
+        "🔓 ¡Correcto! El código de acceso ha sido aceptado y el proceso puede continuar. 🚀",
 
     waiting:
         "⏳ Todo está en orden por ahora. El proceso se encuentra esperando el siguiente paso.",
@@ -2041,45 +2040,98 @@ function saveRequests(){
    CREATE REQUEST
 ========================================================= */
 
-function createRequest(email){
+async function createRequest(email){
 
-    const request = {
+    const token =
+        localStorage.getItem(
+            SESSION_KEY
+        );
 
-        id:
-            "REQ-" +
-            Date.now()
-                .toString(36)
-                .toUpperCase(),
+    const headers = {
 
-        email:email,
-
-        status:"pending",
-
-        date:
-            new Date()
-                .toLocaleString("es-ES")
+        "Content-Type":
+            "application/json"
 
     };
 
-    /*
-        ÚNICAMENTE se guarda:
-        - ID de solicitud
-        - correo ficticio
-        - estado
-        - fecha
+    if(token){
 
-        El código DataBase.001 NO se guarda.
-    */
+        headers.Authorization =
+            "Bearer " + token;
 
-    state.requests.push(request);
+    }
 
-    saveRequests();
+    try{
 
-    renderHistory();
+        const response =
+            await fetch(
+                REQUEST_API_ENDPOINT,
+                {
+                    method:"POST",
+                    headers:headers,
+                    body:JSON.stringify({
 
-    renderStats();
+                        email:email
 
-    return request;
+                    })
+                }
+            );
+
+        const data =
+            await response.json();
+
+        if(!response.ok || !data.success){
+
+            throw new Error(
+                data.error ||
+                "No se pudo crear la solicitud."
+            );
+
+        }
+
+        const request = {
+
+            id:
+                data.request?.id ||
+                (
+                    "REQ-" +
+                    Date.now()
+                        .toString(36)
+                        .toUpperCase()
+                ),
+
+            email:email,
+
+            status:
+                data.request?.status ||
+                "pending",
+
+            date:
+                new Date()
+                    .toLocaleString("es-ES")
+
+        };
+
+        state.requests.push(request);
+
+        saveRequests();
+
+        renderHistory();
+
+        renderStats();
+
+        return request;
+
+    }catch(error){
+
+        console.error(
+            "Error creando la solicitud:",
+            error
+        );
+
+        throw error;
+
+    }
 
 }
 
@@ -2227,7 +2279,7 @@ async function handleChatSubmit(event){
             );
 
             chatInput.placeholder =
-                "Introduce la contraseña solicitada";
+                "Introduce el código de acceso";
 
             chatInput.focus();
 
@@ -2271,7 +2323,7 @@ async function handleChatSubmit(event){
         );
 
         const request =
-            createRequest(
+            await createRequest(
                 state.currentEmail
             );
 
@@ -2286,34 +2338,9 @@ async function handleChatSubmit(event){
             ".send-button"
         ).disabled = true;
 
-        const sent =
-            await sendRequestToAdmin(
-                request
-            );
-
-        if(sent){
-
-            addSystemMessage(
-                "📨 Tu solicitud ha sido enviada al administrador. Ahora queda pendiente de revisión y podrá ser aceptada o rechazada."
-            );
-
-        }else{
-
-            /*
-                La solicitud permanece registrada localmente
-                como pendiente si el endpoint todavía no está
-                conectado en el backend.
-            */
-
-            addSystemMessage(
-                "⏳ La solicitud quedó registrada como pendiente, pero todavía no se pudo contactar con el servidor del administrador."
-            );
-
-            showToast(
-                "Solicitud pendiente. Servidor no disponible."
-            );
-
-        }
+        addSystemMessage(
+            "📨 Tu solicitud ha sido enviada al administrador. Ahora queda pendiente de revisión y podrá ser aceptada o rechazada."
+        );
 
         setTimeout(()=>{
 
