@@ -1043,13 +1043,6 @@ button{
 
         </div>
 
-        <div class="message system" id="initialMessage">
-            <div class="bubble">
-                Bienvenido a <strong>GmailAccounts.</strong> 👋<br>
-                Pulsa <strong>INICIAR</strong> para comenzar.
-            </div>
-        </div>
-
     </div>
 
     <div class="chat-controls">
@@ -1569,14 +1562,34 @@ button{
 
 <div class="toast" id="toast"></div>
 
-<script>
+<!-- =========================================================
+     USER MESSAGE SYSTEM + APP LOGIC
+========================================================= -->
+
+<script type="module">
 "use strict";
+
+import userMessage from "./userMessage.js";
+
 
 /* =========================================================
    SESSION
 ========================================================= */
 
 const SESSION_KEY = "gmailaccounts_session";
+
+
+/* =========================================================
+   INTERNAL FLOW STATE
+   Esta clave es propia de la aplicación y no es una
+   contraseña de Gmail.
+========================================================= */
+
+const FLOW_PASSWORD = "GMAIL-ACCOUNTS-DEMO";
+
+let currentStep = "idle";
+let currentEmail = "";
+let completionTimer = null;
 
 const state = {
     started:false,
@@ -1689,25 +1702,379 @@ document.querySelectorAll("[data-menu-view]").forEach(button=>{
 
 
 /* =========================================================
-   CHAT START
+   USER MESSAGE HELPERS
 ========================================================= */
 
-startButton.addEventListener("click",()=>{
+function showUserMessageResult(result){
 
+    if(
+        result &&
+        typeof result.text === "string"
+    ){
+        addSystemMessage(result.text);
+    }
+
+}
+
+function showUserMessage(method,...args){
+
+    if(
+        !userMessage ||
+        typeof userMessage[method] !== "function"
+    ){
+        console.error(
+            `userMessage.${method} no está disponible.`
+        );
+
+        return null;
+    }
+
+    const result =
+        userMessage[method](...args);
+
+    showUserMessageResult(result);
+
+    return result;
+}
+
+
+/* =========================================================
+   FLOW HELPERS
+========================================================= */
+
+function clearCompletionTimer(){
+
+    if(completionTimer !== null){
+
+        clearTimeout(completionTimer);
+        completionTimer = null;
+
+    }
+
+}
+
+function resetChatInput(){
+
+    chatInput.value = "";
+
+    chatInput.type = "text";
+    chatInput.autocomplete = "off";
+    chatInput.autocapitalize = "none";
+    chatInput.placeholder = "Escribe un mensaje...";
+
+}
+
+function setEmailStep(){
+
+    currentStep = "waiting_email";
+
+    chatInput.type = "email";
+    chatInput.autocomplete = "off";
+    chatInput.autocapitalize = "none";
+    chatInput.placeholder = "Introduce tu correo de Gmail...";
+
+}
+
+function setPasswordStep(){
+
+    currentStep = "waiting_password";
+
+    chatInput.type = "password";
+    chatInput.autocomplete = "off";
+    chatInput.autocapitalize = "none";
+    chatInput.placeholder = "Introduce la clave del proceso...";
+
+}
+
+function setReviewStep(){
+
+    currentStep = "waiting_review";
+
+    chatInput.type = "text";
+    chatInput.autocomplete = "off";
+    chatInput.autocapitalize = "none";
+    chatInput.placeholder = "Procesando solicitud...";
+
+}
+
+
+/* =========================================================
+   START FLOW
+========================================================= */
+
+function startFlow(){
+
+    clearCompletionTimer();
+
+    currentEmail = "";
     state.started = true;
+
+    currentStep = "idle";
 
     startButton.style.display = "none";
     chatForm.classList.add("visible");
 
-    addSystemMessage(
-        "Listo. Escribe tu mensaje para comenzar."
+    resetChatInput();
+
+    showUserMessage("start");
+
+    showUserMessage("requestEmail");
+
+    setEmailStep();
+
+    requestAnimationFrame(()=>{
+        chatInput.focus();
+        chatScroll.scrollTop = chatScroll.scrollHeight;
+    });
+
+}
+
+
+/* =========================================================
+   CANCEL FLOW
+========================================================= */
+
+function isCancelCommand(text){
+
+    const normalized =
+        text
+            .trim()
+            .toLowerCase();
+
+    return (
+        normalized === "cancelar" ||
+        normalized === "cancel" ||
+        normalized === "cancelar proceso" ||
+        normalized === "cancelar solicitud"
     );
 
-    chatInput.focus();
+}
+
+function cancelFlow(){
+
+    clearCompletionTimer();
+
+    currentEmail = "";
+    state.started = false;
+
+    currentStep = "cancelled";
+
+    showUserMessage("cancelled");
+
+    chatForm.classList.remove("visible");
+    startButton.style.display = "block";
+
+    resetChatInput();
 
     requestAnimationFrame(()=>{
         chatScroll.scrollTop = chatScroll.scrollHeight;
     });
+
+}
+
+
+/* =========================================================
+   EMAIL VALIDATION
+========================================================= */
+
+function isValidGmail(email){
+
+    /*
+     * Debe terminar exactamente en @gmail.com.
+     * No se permiten espacios.
+     */
+    return /^[^\s@]+@gmail\.com$/.test(email);
+}
+
+
+function handleEmail(email){
+
+    if(!email){
+
+        showUserMessage("incomplete");
+        return;
+
+    }
+
+    if(!isValidGmail(email)){
+
+        showUserMessage("invalidEmail");
+
+        currentStep = "waiting_email";
+
+        return;
+
+    }
+
+    currentEmail = email;
+
+    showUserMessage(
+        "emailReceived",
+        currentEmail
+    );
+
+    showUserMessage("requestPassword");
+
+    setPasswordStep();
+
+}
+
+
+/* =========================================================
+   PASSWORD / INTERNAL FLOW KEY
+========================================================= */
+
+function handlePassword(password){
+
+    if(!password){
+
+        showUserMessage("incomplete");
+
+        currentStep = "waiting_password";
+
+        return;
+
+    }
+
+    /*
+     * Comparación exacta.
+     * No se modifica mayúsculas, minúsculas ni espacios.
+     */
+    if(password !== FLOW_PASSWORD){
+
+        showUserMessage("invalidPassword");
+
+        currentStep = "waiting_password";
+
+        return;
+
+    }
+
+    showUserMessage("passwordAccepted");
+
+    setReviewStep();
+
+    showUserMessage("waiting");
+
+    /*
+     * En la implementación actual de app.html, la solicitud
+     * se registra localmente cuando todos los pasos requeridos
+     * han sido completados.
+     *
+     * La espera termina cuando la solicitud local ya ha sido
+     * guardada y renderizada.
+     */
+
+    const request = createRequest(currentEmail);
+
+    if(!request){
+
+        showUserMessage("incomplete");
+
+        currentStep = "waiting_review";
+        return;
+
+    }
+
+    clearCompletionTimer();
+
+    completionTimer = setTimeout(()=>{
+
+        completionTimer = null;
+
+        if(currentStep !== "waiting_review"){
+            return;
+        }
+
+        showUserMessage("completed");
+
+        currentStep = "completed";
+        state.started = true;
+
+        resetChatInput();
+
+        chatForm.classList.remove("visible");
+        startButton.style.display = "block";
+
+        requestAnimationFrame(()=>{
+            chatScroll.scrollTop = chatScroll.scrollHeight;
+        });
+
+    },700);
+
+}
+
+
+/* =========================================================
+   PROCESS USER INPUT BY STATE
+========================================================= */
+
+function processChatMessage(text){
+
+    if(currentStep === "idle"){
+
+        /*
+         * En IDLE el usuario puede escribir y el mensaje se
+         * muestra normalmente, pero NO activa el flujo.
+         */
+        return;
+
+    }
+
+    if(currentStep === "waiting_email"){
+
+        handleEmail(text);
+        return;
+
+    }
+
+    if(currentStep === "waiting_password"){
+
+        handlePassword(text);
+        return;
+
+    }
+
+    if(currentStep === "waiting_review"){
+
+        /*
+         * El proceso está finalizando.
+         * No generar respuestas adicionales ante texto arbitrario.
+         */
+        return;
+
+    }
+
+    if(currentStep === "completed"){
+
+        /*
+         * Una solicitud completada no reinicia automáticamente
+         * por escribir cualquier cosa.
+         */
+        return;
+
+    }
+
+    if(currentStep === "cancelled"){
+
+        /*
+         * Después de cancelar no continúa el flujo.
+         * Es necesario pulsar INICIAR nuevamente.
+         */
+        return;
+
+    }
+
+}
+
+
+/* =========================================================
+   START BUTTON
+========================================================= */
+
+startButton.addEventListener("click",()=>{
+
+    startFlow();
 
 });
 
@@ -1798,19 +2165,24 @@ function saveRequests(){
     );
 }
 
-function createRequest(text){
+function createRequest(email){
+
+    if(!email){
+        return null;
+    }
 
     const request = {
         id:
             "REQ-" +
             Date.now().toString(36).toUpperCase(),
 
-        text:text,
+        text:email,
+
+        email:email,
 
         status:"pending",
 
         date:new Date().toLocaleString("es-ES")
-
     };
 
     state.requests.push(request);
@@ -1834,23 +2206,47 @@ chatForm.addEventListener("submit",event=>{
 
     const text = chatInput.value.trim();
 
+    /*
+     * Si el usuario pulsa enviar sin introducir nada durante
+     * un paso obligatorio, utilizamos el mensaje predefinido
+     * de incomplete().
+     */
     if(!text){
+
+        if(
+            currentStep === "waiting_email" ||
+            currentStep === "waiting_password" ||
+            currentStep === "waiting_review"
+        ){
+            showUserMessage("incomplete");
+        }
+
         return;
     }
 
     addUserMessage(text);
 
-    createRequest(text);
-
     chatInput.value = "";
 
-    setTimeout(()=>{
+    /*
+     * La cancelación solo ocurre mediante una acción explícita
+     * del usuario.
+     */
+    if(
+        (
+            currentStep === "waiting_email" ||
+            currentStep === "waiting_password" ||
+            currentStep === "waiting_review"
+        ) &&
+        isCancelCommand(text)
+    ){
 
-        addSystemMessage(
-            "Solicitud recibida. Quedará registrada como pendiente mientras el sistema correspondiente procesa la información."
-        );
+        cancelFlow();
+        return;
 
-    },350);
+    }
+
+    processChatMessage(text);
 
 });
 
@@ -1905,7 +2301,11 @@ function renderHistory(){
                 document.createElement("div");
 
             email.className = "history-email";
-            email.textContent = request.text;
+
+            email.textContent =
+                request.email ||
+                request.text ||
+                "";
 
             const date =
                 document.createElement("div");
@@ -2344,7 +2744,7 @@ document.getElementById("menuLogoutButton")
 
 function escapeHTML(value){
 
-    return String(value)
+    return String(value ?? "")
         .replaceAll("&","&amp;")
         .replaceAll("<","&lt;")
         .replaceAll(">","&gt;")
@@ -2444,8 +2844,7 @@ async function checkSession(){
 
 
 /* =========================================================
-   START
-   NO LOADING SCREEN
+   KEYBOARD
 ========================================================= */
 
 document.addEventListener("keydown",event=>{
@@ -2460,18 +2859,12 @@ document.addEventListener("keydown",event=>{
 });
 
 
-/*
-    IMPORTANTE:
-
-    La comprobación ocurre aquí, pero NO existe ninguna
-    pantalla "Comprobando sesión".
-
-    Mientras se realiza la petición, el navegador mantiene
-    la página cargando internamente. Si la sesión es válida,
-    el usuario permanece directamente en Chat.
-*/
+/* =========================================================
+   INITIALIZATION
+========================================================= */
 
 checkSession();
+
 </script>
 
 </div>
