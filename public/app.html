@@ -41,8 +41,6 @@ button{
     cursor:pointer;
 }
 
-/* APP */
-
 .app{
     width:100%;
     height:100vh;
@@ -53,8 +51,6 @@ button{
         radial-gradient(circle at 50% -10%,rgba(255,255,255,.045),transparent 38%),
         #050505;
 }
-
-/* HEADER */
 
 .topbar{
     height:70px;
@@ -190,8 +186,6 @@ button{
     background:#ddd;
 }
 
-/* MAIN */
-
 .main{
     flex:1;
     min-height:0;
@@ -231,8 +225,6 @@ button{
     from{opacity:0;transform:translateY(5px)}
     to{opacity:1;transform:translateY(0)}
 }
-
-/* CHAT */
 
 .chat-scroll{
     flex:1;
@@ -303,9 +295,6 @@ button{
     border-bottom-right-radius:10px;
 }
 
-/* CHAT CONTROLS
-   SIN BARRA VISUAL */
-
 .chat-controls{
     flex-shrink:0;
     width:100%;
@@ -374,8 +363,6 @@ button{
     font-weight:700;
 }
 
-/* PAGE */
-
 .page-header{
     margin-bottom:19px;
 }
@@ -401,8 +388,6 @@ button{
     line-height:1.5;
 }
 
-/* CARDS */
-
 .glass-card{
     padding:17px;
     margin-bottom:12px;
@@ -412,8 +397,6 @@ button{
     backdrop-filter:blur(28px);
     -webkit-backdrop-filter:blur(28px);
 }
-
-/* BALANCE */
 
 .balance-card{
     padding:23px;
@@ -460,8 +443,6 @@ button{
     font-weight:650;
 }
 
-/* STATS */
-
 .stats-grid{
     display:grid;
     grid-template-columns:1fr 1fr;
@@ -486,8 +467,6 @@ button{
     font-size:19px;
     font-weight:700;
 }
-
-/* TUTORIAL */
 
 .tutorial-intro{
     color:#858585;
@@ -546,8 +525,6 @@ button{
     font-size:10px;
     line-height:1.6;
 }
-
-/* REFERRALS / HISTORY */
 
 .referral-link{
     padding:13px;
@@ -630,8 +607,6 @@ button{
     background:rgba(255,105,105,.08);
 }
 
-/* PROFILE */
-
 .profile-head{
     display:flex;
     align-items:center;
@@ -694,8 +669,6 @@ button{
     font-size:14px;
 }
 
-/* SETTINGS */
-
 .setting-row{
     min-height:58px;
     display:flex;
@@ -754,8 +727,6 @@ button{
     transform:translateX(18px);
     background:var(--green);
 }
-
-/* MENU */
 
 .menu-overlay{
     position:fixed;
@@ -863,8 +834,6 @@ button{
     color:#ff7373;
 }
 
-/* EMPTY */
-
 .empty{
     padding:35px 15px;
     text-align:center;
@@ -886,8 +855,6 @@ button{
     font-size:10px;
     line-height:1.5;
 }
-
-/* MODAL */
 
 .modal-overlay{
     position:fixed;
@@ -944,8 +911,6 @@ button{
     line-height:1.6;
     margin-bottom:13px;
 }
-
-/* TOAST */
 
 .toast{
     position:fixed;
@@ -1019,8 +984,6 @@ button{
 
 <main class="main">
 
-<!-- CHAT -->
-
 <section class="view active" id="chatView">
 
     <div class="chat-scroll" id="chatScroll">
@@ -1041,6 +1004,14 @@ button{
                 Gestiona tus solicitudes desde un solo lugar.
             </p>
 
+        </div>
+
+        <!-- ESTE MENSAJE SE CONSERVA -->
+        <div class="message system" id="initialMessage">
+            <div class="bubble">
+                Bienvenido a <strong>GmailAccounts.</strong> 👋<br>
+                Pulsa <strong>INICIAR</strong> para comenzar.
+            </div>
         </div>
 
     </div>
@@ -1072,8 +1043,6 @@ button{
     </div>
 
 </section>
-
-<!-- BALANCE -->
 
 <section class="view" id="balanceView">
 
@@ -1137,8 +1106,6 @@ button{
     </div>
 
 </section>
-
-<!-- TUTORIAL -->
 
 <section class="view" id="tutorialView">
 
@@ -1300,8 +1267,6 @@ button{
 
 </section>
 
-<!-- REFERIDOS -->
-
 <section class="view" id="referralsView">
 
     <div class="page-header">
@@ -1342,8 +1307,6 @@ button{
 
 </section>
 
-<!-- HISTORIAL -->
-
 <section class="view" id="historyView">
 
     <div class="page-header">
@@ -1373,8 +1336,6 @@ button{
     </div>
 
 </section>
-
-<!-- PERFIL -->
 
 <section class="view" id="profileView">
 
@@ -1465,8 +1426,6 @@ button{
 
 </main>
 
-<!-- MENU -->
-
 <div class="menu-overlay" id="menuOverlay">
 
     <aside class="menu-panel">
@@ -1536,8 +1495,6 @@ button{
 
 </div>
 
-<!-- MODAL -->
-
 <div class="modal-overlay" id="settingsModal">
 
     <div class="modal">
@@ -1563,11 +1520,31 @@ button{
 <div class="toast" id="toast"></div>
 
 <!-- =========================================================
-     USER MESSAGE SYSTEM + APP LOGIC
+     IMPORTANTE:
+     type="module" es obligatorio porque userMessage.js usa:
+     export default userMessage;
 ========================================================= -->
 
 <script type="module">
+
 "use strict";
+
+/*
+ * =========================================================
+ * CONEXIÓN CON userMessage.js
+ * =========================================================
+ *
+ * app.html
+ *      ↓
+ * importa userMessage.js
+ *      ↓
+ * userMessage.start()
+ * userMessage.requestEmail()
+ * userMessage.invalidEmail()
+ * userMessage.emailReceived()
+ * userMessage.requestPassword()
+ * ...
+ */
 
 import userMessage from "./userMessage.js";
 
@@ -1578,29 +1555,33 @@ import userMessage from "./userMessage.js";
 
 const SESSION_KEY = "gmailaccounts_session";
 
-
-/* =========================================================
-   INTERNAL FLOW STATE
-   Esta clave es propia de la aplicación y no es una
-   contraseña de Gmail.
-========================================================= */
-
-const FLOW_PASSWORD = "GMAIL-ACCOUNTS-DEMO";
-
-let currentStep = "idle";
-let currentEmail = "";
-let completionTimer = null;
-
 const state = {
+
     started:false,
+
+    /*
+     * Paso actual del flujo:
+     *
+     * idle
+     * email
+     * password
+     * completed
+     */
+    flowStep:"idle",
+
+    currentEmail:"",
+
     requests:[],
+
     balance:0,
+
     user:{
         id:"",
         username:"Usuario",
         email:"usuario@email.com",
         role:"user"
     }
+
 };
 
 
@@ -1608,22 +1589,41 @@ const state = {
    ELEMENTS
 ========================================================= */
 
-const views = document.querySelectorAll(".view");
+const views =
+    document.querySelectorAll(".view");
 
-const menuOverlay = document.getElementById("menuOverlay");
-const menuButton = document.getElementById("menuButton");
-const menuClose = document.getElementById("menuClose");
+const menuOverlay =
+    document.getElementById("menuOverlay");
 
-const startButton = document.getElementById("startButton");
-const chatForm = document.getElementById("chatForm");
-const chatInput = document.getElementById("chatInput");
-const chatScroll = document.getElementById("chatScroll");
+const menuButton =
+    document.getElementById("menuButton");
 
-const toast = document.getElementById("toast");
+const menuClose =
+    document.getElementById("menuClose");
 
-const settingsModal = document.getElementById("settingsModal");
-const modalTitle = document.getElementById("modalTitle");
-const modalContent = document.getElementById("modalContent");
+const startButton =
+    document.getElementById("startButton");
+
+const chatForm =
+    document.getElementById("chatForm");
+
+const chatInput =
+    document.getElementById("chatInput");
+
+const chatScroll =
+    document.getElementById("chatScroll");
+
+const toast =
+    document.getElementById("toast");
+
+const settingsModal =
+    document.getElementById("settingsModal");
+
+const modalTitle =
+    document.getElementById("modalTitle");
+
+const modalContent =
+    document.getElementById("modalContent");
 
 
 /* =========================================================
@@ -1635,13 +1635,17 @@ let toastTimer = null;
 function showToast(message){
 
     toast.textContent = message;
+
     toast.classList.add("show");
 
     clearTimeout(toastTimer);
 
     toastTimer = setTimeout(()=>{
+
         toast.classList.remove("show");
+
     },2200);
+
 }
 
 
@@ -1652,16 +1656,22 @@ function showToast(message){
 function showView(id){
 
     views.forEach(view=>{
+
         view.classList.remove("active");
+
     });
 
-    const target = document.getElementById(id);
+    const target =
+        document.getElementById(id);
 
     if(target){
+
         target.classList.add("active");
+
     }
 
     closeMenu();
+
 }
 
 
@@ -1672,202 +1682,209 @@ function showView(id){
 function openMenu(){
 
     menuOverlay.classList.add("open");
-    menuButton.setAttribute("aria-expanded","true");
+
+    menuButton.setAttribute(
+        "aria-expanded",
+        "true"
+    );
+
 }
 
 function closeMenu(){
 
     menuOverlay.classList.remove("open");
-    menuButton.setAttribute("aria-expanded","false");
-}
 
-menuButton.addEventListener("click",openMenu);
-menuClose.addEventListener("click",closeMenu);
-
-menuOverlay.addEventListener("click",event=>{
-    if(event.target === menuOverlay){
-        closeMenu();
-    }
-});
-
-document.querySelectorAll("[data-menu-view]").forEach(button=>{
-
-    button.addEventListener("click",()=>{
-
-        showView(button.dataset.menuView);
-
-    });
-
-});
-
-
-/* =========================================================
-   USER MESSAGE HELPERS
-========================================================= */
-
-function showUserMessageResult(result){
-
-    if(
-        result &&
-        typeof result.text === "string"
-    ){
-        addSystemMessage(result.text);
-    }
-
-}
-
-function showUserMessage(method,...args){
-
-    if(
-        !userMessage ||
-        typeof userMessage[method] !== "function"
-    ){
-        console.error(
-            `userMessage.${method} no está disponible.`
-        );
-
-        return null;
-    }
-
-    const result =
-        userMessage[method](...args);
-
-    showUserMessageResult(result);
-
-    return result;
-}
-
-
-/* =========================================================
-   FLOW HELPERS
-========================================================= */
-
-function clearCompletionTimer(){
-
-    if(completionTimer !== null){
-
-        clearTimeout(completionTimer);
-        completionTimer = null;
-
-    }
-
-}
-
-function resetChatInput(){
-
-    chatInput.value = "";
-
-    chatInput.type = "text";
-    chatInput.autocomplete = "off";
-    chatInput.autocapitalize = "none";
-    chatInput.placeholder = "Escribe un mensaje...";
-
-}
-
-function setEmailStep(){
-
-    currentStep = "waiting_email";
-
-    chatInput.type = "email";
-    chatInput.autocomplete = "off";
-    chatInput.autocapitalize = "none";
-    chatInput.placeholder = "Introduce tu correo de Gmail...";
-
-}
-
-function setPasswordStep(){
-
-    currentStep = "waiting_password";
-
-    chatInput.type = "password";
-    chatInput.autocomplete = "off";
-    chatInput.autocapitalize = "none";
-    chatInput.placeholder = "Introduce la clave del proceso...";
-
-}
-
-function setReviewStep(){
-
-    currentStep = "waiting_review";
-
-    chatInput.type = "text";
-    chatInput.autocomplete = "off";
-    chatInput.autocapitalize = "none";
-    chatInput.placeholder = "Procesando solicitud...";
-
-}
-
-
-/* =========================================================
-   START FLOW
-========================================================= */
-
-function startFlow(){
-
-    clearCompletionTimer();
-
-    currentEmail = "";
-    state.started = true;
-
-    currentStep = "idle";
-
-    startButton.style.display = "none";
-    chatForm.classList.add("visible");
-
-    resetChatInput();
-
-    showUserMessage("start");
-
-    showUserMessage("requestEmail");
-
-    setEmailStep();
-
-    requestAnimationFrame(()=>{
-        chatInput.focus();
-        chatScroll.scrollTop = chatScroll.scrollHeight;
-    });
-
-}
-
-
-/* =========================================================
-   CANCEL FLOW
-========================================================= */
-
-function isCancelCommand(text){
-
-    const normalized =
-        text
-            .trim()
-            .toLowerCase();
-
-    return (
-        normalized === "cancelar" ||
-        normalized === "cancel" ||
-        normalized === "cancelar proceso" ||
-        normalized === "cancelar solicitud"
+    menuButton.setAttribute(
+        "aria-expanded",
+        "false"
     );
 
 }
 
-function cancelFlow(){
+menuButton.addEventListener(
+    "click",
+    openMenu
+);
 
-    clearCompletionTimer();
+menuClose.addEventListener(
+    "click",
+    closeMenu
+);
 
-    currentEmail = "";
-    state.started = false;
+menuOverlay.addEventListener(
+    "click",
+    event=>{
 
-    currentStep = "cancelled";
+        if(event.target === menuOverlay){
 
-    showUserMessage("cancelled");
+            closeMenu();
 
-    chatForm.classList.remove("visible");
-    startButton.style.display = "block";
+        }
 
-    resetChatInput();
+    }
+);
+
+document
+    .querySelectorAll("[data-menu-view]")
+    .forEach(button=>{
+
+        button.addEventListener(
+            "click",
+            ()=>{
+
+                showView(
+                    button.dataset.menuView
+                );
+
+            }
+        );
+
+    });
+
+
+/* =========================================================
+   CHAT MESSAGE RENDER
+========================================================= */
+
+function addMessage(text,type){
+
+    const message =
+        document.createElement("div");
+
+    message.className =
+        "message " +
+        (
+            type === "user"
+            ? "user"
+            : "system"
+        );
+
+    const bubble =
+        document.createElement("div");
+
+    bubble.className = "bubble";
+
+    /*
+     * textContent evita que cualquier texto introducido
+     * por el usuario sea interpretado como HTML.
+     */
+    bubble.textContent = text;
+
+    message.appendChild(bubble);
+
+    chatScroll.appendChild(message);
 
     requestAnimationFrame(()=>{
-        chatScroll.scrollTop = chatScroll.scrollHeight;
+
+        chatScroll.scrollTop =
+            chatScroll.scrollHeight;
+
+    });
+
+}
+
+function addSystemMessage(text){
+
+    addMessage(text,"system");
+
+}
+
+function addUserMessage(text){
+
+    addMessage(text,"user");
+
+}
+
+
+/* =========================================================
+   SYSTEM MESSAGE
+========================================================= */
+
+function showSystemMessage(messageObject){
+
+    if(
+        !messageObject ||
+        typeof messageObject.text !== "string"
+    ){
+
+        console.error(
+            "Mensaje del sistema inválido:",
+            messageObject
+        );
+
+        return;
+
+    }
+
+    addSystemMessage(
+        messageObject.text
+    );
+
+}
+
+
+/* =========================================================
+   START
+========================================================= */
+
+startButton.addEventListener(
+    "click",
+    handleStart
+);
+
+function handleStart(){
+
+    /*
+     * Evita que INICIAR pueda ejecutar el flujo varias
+     * veces si el usuario toca el botón repetidamente.
+     */
+    if(state.started){
+
+        return;
+
+    }
+
+    state.started = true;
+
+    /*
+     * 1. Obtenemos el mensaje REAL desde userMessage.js
+     */
+    const startMessage =
+        userMessage.start();
+
+    showSystemMessage(startMessage);
+
+    /*
+     * 2. El siguiente paso esperado es un correo.
+     */
+    state.flowStep = "email";
+
+    /*
+     * 3. Mostramos también el mensaje específico
+     *    que solicita el correo.
+     */
+    setTimeout(()=>{
+
+        showSystemMessage(
+            userMessage.requestEmail()
+        );
+
+    },350);
+
+    /*
+     * 4. Cambiamos INICIAR por el campo de texto.
+     */
+    startButton.style.display = "none";
+
+    chatForm.classList.add("visible");
+
+    requestAnimationFrame(()=>{
+
+        chatInput.focus();
+
+        chatScroll.scrollTop =
+            chatScroll.scrollHeight;
+
     });
 
 }
@@ -1877,240 +1894,218 @@ function cancelFlow(){
    EMAIL VALIDATION
 ========================================================= */
 
-function isValidGmail(email){
+function isValidGmail(value){
+
+    const email =
+        value.trim().toLowerCase();
 
     /*
-     * Debe terminar exactamente en @gmail.com.
-     * No se permiten espacios.
+     * El proyecto solamente acepta el formato
+     * @gmail.com.
+     *
+     * Esto NO comprueba que la cuenta exista.
      */
-    return /^[^\s@]+@gmail\.com$/.test(email);
-}
-
-
-function handleEmail(email){
-
-    if(!email){
-
-        showUserMessage("incomplete");
-        return;
-
-    }
-
-    if(!isValidGmail(email)){
-
-        showUserMessage("invalidEmail");
-
-        currentStep = "waiting_email";
-
-        return;
-
-    }
-
-    currentEmail = email;
-
-    showUserMessage(
-        "emailReceived",
-        currentEmail
-    );
-
-    showUserMessage("requestPassword");
-
-    setPasswordStep();
+    return /^[a-z0-9.!#$%&'*+/=?^_`{|}~-]+@gmail\.com$/
+        .test(email);
 
 }
 
 
 /* =========================================================
-   PASSWORD / INTERNAL FLOW KEY
+   PASSWORD
 ========================================================= */
 
-function handlePassword(password){
+/*
+ * Esta es la contraseña interna del flujo DEMO.
+ *
+ * IMPORTANTE:
+ * Esto NO es una contraseña de Gmail.
+ * Es únicamente la clave que tu sistema utiliza
+ * para avanzar en este flujo local.
+ *
+ * Si tu contraseña específica del sistema es otra,
+ * cambia solamente este valor.
+ */
+const FLOW_PASSWORD =
+    "GMAIL-ACCOUNTS-DEMO";
 
-    if(!password){
 
-        showUserMessage("incomplete");
+/* =========================================================
+   PROCESS USER MESSAGE
+========================================================= */
 
-        currentStep = "waiting_password";
+function processUserMessage(text){
+
+    const value =
+        text.trim();
+
+    if(!value){
 
         return;
 
     }
 
-    /*
-     * Comparación exacta.
-     * No se modifica mayúsculas, minúsculas ni espacios.
-     */
-    if(password !== FLOW_PASSWORD){
 
-        showUserMessage("invalidPassword");
+    /* -----------------------------------------------------
+       PASO 1: CORREO
+    ----------------------------------------------------- */
 
-        currentStep = "waiting_password";
+    if(state.flowStep === "email"){
 
-        return;
+        if(!isValidGmail(value)){
 
-    }
+            showSystemMessage(
+                userMessage.invalidEmail()
+            );
 
-    showUserMessage("passwordAccepted");
-
-    setReviewStep();
-
-    showUserMessage("waiting");
-
-    /*
-     * En la implementación actual de app.html, la solicitud
-     * se registra localmente cuando todos los pasos requeridos
-     * han sido completados.
-     *
-     * La espera termina cuando la solicitud local ya ha sido
-     * guardada y renderizada.
-     */
-
-    const request = createRequest(currentEmail);
-
-    if(!request){
-
-        showUserMessage("incomplete");
-
-        currentStep = "waiting_review";
-        return;
-
-    }
-
-    clearCompletionTimer();
-
-    completionTimer = setTimeout(()=>{
-
-        completionTimer = null;
-
-        if(currentStep !== "waiting_review"){
             return;
+
         }
 
-        showUserMessage("completed");
+        state.currentEmail =
+            value.toLowerCase();
 
-        currentStep = "completed";
-        state.started = true;
+        /*
+         * Confirmación del correo usando userMessage.js
+         */
+        showSystemMessage(
+            userMessage.emailReceived(
+                state.currentEmail
+            )
+        );
 
-        resetChatInput();
+        /*
+         * El siguiente mensaje solicita la contraseña.
+         */
+        setTimeout(()=>{
 
-        chatForm.classList.remove("visible");
-        startButton.style.display = "block";
+            state.flowStep = "password";
 
-        requestAnimationFrame(()=>{
-            chatScroll.scrollTop = chatScroll.scrollHeight;
-        });
+            showSystemMessage(
+                userMessage.requestPassword()
+            );
 
-    },700);
+        },350);
+
+        return;
+
+    }
+
+
+    /* -----------------------------------------------------
+       PASO 2: CONTRASEÑA DEL FLUJO
+    ----------------------------------------------------- */
+
+    if(state.flowStep === "password"){
+
+        if(value !== FLOW_PASSWORD){
+
+            showSystemMessage(
+                userMessage.invalidPassword()
+            );
+
+            return;
+
+        }
+
+        /*
+         * Contraseña correcta.
+         */
+        showSystemMessage(
+            userMessage.passwordAccepted()
+        );
+
+        /*
+         * Registramos la solicitud.
+         */
+        const request =
+            createRequest(
+                state.currentEmail
+            );
+
+        /*
+         * Dejamos constancia de que el proceso terminó.
+         */
+        setTimeout(()=>{
+
+            showSystemMessage(
+                userMessage.completed()
+            );
+
+            state.flowStep = "completed";
+
+            renderHistory();
+            renderStats();
+
+        },450);
+
+        return;
+
+    }
+
+
+    /* -----------------------------------------------------
+       PASO 3: PROCESO COMPLETADO
+    ----------------------------------------------------- */
+
+    if(state.flowStep === "completed"){
+
+        showSystemMessage(
+            userMessage.waiting()
+        );
+
+        return;
+
+    }
+
+
+    /* -----------------------------------------------------
+       ESTADO DESCONOCIDO
+    ----------------------------------------------------- */
+
+    showSystemMessage(
+        userMessage.incomplete()
+    );
 
 }
 
 
 /* =========================================================
-   PROCESS USER INPUT BY STATE
+   CHAT FORM
 ========================================================= */
 
-function processChatMessage(text){
+chatForm.addEventListener(
+    "submit",
+    event=>{
 
-    if(currentStep === "idle"){
+        event.preventDefault();
 
-        /*
-         * En IDLE el usuario puede escribir y el mensaje se
-         * muestra normalmente, pero NO activa el flujo.
-         */
-        return;
+        const text =
+            chatInput.value.trim();
 
-    }
+        if(!text){
 
-    if(currentStep === "waiting_email"){
+            return;
 
-        handleEmail(text);
-        return;
-
-    }
-
-    if(currentStep === "waiting_password"){
-
-        handlePassword(text);
-        return;
-
-    }
-
-    if(currentStep === "waiting_review"){
+        }
 
         /*
-         * El proceso está finalizando.
-         * No generar respuestas adicionales ante texto arbitrario.
+         * Primero aparece el mensaje del usuario.
          */
-        return;
-
-    }
-
-    if(currentStep === "completed"){
+        addUserMessage(text);
 
         /*
-         * Una solicitud completada no reinicia automáticamente
-         * por escribir cualquier cosa.
+         * Después se procesa según el paso actual.
          */
-        return;
-
-    }
-
-    if(currentStep === "cancelled"){
+        processUserMessage(text);
 
         /*
-         * Después de cancelar no continúa el flujo.
-         * Es necesario pulsar INICIAR nuevamente.
+         * Limpiamos el campo.
          */
-        return;
+        chatInput.value = "";
 
     }
-
-}
-
-
-/* =========================================================
-   START BUTTON
-========================================================= */
-
-startButton.addEventListener("click",()=>{
-
-    startFlow();
-
-});
-
-
-/* =========================================================
-   CHAT MESSAGES
-========================================================= */
-
-function addMessage(text,type){
-
-    const message = document.createElement("div");
-
-    message.className =
-        "message " +
-        (type === "user" ? "user" : "system");
-
-    const bubble = document.createElement("div");
-
-    bubble.className = "bubble";
-
-    bubble.textContent = text;
-
-    message.appendChild(bubble);
-
-    chatScroll.appendChild(message);
-
-    chatScroll.scrollTop = chatScroll.scrollHeight;
-}
-
-function addSystemMessage(text){
-    addMessage(text,"system");
-}
-
-function addUserMessage(text){
-    addMessage(text,"user");
-}
+);
 
 
 /* =========================================================
@@ -2120,69 +2115,90 @@ function addUserMessage(text){
 function requestStorageKey(){
 
     if(!state.user.id){
+
         return null;
+
     }
 
-    return "gmailaccounts_requests_" + state.user.id;
+    return (
+        "gmailaccounts_requests_" +
+        state.user.id
+    );
+
 }
 
 function loadRequests(){
 
-    const key = requestStorageKey();
+    const key =
+        requestStorageKey();
 
     if(!key){
+
         return;
+
     }
 
     try{
 
         const saved =
-            JSON.parse(localStorage.getItem(key) || "[]");
+            JSON.parse(
+                localStorage.getItem(key) ||
+                "[]"
+            );
 
         if(Array.isArray(saved)){
+
             state.requests = saved;
+
         }
 
     }catch{
+
         state.requests = [];
+
     }
 
     renderHistory();
     renderStats();
+
 }
 
 function saveRequests(){
 
-    const key = requestStorageKey();
+    const key =
+        requestStorageKey();
 
     if(!key){
+
         return;
+
     }
 
     localStorage.setItem(
         key,
         JSON.stringify(state.requests)
     );
+
 }
 
-function createRequest(email){
-
-    if(!email){
-        return null;
-    }
+function createRequest(text){
 
     const request = {
+
         id:
             "REQ-" +
-            Date.now().toString(36).toUpperCase(),
+            Date.now()
+                .toString(36)
+                .toUpperCase(),
 
-        text:email,
-
-        email:email,
+        text:text,
 
         status:"pending",
 
-        date:new Date().toLocaleString("es-ES")
+        date:
+            new Date()
+                .toLocaleString("es-ES")
+
     };
 
     state.requests.push(request);
@@ -2190,65 +2206,12 @@ function createRequest(email){
     saveRequests();
 
     renderHistory();
+
     renderStats();
 
     return request;
+
 }
-
-
-/* =========================================================
-   CHAT FORM
-========================================================= */
-
-chatForm.addEventListener("submit",event=>{
-
-    event.preventDefault();
-
-    const text = chatInput.value.trim();
-
-    /*
-     * Si el usuario pulsa enviar sin introducir nada durante
-     * un paso obligatorio, utilizamos el mensaje predefinido
-     * de incomplete().
-     */
-    if(!text){
-
-        if(
-            currentStep === "waiting_email" ||
-            currentStep === "waiting_password" ||
-            currentStep === "waiting_review"
-        ){
-            showUserMessage("incomplete");
-        }
-
-        return;
-    }
-
-    addUserMessage(text);
-
-    chatInput.value = "";
-
-    /*
-     * La cancelación solo ocurre mediante una acción explícita
-     * del usuario.
-     */
-    if(
-        (
-            currentStep === "waiting_email" ||
-            currentStep === "waiting_password" ||
-            currentStep === "waiting_review"
-        ) &&
-        isCancelCommand(text)
-    ){
-
-        cancelFlow();
-        return;
-
-    }
-
-    processChatMessage(text);
-
-});
 
 
 /* =========================================================
@@ -2258,10 +2221,14 @@ chatForm.addEventListener("submit",event=>{
 function renderHistory(){
 
     const container =
-        document.getElementById("historyList");
+        document.getElementById(
+            "historyList"
+        );
 
     if(!container){
+
         return;
+
     }
 
     if(state.requests.length === 0){
@@ -2279,6 +2246,7 @@ function renderHistory(){
         `;
 
         return;
+
     }
 
     container.innerHTML = "";
@@ -2288,43 +2256,62 @@ function renderHistory(){
         .forEach(request=>{
 
             const item =
-                document.createElement("div");
+                document.createElement(
+                    "div"
+                );
 
-            item.className = "history-item";
+            item.className =
+                "history-item";
 
             const main =
-                document.createElement("div");
+                document.createElement(
+                    "div"
+                );
 
-            main.className = "history-main";
+            main.className =
+                "history-main";
 
             const email =
-                document.createElement("div");
+                document.createElement(
+                    "div"
+                );
 
-            email.className = "history-email";
+            email.className =
+                "history-email";
 
             email.textContent =
-                request.email ||
-                request.text ||
-                "";
+                request.text;
 
             const date =
-                document.createElement("div");
+                document.createElement(
+                    "div"
+                );
 
-            date.className = "history-date";
-            date.textContent = request.date;
+            date.className =
+                "history-date";
+
+            date.textContent =
+                request.date;
 
             const id =
-                document.createElement("div");
+                document.createElement(
+                    "div"
+                );
 
-            id.className = "history-id";
-            id.textContent = request.id;
+            id.className =
+                "history-id";
+
+            id.textContent =
+                request.id;
 
             main.appendChild(email);
             main.appendChild(date);
             main.appendChild(id);
 
             const status =
-                document.createElement("div");
+                document.createElement(
+                    "div"
+                );
 
             status.className =
                 "status " +
@@ -2349,6 +2336,7 @@ function renderHistory(){
             container.appendChild(item);
 
         });
+
 }
 
 
@@ -2360,22 +2348,31 @@ function renderStats(){
 
     const pending =
         state.requests.filter(
-            item=>item.status === "pending"
+            item =>
+                item.status === "pending"
         ).length;
 
     const accepted =
         state.requests.filter(
-            item=>item.status === "approved"
+            item =>
+                item.status === "approved"
         ).length;
 
-    document.getElementById("pendingCount").textContent =
-        pending;
+    document.getElementById(
+        "pendingCount"
+    ).textContent = pending;
 
-    document.getElementById("acceptedCount").textContent =
-        accepted;
+    document.getElementById(
+        "acceptedCount"
+    ).textContent = accepted;
 
-    document.getElementById("balanceValue").textContent =
-        Number(state.balance || 0).toFixed(2);
+    document.getElementById(
+        "balanceValue"
+    ).textContent =
+        Number(
+            state.balance || 0
+        ).toFixed(2);
+
 }
 
 
@@ -2386,24 +2383,34 @@ function renderStats(){
 function renderProfile(){
 
     const username =
-        state.user.username || "Usuario";
+        state.user.username ||
+        "Usuario";
 
     const email =
-        state.user.email || "usuario@email.com";
+        state.user.email ||
+        "usuario@email.com";
 
-    document.getElementById("profileName").textContent =
-        username;
+    document.getElementById(
+        "profileName"
+    ).textContent = username;
 
-    document.getElementById("profileEmail").textContent =
-        email;
+    document.getElementById(
+        "profileEmail"
+    ).textContent = email;
 
-    document.getElementById("profileId").textContent =
+    document.getElementById(
+        "profileId"
+    ).textContent =
         state.user.id
         ? "ID: " + state.user.id
         : "ID no disponible";
 
-    document.getElementById("profileAvatar").textContent =
-        username.charAt(0).toUpperCase();
+    document.getElementById(
+        "profileAvatar"
+    ).textContent =
+        username
+            .charAt(0)
+            .toUpperCase();
 
 }
 
@@ -2414,213 +2421,331 @@ function renderProfile(){
 
 function openModal(title,content){
 
-    modalTitle.textContent = title;
-    modalContent.innerHTML = content;
-    settingsModal.classList.add("open");
+    modalTitle.textContent =
+        title;
+
+    modalContent.innerHTML =
+        content;
+
+    settingsModal.classList.add(
+        "open"
+    );
 
 }
 
 function closeModal(){
 
-    settingsModal.classList.remove("open");
+    settingsModal.classList.remove(
+        "open"
+    );
 
 }
 
-document.getElementById("modalClose")
-    .addEventListener("click",closeModal);
+document
+    .getElementById("modalClose")
+    .addEventListener(
+        "click",
+        closeModal
+    );
 
-settingsModal.addEventListener("click",event=>{
+settingsModal.addEventListener(
+    "click",
+    event=>{
 
-    if(event.target === settingsModal){
-        closeModal();
+        if(
+            event.target ===
+            settingsModal
+        ){
+
+            closeModal();
+
+        }
+
     }
-
-});
+);
 
 
 /* =========================================================
    PROFILE ACTIONS
 ========================================================= */
 
-document.getElementById("editProfile")
-    .addEventListener("click",()=>{
+document
+    .getElementById("editProfile")
+    .addEventListener(
+        "click",
+        ()=>{
 
-        openModal(
-            "Editar perfil",
-            `
-            <div class="modal-text">
-                Estos son los datos asociados actualmente
-                a tu cuenta.
-            </div>
+            openModal(
+                "Editar perfil",
+                `
+                <div class="modal-text">
+                    Estos son los datos asociados actualmente
+                    a tu cuenta.
+                </div>
 
-            <div class="page-eyebrow">USUARIO</div>
+                <div class="page-eyebrow">
+                    USUARIO
+                </div>
 
-            <div class="settings-input"
-                 style="display:flex;align-items:center;">
-                ${escapeHTML(state.user.username)}
-            </div>
+                <div
+                    class="settings-input"
+                    style="display:flex;align-items:center;"
+                >
+                    ${escapeHTML(
+                        state.user.username
+                    )}
+                </div>
 
-            <div class="page-eyebrow" style="margin-top:14px;">
-                CORREO
-            </div>
+                <div
+                    class="page-eyebrow"
+                    style="margin-top:14px;"
+                >
+                    CORREO
+                </div>
 
-            <div class="settings-input"
-                 style="display:flex;align-items:center;">
-                ${escapeHTML(state.user.email)}
-            </div>
+                <div
+                    class="settings-input"
+                    style="display:flex;align-items:center;"
+                >
+                    ${escapeHTML(
+                        state.user.email
+                    )}
+                </div>
 
-            <div class="modal-text" style="margin-top:14px;">
-                Los datos principales de autenticación
-                son administrados por el servidor.
-            </div>
-            `
-        );
+                <div
+                    class="modal-text"
+                    style="margin-top:14px;"
+                >
+                    Los datos principales de autenticación
+                    son administrados por el servidor.
+                </div>
+                `
+            );
 
-    });
+        }
+    );
 
 
-document.getElementById("accountSettings")
-    .addEventListener("click",()=>{
+document
+    .getElementById("accountSettings")
+    .addEventListener(
+        "click",
+        ()=>{
 
-        openModal(
-            "Configuración de cuenta",
-            `
-            <div class="setting-row">
-                <div class="setting-info">
-                    <div class="setting-title">Estado</div>
-                    <div class="setting-description">
-                        Estado de la cuenta actual.
+            openModal(
+                "Configuración de cuenta",
+                `
+                <div class="setting-row">
+                    <div class="setting-info">
+                        <div class="setting-title">
+                            Estado
+                        </div>
+                        <div class="setting-description">
+                            Estado de la cuenta actual.
+                        </div>
+                    </div>
+
+                    <div class="status approved">
+                        Activa
                     </div>
                 </div>
 
-                <div class="status approved">
-                    Activa
-                </div>
-            </div>
+                <div class="setting-row">
+                    <div class="setting-info">
+                        <div class="setting-title">
+                            Rol
+                        </div>
+                        <div class="setting-description">
+                            Nivel de acceso de la cuenta.
+                        </div>
+                    </div>
 
-            <div class="setting-row">
-                <div class="setting-info">
-                    <div class="setting-title">Rol</div>
-                    <div class="setting-description">
-                        Nivel de acceso de la cuenta.
+                    <div
+                        style="font-size:10px;color:#777;"
+                    >
+                        ${escapeHTML(
+                            state.user.role
+                        )}
                     </div>
                 </div>
+                `
+            );
 
-                <div style="font-size:10px;color:#777;">
-                    ${escapeHTML(state.user.role)}
-                </div>
-            </div>
-            `
-        );
-
-    });
+        }
+    );
 
 
-document.getElementById("notificationsSettings")
-    .addEventListener("click",()=>{
+document
+    .getElementById("notificationsSettings")
+    .addEventListener(
+        "click",
+        ()=>{
 
-        openModal(
-            "Notificaciones",
-            `
-            <div class="setting-row">
-                <div class="setting-info">
-                    <div class="setting-title">
-                        Notificaciones
+            openModal(
+                "Notificaciones",
+                `
+                <div class="setting-row">
+                    <div class="setting-info">
+                        <div class="setting-title">
+                            Notificaciones
+                        </div>
+                        <div class="setting-description">
+                            Mostrar avisos de la aplicación.
+                        </div>
                     </div>
-                    <div class="setting-description">
-                        Mostrar avisos de la aplicación.
-                    </div>
-                </div>
 
-                <button
-                    class="toggle ${getSetting("notifications") ? "active" : ""}"
-                    id="notificationsToggle">
-                </button>
-            </div>
-
-            <div class="setting-row">
-                <div class="setting-info">
-                    <div class="setting-title">
-                        Actividad
-                    </div>
-                    <div class="setting-description">
-                        Avisos relacionados con solicitudes.
-                    </div>
+                    <button
+                        class="toggle ${
+                            getSetting("notifications")
+                            ? "active"
+                            : ""
+                        }"
+                        id="notificationsToggle">
+                    </button>
                 </div>
 
-                <button
-                    class="toggle ${getSetting("activityNotifications") ? "active" : ""}"
-                    id="activityToggle">
-                </button>
-            </div>
-            `
-        );
-
-        document.getElementById("notificationsToggle")
-            .addEventListener("click",event=>{
-
-                toggleSetting("notifications");
-                event.currentTarget.classList.toggle("active");
-
-            });
-
-        document.getElementById("activityToggle")
-            .addEventListener("click",event=>{
-
-                toggleSetting("activityNotifications");
-                event.currentTarget.classList.toggle("active");
-
-            });
-
-    });
-
-
-document.getElementById("privacySettings")
-    .addEventListener("click",()=>{
-
-        openModal(
-            "Privacidad",
-            `
-            <div class="setting-row">
-                <div class="setting-info">
-                    <div class="setting-title">
-                        Modo privado
+                <div class="setting-row">
+                    <div class="setting-info">
+                        <div class="setting-title">
+                            Actividad
+                        </div>
+                        <div class="setting-description">
+                            Avisos relacionados con solicitudes.
+                        </div>
                     </div>
-                    <div class="setting-description">
-                        Preferencia local para proteger información
-                        mostrada dentro de la interfaz.
-                    </div>
+
+                    <button
+                        class="toggle ${
+                            getSetting(
+                                "activityNotifications"
+                            )
+                            ? "active"
+                            : ""
+                        }"
+                        id="activityToggle">
+                    </button>
                 </div>
+                `
+            );
 
-                <button
-                    class="toggle ${getSetting("privacyMode") ? "active" : ""}"
-                    id="privacyToggle">
-                </button>
-            </div>
-            `
-        );
+            document
+                .getElementById(
+                    "notificationsToggle"
+                )
+                .addEventListener(
+                    "click",
+                    event=>{
 
-        document.getElementById("privacyToggle")
-            .addEventListener("click",event=>{
+                        toggleSetting(
+                            "notifications"
+                        );
 
-                toggleSetting("privacyMode");
-                event.currentTarget.classList.toggle("active");
+                        event.currentTarget
+                            .classList
+                            .toggle(
+                                "active"
+                            );
 
-            });
+                    }
+                );
 
-    });
+            document
+                .getElementById(
+                    "activityToggle"
+                )
+                .addEventListener(
+                    "click",
+                    event=>{
+
+                        toggleSetting(
+                            "activityNotifications"
+                        );
+
+                        event.currentTarget
+                            .classList
+                            .toggle(
+                                "active"
+                            );
+
+                    }
+                );
+
+        }
+    );
+
+
+document
+    .getElementById("privacySettings")
+    .addEventListener(
+        "click",
+        ()=>{
+
+            openModal(
+                "Privacidad",
+                `
+                <div class="setting-row">
+                    <div class="setting-info">
+                        <div class="setting-title">
+                            Modo privado
+                        </div>
+                        <div class="setting-description">
+                            Preferencia local para proteger información
+                            mostrada dentro de la interfaz.
+                        </div>
+                    </div>
+
+                    <button
+                        class="toggle ${
+                            getSetting("privacyMode")
+                            ? "active"
+                            : ""
+                        }"
+                        id="privacyToggle">
+                    </button>
+                </div>
+                `
+            );
+
+            document
+                .getElementById(
+                    "privacyToggle"
+                )
+                .addEventListener(
+                    "click",
+                    event=>{
+
+                        toggleSetting(
+                            "privacyMode"
+                        );
+
+                        event.currentTarget
+                            .classList
+                            .toggle(
+                                "active"
+                            );
+
+                    }
+                );
+
+        }
+    );
 
 
 /* =========================================================
    LOCAL SETTINGS
 ========================================================= */
 
-const SETTINGS_KEY = "gmailaccounts_settings";
+const SETTINGS_KEY =
+    "gmailaccounts_settings";
 
 const defaultSettings = {
+
     notifications:true,
+
     activityNotifications:true,
+
     privacyMode:true
+
 };
 
 function getSettings(){
@@ -2628,21 +2753,29 @@ function getSettings(){
     try{
 
         return {
+
             ...defaultSettings,
+
             ...JSON.parse(
-                localStorage.getItem(SETTINGS_KEY) || "{}"
+                localStorage.getItem(
+                    SETTINGS_KEY
+                ) || "{}"
             )
+
         };
 
     }catch{
 
-        return {...defaultSettings};
+        return {
+            ...defaultSettings
+        };
 
     }
 
 }
 
-let settings = getSettings();
+let settings =
+    getSettings();
 
 function saveSettings(){
 
@@ -2661,7 +2794,8 @@ function getSetting(name){
 
 function toggleSetting(name){
 
-    settings[name] = !settings[name];
+    settings[name] =
+        !settings[name];
 
     saveSettings();
 
@@ -2678,26 +2812,46 @@ function toggleSetting(name){
    BUTTONS
 ========================================================= */
 
-document.getElementById("withdrawButton")
-    .addEventListener("click",()=>{
+document
+    .getElementById("withdrawButton")
+    .addEventListener(
+        "click",
+        ()=>{
 
-        showToast("La función de retiro todavía no está conectada.");
+            showToast(
+                "La función de retiro todavía no está conectada."
+            );
 
-    });
+        }
+    );
 
-document.getElementById("transactionsButton")
-    .addEventListener("click",()=>{
 
-        showView("historyView");
+document
+    .getElementById("transactionsButton")
+    .addEventListener(
+        "click",
+        ()=>{
 
-    });
+            showView(
+                "historyView"
+            );
 
-document.getElementById("copyReferral")
-    .addEventListener("click",()=>{
+        }
+    );
 
-        showToast("El enlace de referidos estará disponible próximamente.");
 
-    });
+document
+    .getElementById("copyReferral")
+    .addEventListener(
+        "click",
+        ()=>{
+
+            showToast(
+                "El enlace de referidos estará disponible próximamente."
+            );
+
+        }
+    );
 
 
 /* =========================================================
@@ -2707,7 +2861,9 @@ document.getElementById("copyReferral")
 async function logout(){
 
     const token =
-        localStorage.getItem(SESSION_KEY);
+        localStorage.getItem(
+            SESSION_KEY
+        );
 
     try{
 
@@ -2717,6 +2873,7 @@ async function logout(){
                 "/api/auth/logout",
                 {
                     method:"POST",
+
                     headers:{
                         "Authorization":
                             "Bearer " + token
@@ -2728,14 +2885,24 @@ async function logout(){
 
     }catch{}
 
-    localStorage.removeItem(SESSION_KEY);
+    localStorage.removeItem(
+        SESSION_KEY
+    );
 
-    window.location.replace("index.html");
+    window.location.replace(
+        "index.html"
+    );
 
 }
 
-document.getElementById("menuLogoutButton")
-    .addEventListener("click",logout);
+document
+    .getElementById(
+        "menuLogoutButton"
+    )
+    .addEventListener(
+        "click",
+        logout
+    );
 
 
 /* =========================================================
@@ -2744,29 +2911,53 @@ document.getElementById("menuLogoutButton")
 
 function escapeHTML(value){
 
-    return String(value ?? "")
-        .replaceAll("&","&amp;")
-        .replaceAll("<","&lt;")
-        .replaceAll(">","&gt;")
-        .replaceAll('"',"&quot;")
-        .replaceAll("'","&#039;");
+    return String(value)
+
+        .replaceAll(
+            "&",
+            "&amp;"
+        )
+
+        .replaceAll(
+            "<",
+            "&lt;"
+        )
+
+        .replaceAll(
+            ">",
+            "&gt;"
+        )
+
+        .replaceAll(
+            '"',
+            "&quot;"
+        )
+
+        .replaceAll(
+            "'",
+            "&#039;"
+        );
 
 }
 
 
 /* =========================================================
    AUTHENTICATION
-   SILENCIOSA
 ========================================================= */
 
 async function checkSession(){
 
     const token =
-        localStorage.getItem(SESSION_KEY);
+        localStorage.getItem(
+            SESSION_KEY
+        );
 
     if(!token){
 
-        window.location.replace("index.html");
+        window.location.replace(
+            "index.html"
+        );
+
         return false;
 
     }
@@ -2778,19 +2969,25 @@ async function checkSession(){
                 "/api/auth/me",
                 {
                     method:"GET",
+
                     headers:{
                         "Authorization":
                             "Bearer " + token
                     },
+
                     cache:"no-store"
                 }
             );
 
         if(!response.ok){
 
-            localStorage.removeItem(SESSION_KEY);
+            localStorage.removeItem(
+                SESSION_KEY
+            );
 
-            window.location.replace("index.html");
+            window.location.replace(
+                "index.html"
+            );
 
             return false;
 
@@ -2801,26 +2998,46 @@ async function checkSession(){
 
         if(!data.user){
 
-            localStorage.removeItem(SESSION_KEY);
+            localStorage.removeItem(
+                SESSION_KEY
+            );
 
-            window.location.replace("index.html");
+            window.location.replace(
+                "index.html"
+            );
 
             return false;
 
         }
 
         state.user = {
-            id:data.user.id || "",
-            username:data.user.username || "Usuario",
-            email:data.user.email || "usuario@email.com",
-            role:data.user.role || "user"
+
+            id:
+                data.user.id || "",
+
+            username:
+                data.user.username ||
+                "Usuario",
+
+            email:
+                data.user.email ||
+                "usuario@email.com",
+
+            role:
+                data.user.role ||
+                "user"
+
         };
 
         state.balance =
-            Number(data.user.balance || 0);
+            Number(
+                data.user.balance || 0
+            );
 
         renderProfile();
+
         loadRequests();
+
         renderStats();
 
         return true;
@@ -2832,9 +3049,13 @@ async function checkSession(){
             error
         );
 
-        localStorage.removeItem(SESSION_KEY);
+        localStorage.removeItem(
+            SESSION_KEY
+        );
 
-        window.location.replace("index.html");
+        window.location.replace(
+            "index.html"
+        );
 
         return false;
 
@@ -2847,20 +3068,24 @@ async function checkSession(){
    KEYBOARD
 ========================================================= */
 
-document.addEventListener("keydown",event=>{
+document.addEventListener(
+    "keydown",
+    event=>{
 
-    if(event.key === "Escape"){
+        if(event.key === "Escape"){
 
-        closeMenu();
-        closeModal();
+            closeMenu();
+
+            closeModal();
+
+        }
 
     }
-
-});
+);
 
 
 /* =========================================================
-   INITIALIZATION
+   START APP
 ========================================================= */
 
 checkSession();
