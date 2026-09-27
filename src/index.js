@@ -140,6 +140,13 @@ export default {
       }
 
       if (
+        url.pathname === "/api/admin/requests/pending-count" &&
+        request.method === "GET"
+      ) {
+        return handleAdminPendingRequestCount(request, env);
+      }
+
+      if (
         url.pathname === "/api/admin/balances" &&
         request.method === "GET"
       ) {
@@ -972,7 +979,15 @@ async function handleLogout(
 
 /*
  * =========================================================
- * CREATE DEMO ACCOUNT REQUEST
+ * CREATE ACCOUNT REQUEST
+ * =========================================================
+ *
+ * IMPORTANT:
+ * Only the email of the requested account
+ * is accepted and stored.
+ *
+ * No password or verification code is
+ * collected, transmitted or stored.
  * =========================================================
  */
 
@@ -1014,22 +1029,18 @@ async function handleCreateRequest(
         .trim()
         .toLowerCase();
 
-    const demoPassword =
-      String(
-        body.demo_password ||
-        body.password ||
-        ""
-      );
+    /*
+     * Solo se necesita el correo.
+     * No leemos ningún campo de contraseña
+     * ni código de acceso.
+     */
 
-    if (
-      !demoEmail ||
-      !demoPassword
-    ) {
+    if (!demoEmail) {
       return json(
         {
           success: false,
           error:
-            "Completa los datos de la cuenta demo."
+            "Completa el correo de la cuenta."
         },
         400
       );
@@ -1040,7 +1051,7 @@ async function handleCreateRequest(
         {
           success: false,
           error:
-            "El correo demo no es válido."
+            "El correo de la cuenta no es válido."
         },
         400
       );
@@ -1072,7 +1083,7 @@ async function handleCreateRequest(
         {
           success: false,
           error:
-            "Ya tienes una solicitud pendiente para esta cuenta demo."
+            "Ya tienes una solicitud pendiente para esta cuenta."
         },
         409
       );
@@ -1086,6 +1097,17 @@ async function handleCreateRequest(
 
     const now =
       Date.now();
+
+    /*
+     * La base de datos actual todavía tiene
+     * la columna legacy demo_password como
+     * NOT NULL. Se mantiene temporalmente
+     * por compatibilidad, pero SIEMPRE se
+     * escribe una cadena vacía.
+     *
+     * Nunca se almacena una contraseña,
+     * código ni secreto de la cuenta solicitada.
+     */
 
     await env.DB1
       .prepare(`
@@ -1118,11 +1140,15 @@ async function handleCreateRequest(
         id,
         user.id,
         demoEmail,
-        demoPassword,
+        "",
         reward,
         now
       )
       .run();
+
+    /*
+     * Notificación para el usuario.
+     */
 
     await createNotification(
       env,
@@ -1130,6 +1156,18 @@ async function handleCreateRequest(
       "request_created",
       "Solicitud enviada",
       `Tu solicitud fue enviada para revisión. Recompensa prevista: +${formatAmount(reward)} USDT.`
+    );
+
+    /*
+     * Notificación para los administradores.
+     */
+
+    await createAdminRequestNotification(
+      env,
+      user,
+      id,
+      demoEmail,
+      now
     );
 
     return json({
@@ -1143,7 +1181,12 @@ async function handleCreateRequest(
         created_at: now
       }
     });
-  } catch {
+  } catch (error) {
+    console.error(
+      "Create request error:",
+      error
+    );
+
     return json(
       {
         success: false,
@@ -1548,16 +1591,6 @@ async function handleAdminUserStatus(
       );
     }
 
-    /*
-     * Para no modificar el esquema
-     * original de users, el bloqueo
-     * se implementa mediante
-     * admin_accounts para admins.
-     *
-     * Los usuarios normales se
-     * controlan con user_status.
-     */
-
     const exists =
       await env.DB1
         .prepare(`
@@ -1604,12 +1637,6 @@ async function handleAdminUserStatus(
         400
       );
     }
-
-    /*
-     * Add the status column only if
-     * the existing users table does
-     * not have it.
-     */
 
     await ensureUserStatusColumn(env);
 
@@ -1684,7 +1711,6 @@ async function handleAdminRequests(
       r.id,
       r.user_id,
       r.demo_email,
-      r.demo_password,
       r.status,
       r.reward,
       r.admin_id,
@@ -1729,6 +1755,49 @@ async function handleAdminRequests(
     success: true,
     requests:
       rows.results || []
+  });
+}
+
+
+/*
+ * =========================================================
+ * ADMIN PENDING REQUEST COUNT
+ * =========================================================
+ */
+
+async function handleAdminPendingRequestCount(
+  request,
+  env
+) {
+  const admin =
+    await requireAdmin(
+      request,
+      env
+    );
+
+  if (!admin) {
+    return unauthorized();
+  }
+
+  const result =
+    await env.DB1
+      .prepare(`
+        SELECT COUNT(*) AS count
+        FROM requests
+        WHERE status = 'pending'
+      `)
+      .first();
+
+  const count =
+    Number(result?.count || 0);
+
+  return json({
+    success: true,
+    count,
+    message:
+      count === 1
+        ? "1 nueva solicitud pendiente"
+        : `${count} nuevas solicitudes pendientes`
   });
 }
 
@@ -2032,7 +2101,12 @@ async function handleAdminRequestAction(
       reward,
       balance: balanceAfter
     });
-  } catch {
+  } catch (error) {
+    console.error(
+      "Admin request action error:",
+      error
+    );
+
     return json(
       {
         success: false,
@@ -2176,6 +2250,7 @@ async function handleAdminNotifications(
         FROM notifications n
         INNER JOIN users u
           ON u.id = n.user_id
+        WHERE n.type LIKE 'admin_%'
         ORDER BY n.created_at DESC
         LIMIT 500
       `)
@@ -2610,11 +2685,6 @@ async function handleAdminAdminStatus(
       )
       .run();
 
-    /*
-     * If deactivated, invalidate
-     * every existing session.
-     */
-
     if (active === 0) {
       await env.DB1
         .prepare(`
@@ -2898,14 +2968,6 @@ async function requireAdmin(
     return null;
   }
 
-  /*
-   * Primary admin is controlled
-   * through Cloudflare secrets.
-   *
-   * Secondary admins must also be
-   * active in admin_accounts.
-   */
-
   const primaryEmail =
     getAdminEmail(env);
 
@@ -2985,11 +3047,6 @@ async function getAuthenticatedUser(
     return null;
   }
 
-  /*
-   * Disabled normal users cannot
-   * continue using their sessions.
-   */
-
   if (session.role === "user") {
     try {
       await ensureUserStatusColumn(env);
@@ -3024,408 +3081,4 @@ async function getAuthenticatedUser(
 }
 
 
-function getSessionToken(
-  request
-) {
-  const authorization =
-    request.headers.get(
-      "Authorization"
-    );
-
-  if (
-    authorization &&
-    authorization.startsWith("Bearer ")
-  ) {
-    return authorization
-      .slice(7)
-      .trim();
-  }
-
-  const cookieHeader =
-    request.headers.get("Cookie");
-
-  if (!cookieHeader) {
-    return null;
-  }
-
-  const cookies =
-    parseCookies(cookieHeader);
-
-  return cookies.session || null;
-}
-
-
-/*
- * =========================================================
- * SESSIONS
- * =========================================================
- */
-
-async function createSession(
-  userId,
-  env
-) {
-  const token =
-    crypto.randomUUID() +
-    crypto.randomUUID();
-
-  const tokenHash =
-    await hashToken(token);
-
-  const sessionId =
-    crypto.randomUUID();
-
-  const createdAt =
-    Date.now();
-
-  const expiresAt =
-    createdAt +
-    SESSION_DURATION;
-
-  await env.DB1
-    .prepare(`
-      INSERT INTO sessions (
-        id,
-        user_id,
-        token_hash,
-        expires_at,
-        created_at
-      )
-      VALUES (
-        ?1,
-        ?2,
-        ?3,
-        ?4,
-        ?5
-      )
-    `)
-    .bind(
-      sessionId,
-      userId,
-      tokenHash,
-      expiresAt,
-      createdAt
-    )
-    .run();
-
-  return {
-    id: sessionId,
-    token,
-    expiresAt
-  };
-}
-
-
-/*
- * =========================================================
- * NOTIFICATIONS
- * =========================================================
- */
-
-async function createNotification(
-  env,
-  userId,
-  type,
-  title,
-  message
-) {
-  await env.DB1
-    .prepare(`
-      INSERT INTO notifications (
-        id,
-        user_id,
-        type,
-        title,
-        message,
-        read,
-        created_at
-      )
-      VALUES (
-        ?1,
-        ?2,
-        ?3,
-        ?4,
-        ?5,
-        0,
-        ?6
-      )
-    `)
-    .bind(
-      crypto.randomUUID(),
-      userId,
-      type,
-      title,
-      message,
-      Date.now()
-    )
-    .run();
-}
-
-
-/*
- * =========================================================
- * CONFIG HELPERS
- * =========================================================
- */
-
-async function getDefaultReward(env) {
-  const row =
-    await env.DB1
-      .prepare(`
-        SELECT value
-        FROM app_config
-        WHERE key = 'default_reward'
-        LIMIT 1
-      `)
-      .first();
-
-  const reward =
-    Number(
-      row?.value ?? 0.20
-    );
-
-  if (
-    !Number.isFinite(reward) ||
-    reward < 0
-  ) {
-    return 0.20;
-  }
-
-  return roundMoney(reward);
-}
-
-
-/*
- * =========================================================
- * USER STATUS COMPATIBILITY
- * =========================================================
- */
-
-async function ensureUserStatusColumn(env) {
-  try {
-    await env.DB1
-      .prepare(`
-        ALTER TABLE users
-        ADD COLUMN user_status INTEGER NOT NULL DEFAULT 1
-      `)
-      .run();
-  } catch {
-    /*
-     * SQLite/D1 throws if the column
-     * already exists. That is harmless.
-     */
-  }
-}
-
-
-/*
- * =========================================================
- * PASSWORD / TOKEN HASHING
- * =========================================================
- */
-
-async function hashPassword(
-  password
-) {
-  const encoder =
-    new TextEncoder();
-
-  const data =
-    encoder.encode(password);
-
-  const hashBuffer =
-    await crypto.subtle.digest(
-      "SHA-256",
-      data
-    );
-
-  return bufferToHex(
-    hashBuffer
-  );
-}
-
-
-async function verifyPassword(
-  password,
-  storedHash
-) {
-  const hash =
-    await hashPassword(password);
-
-  return hash === storedHash;
-}
-
-
-async function hashToken(
-  token
-) {
-  const encoder =
-    new TextEncoder();
-
-  const data =
-    encoder.encode(token);
-
-  const hashBuffer =
-    await crypto.subtle.digest(
-      "SHA-256",
-      data
-    );
-
-  return bufferToHex(
-    hashBuffer
-  );
-}
-
-
-function bufferToHex(
-  buffer
-) {
-  return Array.from(
-    new Uint8Array(buffer)
-  )
-    .map((byte) =>
-      byte
-        .toString(16)
-        .padStart(2, "0")
-    )
-    .join("");
-}
-
-
-/*
- * =========================================================
- * ADMIN SECRETS
- * =========================================================
- */
-
-function getAdminEmail(env) {
-  return env.ADMIN_EMAIL
-    ? String(
-        env.ADMIN_EMAIL
-      ).trim()
-    : null;
-}
-
-
-function getAdminPassword(env) {
-  return env.ADMIN_PASSWORD
-    ? String(
-        env.ADMIN_PASSWORD
-      )
-    : null;
-}
-
-
-/*
- * =========================================================
- * UTILITIES
- * =========================================================
- */
-
-function isValidEmail(
-  email
-) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
-    email
-  );
-}
-
-
-function createReferralCode() {
-  return crypto
-    .randomUUID()
-    .replace(/-/g, "")
-    .slice(0, 10)
-    .toUpperCase();
-}
-
-
-function roundMoney(
-  value
-) {
-  return Math.round(
-    Number(value) * 100
-  ) / 100;
-}
-
-
-function formatAmount(
-  value
-) {
-  return roundMoney(value)
-    .toFixed(2);
-}
-
-
-function parseCookies(
-  header
-) {
-  const cookies = {};
-
-  for (
-    const part of header.split(";")
-  ) {
-    const separator =
-      part.indexOf("=");
-
-    if (separator === -1) {
-      continue;
-    }
-
-    const key =
-      part
-        .slice(0, separator)
-        .trim();
-
-    const value =
-      part
-        .slice(separator + 1)
-        .trim();
-
-    try {
-      cookies[key] =
-        decodeURIComponent(value);
-    } catch {
-      cookies[key] = value;
-    }
-  }
-
-  return cookies;
-}
-
-
-function unauthorized() {
-  return json(
-    {
-      success: false,
-      error:
-        "Sesión no autorizada."
-    },
-    401
-  );
-}
-
-
-/*
- * =========================================================
- * JSON RESPONSE
- * =========================================================
- */
-
-function json(
-  data,
-  status = 200
-) {
-  return new Response(
-    JSON.stringify(data),
-    {
-      status,
-      headers: {
-        "Content-Type":
-          "application/json; charset=UTF-8",
-        "Cache-Control":
-          "no-store"
-      }
-    }
-  );
-        }
+function
