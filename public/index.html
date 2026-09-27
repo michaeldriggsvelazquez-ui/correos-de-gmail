@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
 
@@ -724,6 +725,15 @@
 
         /*
          * =========================================
+         * CONTROL DE REDIRECCIÓN
+         * =========================================
+         */
+
+        let redirecting = false;
+
+
+        /*
+         * =========================================
          * MENSAJES
          * =========================================
          */
@@ -733,6 +743,7 @@
             text,
             type = ""
         ) {
+
             element.textContent = text;
 
             element.className =
@@ -741,14 +752,17 @@
             if (type) {
                 element.classList.add(type);
             }
+
         }
 
 
         function hideMessage(element) {
+
             element.textContent = "";
 
             element.className =
                 "message";
+
         }
 
 
@@ -827,10 +841,14 @@
             let data = null;
 
             try {
+
                 data =
                     await response.json();
+
             } catch {
+
                 data = {};
+
             }
 
             if (!response.ok) {
@@ -843,6 +861,7 @@
             }
 
             return data;
+
         }
 
 
@@ -868,11 +887,17 @@
 
         /*
          * =========================================
-         * REDIRECCIÓN SEGÚN ROL
+         * REDIRECCIONES
          * =========================================
          */
 
         function goToUserApp() {
+
+            if (redirecting) {
+                return;
+            }
+
+            redirecting = true;
 
             window.location.replace(
                 "/app.html"
@@ -883,6 +908,12 @@
 
         function goToAdminPanel() {
 
+            if (redirecting) {
+                return;
+            }
+
+            redirecting = true;
+
             window.location.replace(
                 "/admin.html"
             );
@@ -890,19 +921,171 @@
         }
 
 
-        function redirectByRole(user) {
+        /*
+         * =========================================
+         * OBTENER USUARIO ACTUAL
+         * =========================================
+         */
 
-            if (
-                user &&
-                user.role === "admin"
-            ) {
+        async function getCurrentUser() {
 
-                goToAdminPanel();
+            const token =
+                localStorage.getItem(
+                    "gmailaccounts_session"
+                );
 
-                return;
+            if (!token) {
+                return null;
             }
 
-            goToUserApp();
+            const response =
+                await fetch(
+                    "/api/auth/me",
+                    {
+                        method: "GET",
+
+                        headers: {
+                            "Authorization":
+                                "Bearer " + token
+                        },
+
+                        cache: "no-store"
+                    }
+                );
+
+            let data = {};
+
+            try {
+
+                data =
+                    await response.json();
+
+            } catch {
+
+                data = {};
+
+            }
+
+            if (
+                !response.ok ||
+                !data.success ||
+                !data.authenticated ||
+                !data.user
+            ) {
+
+                return null;
+
+            }
+
+            return data.user;
+
+        }
+
+
+        /*
+         * =========================================
+         * REDIRECCIÓN SEGÚN ROL
+         * =========================================
+         */
+
+        async function redirectByRole(user = null) {
+
+            /*
+             * Si ya tenemos el usuario,
+             * usamos directamente su rol.
+             */
+
+            if (user) {
+
+                if (
+                    String(user.role)
+                        .toLowerCase()
+                        === "admin"
+                ) {
+
+                    goToAdminPanel();
+
+                    return;
+
+                }
+
+                if (
+                    String(user.role)
+                        .toLowerCase()
+                        === "user"
+                ) {
+
+                    goToUserApp();
+
+                    return;
+
+                }
+
+            }
+
+
+            /*
+             * Si /api/auth/login no devolvió
+             * el usuario, consultamos /me.
+             */
+
+            try {
+
+                const currentUser =
+                    await getCurrentUser();
+
+                if (!currentUser) {
+
+                    localStorage.removeItem(
+                        "gmailaccounts_session"
+                    );
+
+                    window.location.replace(
+                        "/"
+                    );
+
+                    return;
+
+                }
+
+
+                /*
+                 * ADMIN
+                 */
+
+                if (
+                    String(currentUser.role)
+                        .toLowerCase()
+                        === "admin"
+                ) {
+
+                    goToAdminPanel();
+
+                    return;
+
+                }
+
+
+                /*
+                 * USUARIO NORMAL
+                 */
+
+                goToUserApp();
+
+            } catch (error) {
+
+                console.error(
+                    "Error comprobando el rol:",
+                    error
+                );
+
+                showMessage(
+                    loginMessage,
+                    "No se pudo comprobar el tipo de cuenta.",
+                    "error"
+                );
+
+            }
 
         }
 
@@ -918,6 +1101,10 @@
             async function(event) {
 
                 event.preventDefault();
+
+                if (redirecting) {
+                    return;
+                }
 
                 hideMessage(loginMessage);
 
@@ -948,6 +1135,7 @@
                     );
 
                     return;
+
                 }
 
                 loginButton.disabled = true;
@@ -970,21 +1158,46 @@
                             }
                         );
 
+
+                    /*
+                     * Guardamos el token ANTES
+                     * de consultar /api/auth/me.
+                     */
+
                     saveSession(
                         data.session
                     );
 
+
+                    if (!data.session) {
+
+                        throw new Error(
+                            "El servidor no devolvió una sesión válida."
+                        );
+
+                    }
+
+
                     showMessage(
                         loginMessage,
-                        "Inicio de sesión correcto. Abriendo GmailAccounts...",
+                        "Inicio de sesión correcto. Comprobando cuenta...",
                         "success"
                     );
 
+
+                    /*
+                     * Damos un pequeño tiempo para
+                     * mostrar el mensaje y después
+                     * comprobamos el rol real.
+                     */
+
                     setTimeout(
-                        function() {
-                            redirectByRole(
-                                data.user
+                        async function() {
+
+                            await redirectByRole(
+                                data.user || null
                             );
+
                         },
                         350
                     );
@@ -1022,6 +1235,10 @@
             async function(event) {
 
                 event.preventDefault();
+
+                if (redirecting) {
+                    return;
+                }
 
                 hideMessage(registerMessage);
 
@@ -1061,6 +1278,7 @@
                     );
 
                     return;
+
                 }
 
                 if (password.length < 8) {
@@ -1072,6 +1290,7 @@
                     );
 
                     return;
+
                 }
 
                 registerButton.disabled = true;
@@ -1095,9 +1314,11 @@
                             }
                         );
 
+
                     saveSession(
                         data.session
                     );
+
 
                     showMessage(
                         registerMessage,
@@ -1105,8 +1326,24 @@
                         "success"
                     );
 
+
                     setTimeout(
-                        goToUserApp,
+                        async function() {
+
+                            /*
+                             * Normalmente el registro
+                             * crea usuarios normales.
+                             *
+                             * Aun así, comprobamos el
+                             * rol real para mantener
+                             * una sola lógica de acceso.
+                             */
+
+                            await redirectByRole(
+                                data.user || null
+                            );
+
+                        },
                         350
                     );
 
@@ -1140,6 +1377,10 @@
 
         async function checkExistingSession() {
 
+            if (redirecting) {
+                return;
+            }
+
             const token =
                 localStorage.getItem(
                     "gmailaccounts_session"
@@ -1151,54 +1392,55 @@
 
             try {
 
-                const response =
-                    await fetch(
-                        "/api/auth/me",
-                        {
-                            method: "GET",
+                const currentUser =
+                    await getCurrentUser();
 
-                            headers: {
-                                "Authorization":
-                                    "Bearer " + token
-                            },
 
-                            cache: "no-store"
-                        }
-                    );
-
-                if (
-                    response.ok
-                ) {
-
-                    const data =
-                        await response.json();
-
-                    if (
-                        data.success &&
-                        data.authenticated &&
-                        data.user
-                    ) {
-
-                        redirectByRole(
-                            data.user
-                        );
-
-                    }
-
-                } else {
+                if (!currentUser) {
 
                     localStorage.removeItem(
                         "gmailaccounts_session"
                     );
 
+                    return;
+
                 }
 
-            } catch {
+
                 /*
-                 * Si temporalmente no se puede
-                 * consultar la sesión, dejamos
-                 * visible el login.
+                 * Si ya existe una sesión:
+                 *
+                 * ADMIN  → admin.html
+                 * USER   → app.html
                  */
+
+                if (
+                    String(currentUser.role)
+                        .toLowerCase()
+                        === "admin"
+                ) {
+
+                    goToAdminPanel();
+
+                    return;
+
+                }
+
+
+                goToUserApp();
+
+            } catch (error) {
+
+                console.error(
+                    "Error comprobando la sesión:",
+                    error
+                );
+
+                /*
+                 * Si temporalmente falla la API,
+                 * dejamos visible el login.
+                 */
+
             }
 
         }
@@ -1215,4 +1457,5 @@
     </script>
 
 </body>
+
     </html>
