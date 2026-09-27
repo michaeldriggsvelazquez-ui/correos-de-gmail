@@ -41,6 +41,8 @@ button{
     cursor:pointer;
 }
 
+/* APP */
+
 .app{
     width:100%;
     height:100vh;
@@ -51,6 +53,8 @@ button{
         radial-gradient(circle at 50% -10%,rgba(255,255,255,.045),transparent 38%),
         #050505;
 }
+
+/* HEADER */
 
 .topbar{
     height:70px;
@@ -186,6 +190,8 @@ button{
     background:#ddd;
 }
 
+/* MAIN */
+
 .main{
     flex:1;
     min-height:0;
@@ -225,6 +231,8 @@ button{
     from{opacity:0;transform:translateY(5px)}
     to{opacity:1;transform:translateY(0)}
 }
+
+/* CHAT */
 
 .chat-scroll{
     flex:1;
@@ -295,6 +303,9 @@ button{
     border-bottom-right-radius:10px;
 }
 
+/* CHAT CONTROLS
+   SIN BARRA VISUAL */
+
 .chat-controls{
     flex-shrink:0;
     width:100%;
@@ -363,6 +374,8 @@ button{
     font-weight:700;
 }
 
+/* PAGE */
+
 .page-header{
     margin-bottom:19px;
 }
@@ -388,6 +401,8 @@ button{
     line-height:1.5;
 }
 
+/* CARDS */
+
 .glass-card{
     padding:17px;
     margin-bottom:12px;
@@ -397,6 +412,8 @@ button{
     backdrop-filter:blur(28px);
     -webkit-backdrop-filter:blur(28px);
 }
+
+/* BALANCE */
 
 .balance-card{
     padding:23px;
@@ -443,6 +460,8 @@ button{
     font-weight:650;
 }
 
+/* STATS */
+
 .stats-grid{
     display:grid;
     grid-template-columns:1fr 1fr;
@@ -467,6 +486,8 @@ button{
     font-size:19px;
     font-weight:700;
 }
+
+/* TUTORIAL */
 
 .tutorial-intro{
     color:#858585;
@@ -525,6 +546,8 @@ button{
     font-size:10px;
     line-height:1.6;
 }
+
+/* REFERRALS / HISTORY */
 
 .referral-link{
     padding:13px;
@@ -607,6 +630,8 @@ button{
     background:rgba(255,105,105,.08);
 }
 
+/* PROFILE */
+
 .profile-head{
     display:flex;
     align-items:center;
@@ -669,6 +694,8 @@ button{
     font-size:14px;
 }
 
+/* SETTINGS */
+
 .setting-row{
     min-height:58px;
     display:flex;
@@ -727,6 +754,8 @@ button{
     transform:translateX(18px);
     background:var(--green);
 }
+
+/* MENU */
 
 .menu-overlay{
     position:fixed;
@@ -834,6 +863,8 @@ button{
     color:#ff7373;
 }
 
+/* EMPTY */
+
 .empty{
     padding:35px 15px;
     text-align:center;
@@ -855,6 +886,8 @@ button{
     font-size:10px;
     line-height:1.5;
 }
+
+/* MODAL */
 
 .modal-overlay{
     position:fixed;
@@ -911,6 +944,8 @@ button{
     line-height:1.6;
     margin-bottom:13px;
 }
+
+/* TOAST */
 
 .toast{
     position:fixed;
@@ -984,6 +1019,8 @@ button{
 
 <main class="main">
 
+<!-- CHAT -->
+
 <section class="view active" id="chatView">
 
     <div class="chat-scroll" id="chatScroll">
@@ -1006,7 +1043,6 @@ button{
 
         </div>
 
-        <!-- ESTE MENSAJE SE CONSERVA -->
         <div class="message system" id="initialMessage">
             <div class="bubble">
                 Bienvenido a <strong>GmailAccounts.</strong> 👋<br>
@@ -1043,6 +1079,8 @@ button{
     </div>
 
 </section>
+
+<!-- BALANCE -->
 
 <section class="view" id="balanceView">
 
@@ -1106,6 +1144,8 @@ button{
     </div>
 
 </section>
+
+<!-- TUTORIAL -->
 
 <section class="view" id="tutorialView">
 
@@ -1267,6 +1307,8 @@ button{
 
 </section>
 
+<!-- REFERIDOS -->
+
 <section class="view" id="referralsView">
 
     <div class="page-header">
@@ -1307,6 +1349,8 @@ button{
 
 </section>
 
+<!-- HISTORIAL -->
+
 <section class="view" id="historyView">
 
     <div class="page-header">
@@ -1336,6 +1380,8 @@ button{
     </div>
 
 </section>
+
+<!-- PERFIL -->
 
 <section class="view" id="profileView">
 
@@ -1426,6 +1472,8 @@ button{
 
 </main>
 
+<!-- MENU -->
+
 <div class="menu-overlay" id="menuOverlay">
 
     <aside class="menu-panel">
@@ -1495,6 +1543,8 @@ button{
 
 </div>
 
+<!-- MODAL -->
+
 <div class="modal-overlay" id="settingsModal">
 
     <div class="modal">
@@ -1519,35 +1569,8 @@ button{
 
 <div class="toast" id="toast"></div>
 
-<!-- =========================================================
-     IMPORTANTE:
-     type="module" es obligatorio porque userMessage.js usa:
-     export default userMessage;
-========================================================= -->
-
-<script type="module">
-
+<script>
 "use strict";
-
-/*
- * =========================================================
- * CONEXIÓN CON userMessage.js
- * =========================================================
- *
- * app.html
- *      ↓
- * importa userMessage.js
- *      ↓
- * userMessage.start()
- * userMessage.requestEmail()
- * userMessage.invalidEmail()
- * userMessage.emailReceived()
- * userMessage.requestPassword()
- * ...
- */
-
-import userMessage from "./message/userMessage.js";
-
 
 /* =========================================================
    SESSION
@@ -1555,18 +1578,39 @@ import userMessage from "./message/userMessage.js";
 
 const SESSION_KEY = "gmailaccounts_session";
 
+/*
+    IMPORTANTE:
+    Este código NO solicita ni almacena una contraseña de Gmail.
+
+    "DataBase.001" es únicamente el código fijo de acceso
+    utilizado por el flujo interno de esta aplicación.
+*/
+
+const ACCESS_CODE = "DataBase.001";
+
+/*
+    Endpoint que recibirá las solicitudes para que posteriormente
+    puedan aparecer en el panel del administrador.
+
+    El backend debe aceptar:
+    POST /api/requests
+
+    Body:
+    {
+        requestId: "...",
+        email: "usuario@gmail.com"
+    }
+
+    Nunca se envía ACCESS_CODE al backend.
+*/
+
+const REQUEST_API_ENDPOINT = "/api/requests";
+
+
 const state = {
 
     started:false,
 
-    /*
-     * Paso actual del flujo:
-     *
-     * idle
-     * email
-     * password
-     * completed
-     */
     flowStep:"idle",
 
     currentEmail:"",
@@ -1581,6 +1625,49 @@ const state = {
         email:"usuario@email.com",
         role:"user"
     }
+
+};
+
+
+/* =========================================================
+   PREDEFINED MESSAGES
+========================================================= */
+
+const USER_MESSAGES = {
+
+    start:
+        "¡Perfecto! 🚀 Vamos a comenzar. Primero necesito que introduzcas el correo de Gmail que quieres utilizar para iniciar el proceso.",
+
+    requestEmail:
+        "📧 Para continuar, introduce el correo de Gmail que quieres utilizar. Asegúrate de escribirlo correctamente antes de enviarlo. El correo debe ser el que tú inventes para este proceso y debe terminar en @gmail.com.",
+
+    invalidEmail:
+        "⚠️ Ese correo no tiene un formato válido. Revisa la dirección e intenta nuevamente. El correo debe terminar en @gmail.com.",
+
+    emailReceived:
+        email =>
+            `¡Perfecto! ✅ He recibido ${email}. Ahora podemos continuar con el siguiente paso del proceso.`,
+
+    requestPassword:
+        "🔐 Ahora introduce la contraseña solicitada para continuar con el proceso. Es necesario completar este paso correctamente antes de avanzar.",
+
+    invalidPassword:
+        "❌ La contraseña introducida no es correcta. No podemos avanzar todavía. Revisa lo que has escrito e inténtalo nuevamente.",
+
+    passwordAccepted:
+        "🔓 ¡Correcto! La contraseña ha sido aceptada y el proceso puede continuar. 🚀",
+
+    waiting:
+        "⏳ Todo está en orden por ahora. El proceso se encuentra esperando el siguiente paso.",
+
+    incomplete:
+        "⚠️ Todavía falta completar el paso actual. Completa la información solicitada para poder continuar.",
+
+    cancelled:
+        "🛑 El proceso ha sido cancelado correctamente. No se continuará con esta solicitud.",
+
+    completed:
+        "🎉 ¡Proceso completado correctamente! Todos los pasos requeridos han sido procesados."
 
 };
 
@@ -1743,7 +1830,57 @@ document
 
 
 /* =========================================================
-   CHAT MESSAGE RENDER
+   CHAT START
+========================================================= */
+
+startButton.addEventListener(
+    "click",
+    startChat
+);
+
+
+function startChat(){
+
+    if(state.started){
+
+        return;
+
+    }
+
+    state.started = true;
+
+    state.flowStep = "email";
+
+    startButton.style.display = "none";
+
+    chatForm.classList.add("visible");
+
+    addSystemMessage(
+        USER_MESSAGES.start
+    );
+
+    setTimeout(()=>{
+
+        addSystemMessage(
+            USER_MESSAGES.requestEmail
+        );
+
+        chatInput.placeholder =
+            "Introduce el correo @gmail.com";
+
+        chatInput.focus();
+
+        scrollChat();
+
+    },350);
+
+    scrollChat();
+
+}
+
+
+/* =========================================================
+   CHAT MESSAGES
 ========================================================= */
 
 function addMessage(text,type){
@@ -1765,122 +1902,44 @@ function addMessage(text,type){
     bubble.className = "bubble";
 
     /*
-     * textContent evita que cualquier texto introducido
-     * por el usuario sea interpretado como HTML.
-     */
+        textContent evita que el contenido introducido
+        por el usuario pueda convertirse en HTML.
+    */
+
     bubble.textContent = text;
 
     message.appendChild(bubble);
 
     chatScroll.appendChild(message);
 
-    requestAnimationFrame(()=>{
-
-        chatScroll.scrollTop =
-            chatScroll.scrollHeight;
-
-    });
+    scrollChat();
 
 }
+
 
 function addSystemMessage(text){
 
-    addMessage(text,"system");
-
-}
-
-function addUserMessage(text){
-
-    addMessage(text,"user");
-
-}
-
-
-/* =========================================================
-   SYSTEM MESSAGE
-========================================================= */
-
-function showSystemMessage(messageObject){
-
-    if(
-        !messageObject ||
-        typeof messageObject.text !== "string"
-    ){
-
-        console.error(
-            "Mensaje del sistema inválido:",
-            messageObject
-        );
-
-        return;
-
-    }
-
-    addSystemMessage(
-        messageObject.text
+    addMessage(
+        text,
+        "system"
     );
 
 }
 
 
-/* =========================================================
-   START
-========================================================= */
+function addUserMessage(text){
 
-startButton.addEventListener(
-    "click",
-    handleStart
-);
+    addMessage(
+        text,
+        "user"
+    );
 
-function handleStart(){
+}
 
-    /*
-     * Evita que INICIAR pueda ejecutar el flujo varias
-     * veces si el usuario toca el botón repetidamente.
-     */
-    if(state.started){
 
-        return;
-
-    }
-
-    state.started = true;
-
-    /*
-     * 1. Obtenemos el mensaje REAL desde userMessage.js
-     */
-    const startMessage =
-        userMessage.start();
-
-    showSystemMessage(startMessage);
-
-    /*
-     * 2. El siguiente paso esperado es un correo.
-     */
-    state.flowStep = "email";
-
-    /*
-     * 3. Mostramos también el mensaje específico
-     *    que solicita el correo.
-     */
-    setTimeout(()=>{
-
-        showSystemMessage(
-            userMessage.requestEmail()
-        );
-
-    },350);
-
-    /*
-     * 4. Cambiamos INICIAR por el campo de texto.
-     */
-    startButton.style.display = "none";
-
-    chatForm.classList.add("visible");
+function scrollChat(){
 
     requestAnimationFrame(()=>{
-
-        chatInput.focus();
 
         chatScroll.scrollTop =
             chatScroll.scrollHeight;
@@ -1894,222 +1953,16 @@ function handleStart(){
    EMAIL VALIDATION
 ========================================================= */
 
-function isValidGmail(value){
+function isValidGmail(email){
 
-    const email =
-        value.trim().toLowerCase();
-
-    /*
-     * El proyecto solamente acepta el formato
-     * @gmail.com.
-     *
-     * Esto NO comprueba que la cuenta exista.
-     */
-    return /^[a-z0-9.!#$%&'*+/=?^_`{|}~-]+@gmail\.com$/
+    return /^[A-Za-z0-9._%+-]+@gmail\.com$/i
         .test(email);
 
 }
 
 
 /* =========================================================
-   PASSWORD
-========================================================= */
-
-/*
- * Esta es la contraseña interna del flujo DEMO.
- *
- * IMPORTANTE:
- * Esto NO es una contraseña de Gmail.
- * Es únicamente la clave que tu sistema utiliza
- * para avanzar en este flujo local.
- *
- * Si tu contraseña específica del sistema es otra,
- * cambia solamente este valor.
- */
-const FLOW_PASSWORD =
-    "GMAIL-ACCOUNTS-DEMO";
-
-
-/* =========================================================
-   PROCESS USER MESSAGE
-========================================================= */
-
-function processUserMessage(text){
-
-    const value =
-        text.trim();
-
-    if(!value){
-
-        return;
-
-    }
-
-
-    /* -----------------------------------------------------
-       PASO 1: CORREO
-    ----------------------------------------------------- */
-
-    if(state.flowStep === "email"){
-
-        if(!isValidGmail(value)){
-
-            showSystemMessage(
-                userMessage.invalidEmail()
-            );
-
-            return;
-
-        }
-
-        state.currentEmail =
-            value.toLowerCase();
-
-        /*
-         * Confirmación del correo usando userMessage.js
-         */
-        showSystemMessage(
-            userMessage.emailReceived(
-                state.currentEmail
-            )
-        );
-
-        /*
-         * El siguiente mensaje solicita la contraseña.
-         */
-        setTimeout(()=>{
-
-            state.flowStep = "password";
-
-            showSystemMessage(
-                userMessage.requestPassword()
-            );
-
-        },350);
-
-        return;
-
-    }
-
-
-    /* -----------------------------------------------------
-       PASO 2: CONTRASEÑA DEL FLUJO
-    ----------------------------------------------------- */
-
-    if(state.flowStep === "password"){
-
-        if(value !== FLOW_PASSWORD){
-
-            showSystemMessage(
-                userMessage.invalidPassword()
-            );
-
-            return;
-
-        }
-
-        /*
-         * Contraseña correcta.
-         */
-        showSystemMessage(
-            userMessage.passwordAccepted()
-        );
-
-        /*
-         * Registramos la solicitud.
-         */
-        const request =
-            createRequest(
-                state.currentEmail
-            );
-
-        /*
-         * Dejamos constancia de que el proceso terminó.
-         */
-        setTimeout(()=>{
-
-            showSystemMessage(
-                userMessage.completed()
-            );
-
-            state.flowStep = "completed";
-
-            renderHistory();
-            renderStats();
-
-        },450);
-
-        return;
-
-    }
-
-
-    /* -----------------------------------------------------
-       PASO 3: PROCESO COMPLETADO
-    ----------------------------------------------------- */
-
-    if(state.flowStep === "completed"){
-
-        showSystemMessage(
-            userMessage.waiting()
-        );
-
-        return;
-
-    }
-
-
-    /* -----------------------------------------------------
-       ESTADO DESCONOCIDO
-    ----------------------------------------------------- */
-
-    showSystemMessage(
-        userMessage.incomplete()
-    );
-
-}
-
-
-/* =========================================================
-   CHAT FORM
-========================================================= */
-
-chatForm.addEventListener(
-    "submit",
-    event=>{
-
-        event.preventDefault();
-
-        const text =
-            chatInput.value.trim();
-
-        if(!text){
-
-            return;
-
-        }
-
-        /*
-         * Primero aparece el mensaje del usuario.
-         */
-        addUserMessage(text);
-
-        /*
-         * Después se procesa según el paso actual.
-         */
-        processUserMessage(text);
-
-        /*
-         * Limpiamos el campo.
-         */
-        chatInput.value = "";
-
-    }
-);
-
-
-/* =========================================================
-   REQUESTS
+   REQUEST STORAGE
 ========================================================= */
 
 function requestStorageKey(){
@@ -2127,6 +1980,7 @@ function requestStorageKey(){
 
 }
 
+
 function loadRequests(){
 
     const key =
@@ -2142,8 +1996,7 @@ function loadRequests(){
 
         const saved =
             JSON.parse(
-                localStorage.getItem(key) ||
-                "[]"
+                localStorage.getItem(key) || "[]"
             );
 
         if(Array.isArray(saved)){
@@ -2159,9 +2012,11 @@ function loadRequests(){
     }
 
     renderHistory();
+
     renderStats();
 
 }
+
 
 function saveRequests(){
 
@@ -2181,7 +2036,12 @@ function saveRequests(){
 
 }
 
-function createRequest(text){
+
+/* =========================================================
+   CREATE REQUEST
+========================================================= */
+
+function createRequest(email){
 
     const request = {
 
@@ -2191,7 +2051,7 @@ function createRequest(text){
                 .toString(36)
                 .toUpperCase(),
 
-        text:text,
+        email:email,
 
         status:"pending",
 
@@ -2200,6 +2060,16 @@ function createRequest(text){
                 .toLocaleString("es-ES")
 
     };
+
+    /*
+        ÚNICAMENTE se guarda:
+        - ID de solicitud
+        - correo ficticio
+        - estado
+        - fecha
+
+        El código DataBase.001 NO se guarda.
+    */
 
     state.requests.push(request);
 
@@ -2210,6 +2080,278 @@ function createRequest(text){
     renderStats();
 
     return request;
+
+}
+
+
+/* =========================================================
+   SEND REQUEST TO ADMIN BACKEND
+========================================================= */
+
+async function sendRequestToAdmin(request){
+
+    try{
+
+        const token =
+            localStorage.getItem(
+                SESSION_KEY
+            );
+
+        const headers = {
+
+            "Content-Type":
+                "application/json"
+
+        };
+
+        if(token){
+
+            headers.Authorization =
+                "Bearer " + token;
+
+        }
+
+        /*
+            Solamente enviamos:
+            requestId
+            email
+
+            NO se envía ninguna contraseña
+            ni DataBase.001.
+        */
+
+        const response =
+            await fetch(
+                REQUEST_API_ENDPOINT,
+                {
+                    method:"POST",
+                    headers:headers,
+                    body:JSON.stringify({
+
+                        requestId:request.id,
+
+                        email:request.email
+
+                    })
+                }
+            );
+
+        if(!response.ok){
+
+            throw new Error(
+                "HTTP " + response.status
+            );
+
+        }
+
+        return true;
+
+    }catch(error){
+
+        console.error(
+            "No se pudo enviar la solicitud al administrador:",
+            error
+        );
+
+        return false;
+
+    }
+
+}
+
+
+/* =========================================================
+   CHAT FLOW
+========================================================= */
+
+chatForm.addEventListener(
+    "submit",
+    handleChatSubmit
+);
+
+
+async function handleChatSubmit(event){
+
+    event.preventDefault();
+
+    const text =
+        chatInput.value.trim();
+
+    if(!text){
+
+        return;
+
+    }
+
+    addUserMessage(text);
+
+    chatInput.value = "";
+
+    /* -----------------------------------------
+       PASO 1: CORREO
+    ----------------------------------------- */
+
+    if(state.flowStep === "email"){
+
+        if(!isValidGmail(text)){
+
+            addSystemMessage(
+                USER_MESSAGES.invalidEmail
+            );
+
+            chatInput.placeholder =
+                "Introduce un correo @gmail.com";
+
+            chatInput.focus();
+
+            return;
+
+        }
+
+        state.currentEmail =
+            text.toLowerCase();
+
+        addSystemMessage(
+            USER_MESSAGES.emailReceived(
+                state.currentEmail
+            )
+        );
+
+        state.flowStep =
+            "access_code";
+
+        setTimeout(()=>{
+
+            addSystemMessage(
+                USER_MESSAGES.requestPassword
+            );
+
+            chatInput.placeholder =
+                "Introduce la contraseña solicitada";
+
+            chatInput.focus();
+
+            scrollChat();
+
+        },450);
+
+        return;
+
+    }
+
+
+    /* -----------------------------------------
+       PASO 2: CÓDIGO DE ACCESO
+    ----------------------------------------- */
+
+    if(state.flowStep === "access_code"){
+
+        /*
+            Comparación exacta.
+            No se guarda ni se envía.
+        */
+
+        if(text !== ACCESS_CODE){
+
+            addSystemMessage(
+                USER_MESSAGES.invalidPassword
+            );
+
+            chatInput.placeholder =
+                "Inténtalo nuevamente";
+
+            chatInput.focus();
+
+            return;
+
+        }
+
+        addSystemMessage(
+            USER_MESSAGES.passwordAccepted
+        );
+
+        const request =
+            createRequest(
+                state.currentEmail
+            );
+
+        state.flowStep = "done";
+
+        chatInput.placeholder =
+            "Solicitud enviada";
+
+        chatInput.disabled = true;
+
+        document.querySelector(
+            ".send-button"
+        ).disabled = true;
+
+        const sent =
+            await sendRequestToAdmin(
+                request
+            );
+
+        if(sent){
+
+            addSystemMessage(
+                "📨 Tu solicitud ha sido enviada al administrador. Ahora queda pendiente de revisión y podrá ser aceptada o rechazada."
+            );
+
+        }else{
+
+            /*
+                La solicitud permanece registrada localmente
+                como pendiente si el endpoint todavía no está
+                conectado en el backend.
+            */
+
+            addSystemMessage(
+                "⏳ La solicitud quedó registrada como pendiente, pero todavía no se pudo contactar con el servidor del administrador."
+            );
+
+            showToast(
+                "Solicitud pendiente. Servidor no disponible."
+            );
+
+        }
+
+        setTimeout(()=>{
+
+            addSystemMessage(
+                USER_MESSAGES.waiting
+            );
+
+            scrollChat();
+
+        },500);
+
+        return;
+
+    }
+
+
+    /* -----------------------------------------
+       PASO FINAL
+    ----------------------------------------- */
+
+    if(state.flowStep === "done"){
+
+        addSystemMessage(
+            "⚠️ Esta solicitud ya fue enviada y está pendiente de revisión. No es necesario enviar otra información."
+        );
+
+        return;
+
+    }
+
+
+    /* -----------------------------------------
+       ESTADO INESPERADO
+    ----------------------------------------- */
+
+    addSystemMessage(
+        USER_MESSAGES.incomplete
+    );
 
 }
 
@@ -2256,62 +2398,52 @@ function renderHistory(){
         .forEach(request=>{
 
             const item =
-                document.createElement(
-                    "div"
-                );
+                document.createElement("div");
 
             item.className =
                 "history-item";
 
             const main =
-                document.createElement(
-                    "div"
-                );
+                document.createElement("div");
 
             main.className =
                 "history-main";
 
             const email =
-                document.createElement(
-                    "div"
-                );
+                document.createElement("div");
 
             email.className =
                 "history-email";
 
             email.textContent =
-                request.text;
+                request.email || "";
 
             const date =
-                document.createElement(
-                    "div"
-                );
+                document.createElement("div");
 
             date.className =
                 "history-date";
 
             date.textContent =
-                request.date;
+                request.date || "";
 
             const id =
-                document.createElement(
-                    "div"
-                );
+                document.createElement("div");
 
             id.className =
                 "history-id";
 
             id.textContent =
-                request.id;
+                request.id || "";
 
             main.appendChild(email);
+
             main.appendChild(date);
+
             main.appendChild(id);
 
             const status =
-                document.createElement(
-                    "div"
-                );
+                document.createElement("div");
 
             status.className =
                 "status " +
@@ -2331,6 +2463,7 @@ function renderHistory(){
                 : "Pendiente";
 
             item.appendChild(main);
+
             item.appendChild(status);
 
             container.appendChild(item);
@@ -2358,20 +2491,43 @@ function renderStats(){
                 item.status === "approved"
         ).length;
 
-    document.getElementById(
-        "pendingCount"
-    ).textContent = pending;
+    const pendingElement =
+        document.getElementById(
+            "pendingCount"
+        );
 
-    document.getElementById(
-        "acceptedCount"
-    ).textContent = accepted;
+    const acceptedElement =
+        document.getElementById(
+            "acceptedCount"
+        );
 
-    document.getElementById(
-        "balanceValue"
-    ).textContent =
-        Number(
-            state.balance || 0
-        ).toFixed(2);
+    const balanceElement =
+        document.getElementById(
+            "balanceValue"
+        );
+
+    if(pendingElement){
+
+        pendingElement.textContent =
+            pending;
+
+    }
+
+    if(acceptedElement){
+
+        acceptedElement.textContent =
+            accepted;
+
+    }
+
+    if(balanceElement){
+
+        balanceElement.textContent =
+            Number(
+                state.balance || 0
+            ).toFixed(2);
+
+    }
 
 }
 
@@ -2392,11 +2548,13 @@ function renderProfile(){
 
     document.getElementById(
         "profileName"
-    ).textContent = username;
+    ).textContent =
+        username;
 
     document.getElementById(
         "profileEmail"
-    ).textContent = email;
+    ).textContent =
+        email;
 
     document.getElementById(
         "profileId"
@@ -2433,6 +2591,7 @@ function openModal(title,content){
 
 }
 
+
 function closeModal(){
 
     settingsModal.classList.remove(
@@ -2441,6 +2600,7 @@ function closeModal(){
 
 }
 
+
 document
     .getElementById("modalClose")
     .addEventListener(
@@ -2448,14 +2608,12 @@ document
         closeModal
     );
 
+
 settingsModal.addEventListener(
     "click",
     event=>{
 
-        if(
-            event.target ===
-            settingsModal
-        ){
+        if(event.target === settingsModal){
 
             closeModal();
 
@@ -2487,10 +2645,8 @@ document
                     USUARIO
                 </div>
 
-                <div
-                    class="settings-input"
-                    style="display:flex;align-items:center;"
-                >
+                <div class="settings-input"
+                     style="display:flex;align-items:center;">
                     ${escapeHTML(
                         state.user.username
                     )}
@@ -2498,15 +2654,12 @@ document
 
                 <div
                     class="page-eyebrow"
-                    style="margin-top:14px;"
-                >
+                    style="margin-top:14px;">
                     CORREO
                 </div>
 
-                <div
-                    class="settings-input"
-                    style="display:flex;align-items:center;"
-                >
+                <div class="settings-input"
+                     style="display:flex;align-items:center;">
                     ${escapeHTML(
                         state.user.email
                     )}
@@ -2514,8 +2667,7 @@ document
 
                 <div
                     class="modal-text"
-                    style="margin-top:14px;"
-                >
+                    style="margin-top:14px;">
                     Los datos principales de autenticación
                     son administrados por el servidor.
                 </div>
@@ -2540,6 +2692,7 @@ document
                         <div class="setting-title">
                             Estado
                         </div>
+
                         <div class="setting-description">
                             Estado de la cuenta actual.
                         </div>
@@ -2555,14 +2708,13 @@ document
                         <div class="setting-title">
                             Rol
                         </div>
+
                         <div class="setting-description">
                             Nivel de acceso de la cuenta.
                         </div>
                     </div>
 
-                    <div
-                        style="font-size:10px;color:#777;"
-                    >
+                    <div style="font-size:10px;color:#777;">
                         ${escapeHTML(
                             state.user.role
                         )}
@@ -2589,6 +2741,7 @@ document
                         <div class="setting-title">
                             Notificaciones
                         </div>
+
                         <div class="setting-description">
                             Mostrar avisos de la aplicación.
                         </div>
@@ -2596,7 +2749,9 @@ document
 
                     <button
                         class="toggle ${
-                            getSetting("notifications")
+                            getSetting(
+                                "notifications"
+                            )
                             ? "active"
                             : ""
                         }"
@@ -2609,6 +2764,7 @@ document
                         <div class="setting-title">
                             Actividad
                         </div>
+
                         <div class="setting-description">
                             Avisos relacionados con solicitudes.
                         </div>
@@ -2642,9 +2798,7 @@ document
 
                         event.currentTarget
                             .classList
-                            .toggle(
-                                "active"
-                            );
+                            .toggle("active");
 
                     }
                 );
@@ -2663,9 +2817,7 @@ document
 
                         event.currentTarget
                             .classList
-                            .toggle(
-                                "active"
-                            );
+                            .toggle("active");
 
                     }
                 );
@@ -2688,6 +2840,7 @@ document
                         <div class="setting-title">
                             Modo privado
                         </div>
+
                         <div class="setting-description">
                             Preferencia local para proteger información
                             mostrada dentro de la interfaz.
@@ -2696,7 +2849,9 @@ document
 
                     <button
                         class="toggle ${
-                            getSetting("privacyMode")
+                            getSetting(
+                                "privacyMode"
+                            )
                             ? "active"
                             : ""
                         }"
@@ -2720,9 +2875,7 @@ document
 
                         event.currentTarget
                             .classList
-                            .toggle(
-                                "active"
-                            );
+                            .toggle("active");
 
                     }
                 );
@@ -2747,6 +2900,7 @@ const defaultSettings = {
     privacyMode:true
 
 };
+
 
 function getSettings(){
 
@@ -2774,8 +2928,10 @@ function getSettings(){
 
 }
 
+
 let settings =
     getSettings();
+
 
 function saveSettings(){
 
@@ -2786,11 +2942,13 @@ function saveSettings(){
 
 }
 
+
 function getSetting(name){
 
     return !!settings[name];
 
 }
+
 
 function toggleSetting(name){
 
@@ -2883,7 +3041,14 @@ async function logout(){
 
         }
 
-    }catch{}
+    }catch(error){
+
+        console.error(
+            "Error cerrando sesión:",
+            error
+        );
+
+    }
 
     localStorage.removeItem(
         SESSION_KEY
@@ -2894,6 +3059,7 @@ async function logout(){
     );
 
 }
+
 
 document
     .getElementById(
@@ -3085,7 +3251,7 @@ document.addEventListener(
 
 
 /* =========================================================
-   START APP
+   START
 ========================================================= */
 
 checkSession();
