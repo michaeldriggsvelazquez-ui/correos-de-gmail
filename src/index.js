@@ -11,9 +11,9 @@ export default {
       await ensureSchema(env);
 
       /*
-       * =========================
+       * =====================================================
        * HEALTH
-       * =========================
+       * =====================================================
        */
 
       if (
@@ -24,9 +24,9 @@ export default {
       }
 
       /*
-       * =========================
+       * =====================================================
        * AUTH
-       * =========================
+       * =====================================================
        */
 
       if (
@@ -58,9 +58,9 @@ export default {
       }
 
       /*
-       * =========================
-       * USER / APP
-       * =========================
+       * =====================================================
+       * USER
+       * =====================================================
        */
 
       if (
@@ -99,9 +99,29 @@ export default {
       }
 
       /*
-       * =========================
+       * =====================================================
+       * WITHDRAWALS
+       * =====================================================
+       */
+
+      if (
+        url.pathname === "/api/withdrawals" &&
+        request.method === "POST"
+      ) {
+        return handleCreateWithdrawal(request, env);
+      }
+
+      if (
+        url.pathname === "/api/withdrawals" &&
+        request.method === "GET"
+      ) {
+        return handleUserWithdrawals(request, env);
+      }
+
+      /*
+       * =====================================================
        * ADMIN
-       * =========================
+       * =====================================================
        */
 
       if (
@@ -209,10 +229,24 @@ export default {
         return handleAdminSetConfig(request, env);
       }
 
+      if (
+        url.pathname === "/api/admin/withdrawals" &&
+        request.method === "GET"
+      ) {
+        return handleAdminWithdrawals(request, env);
+      }
+
+      if (
+        url.pathname === "/api/admin/withdrawals/action" &&
+        request.method === "POST"
+      ) {
+        return handleAdminWithdrawalAction(request, env);
+      }
+
       /*
-       * =========================
+       * =====================================================
        * UNKNOWN API
-       * =========================
+       * =====================================================
        */
 
       if (url.pathname.startsWith("/api/")) {
@@ -226,9 +260,9 @@ export default {
       }
 
       /*
-       * =========================
+       * =====================================================
        * PUBLIC ASSETS
-       * =========================
+       * =====================================================
        */
 
       return env.ASSETS.fetch(request);
@@ -264,12 +298,54 @@ async function ensureSchema(env) {
 
   schemaPromise = (async () => {
     await env.DB1.batch([
+      /*
+       * USERS
+       */
+
+      env.DB1.prepare(`
+        CREATE TABLE IF NOT EXISTS users (
+          id TEXT PRIMARY KEY,
+          email TEXT NOT NULL,
+          username TEXT NOT NULL,
+          password_hash TEXT NOT NULL,
+          role TEXT NOT NULL DEFAULT 'user',
+          balance REAL NOT NULL DEFAULT 0,
+          referral_code TEXT,
+          referred_by TEXT,
+          user_status INTEGER NOT NULL DEFAULT 1,
+          created_at INTEGER NOT NULL,
+          updated_at INTEGER NOT NULL
+        )
+      `),
+
+      /*
+       * SESSIONS
+       */
+
+      env.DB1.prepare(`
+        CREATE TABLE IF NOT EXISTS sessions (
+          id TEXT PRIMARY KEY,
+          user_id TEXT NOT NULL,
+          token_hash TEXT NOT NULL UNIQUE,
+          expires_at INTEGER NOT NULL,
+          created_at INTEGER NOT NULL
+        )
+      `),
+
+      /*
+       * REQUESTS
+       *
+       * IMPORTANT:
+       * Only the requested account email is stored.
+       *
+       * There is intentionally no password/code field.
+       */
+
       env.DB1.prepare(`
         CREATE TABLE IF NOT EXISTS requests (
           id TEXT PRIMARY KEY,
           user_id TEXT NOT NULL,
           demo_email TEXT NOT NULL,
-          demo_password TEXT NOT NULL,
           status TEXT NOT NULL DEFAULT 'pending',
           reward REAL NOT NULL DEFAULT 0.20,
           admin_id TEXT,
@@ -278,6 +354,10 @@ async function ensureSchema(env) {
           reviewed_at INTEGER
         )
       `),
+
+      /*
+       * TRANSACTIONS
+       */
 
       env.DB1.prepare(`
         CREATE TABLE IF NOT EXISTS transactions (
@@ -293,6 +373,10 @@ async function ensureSchema(env) {
         )
       `),
 
+      /*
+       * NOTIFICATIONS
+       */
+
       env.DB1.prepare(`
         CREATE TABLE IF NOT EXISTS notifications (
           id TEXT PRIMARY KEY,
@@ -304,6 +388,10 @@ async function ensureSchema(env) {
           created_at INTEGER NOT NULL
         )
       `),
+
+      /*
+       * ADMIN ACCOUNTS
+       */
 
       env.DB1.prepare(`
         CREATE TABLE IF NOT EXISTS admin_accounts (
@@ -317,6 +405,10 @@ async function ensureSchema(env) {
         )
       `),
 
+      /*
+       * APP CONFIG
+       */
+
       env.DB1.prepare(`
         CREATE TABLE IF NOT EXISTS app_config (
           key TEXT PRIMARY KEY,
@@ -324,6 +416,10 @@ async function ensureSchema(env) {
           updated_at INTEGER NOT NULL
         )
       `),
+
+      /*
+       * WITHDRAWALS
+       */
 
       env.DB1.prepare(`
         CREATE TABLE IF NOT EXISTS withdrawals (
@@ -339,6 +435,19 @@ async function ensureSchema(env) {
         )
       `)
     ]);
+
+    /*
+     * =====================================================
+     * COMPATIBILITY MIGRATIONS
+     * =====================================================
+     */
+
+    await ensureUserStatusColumn(env);
+    await ensureRequestSchema(env);
+
+    /*
+     * DEFAULT REWARD
+     */
 
     const existingReward = await env.DB1
       .prepare(`
@@ -381,6 +490,143 @@ async function ensureSchema(env) {
 
 /*
  * =========================================================
+ * USER STATUS MIGRATION
+ * =========================================================
+ */
+
+async function ensureUserStatusColumn(env) {
+  try {
+    await env.DB1
+      .prepare(`
+        ALTER TABLE users
+        ADD COLUMN user_status INTEGER NOT NULL DEFAULT 1
+      `)
+      .run();
+  } catch {
+    /*
+     * Column already exists.
+     */
+  }
+}
+
+
+/*
+ * =========================================================
+ * REQUEST SCHEMA MIGRATION
+ * =========================================================
+ */
+
+async function ensureRequestSchema(env) {
+  /*
+   * Older installations may have a legacy
+   * demo_password column.
+   *
+   * We do not use or populate that field.
+   *
+   * If the old table already exists, we leave it
+   * untouched so existing data is not destroyed.
+   */
+
+  try {
+    const columns = await env.DB1
+      .prepare(`
+        PRAGMA table_info(requests)
+      `)
+      .all();
+
+    const names = new Set(
+      (columns.results || []).map(
+        column => column.name
+      )
+    );
+
+    if (!names.has("demo_email")) {
+      try {
+        await env.DB1
+          .prepare(`
+            ALTER TABLE requests
+            ADD COLUMN demo_email TEXT
+          `)
+          .run();
+      } catch {}
+    }
+
+    if (!names.has("admin_id")) {
+      try {
+        await env.DB1
+          .prepare(`
+            ALTER TABLE requests
+            ADD COLUMN admin_id TEXT
+          `)
+          .run();
+      } catch {}
+    }
+
+    if (!names.has("admin_note")) {
+      try {
+        await env.DB1
+          .prepare(`
+            ALTER TABLE requests
+            ADD COLUMN admin_note TEXT
+          `)
+          .run();
+      } catch {}
+    }
+
+    if (!names.has("reward")) {
+      try {
+        await env.DB1
+          .prepare(`
+            ALTER TABLE requests
+            ADD COLUMN reward REAL NOT NULL DEFAULT 0.20
+          `)
+          .run();
+      } catch {}
+    }
+
+    if (!names.has("status")) {
+      try {
+        await env.DB1
+          .prepare(`
+            ALTER TABLE requests
+            ADD COLUMN status TEXT NOT NULL DEFAULT 'pending'
+          `)
+          .run();
+      } catch {}
+    }
+
+    if (!names.has("created_at")) {
+      try {
+        await env.DB1
+          .prepare(`
+            ALTER TABLE requests
+            ADD COLUMN created_at INTEGER
+          `)
+          .run();
+      } catch {}
+    }
+
+    if (!names.has("reviewed_at")) {
+      try {
+        await env.DB1
+          .prepare(`
+            ALTER TABLE requests
+            ADD COLUMN reviewed_at INTEGER
+          `)
+          .run();
+      } catch {}
+    }
+  } catch (error) {
+    console.error(
+      "Request schema migration error:",
+      error
+    );
+  }
+}
+
+
+/*
+ * =========================================================
  * HEALTH
  * =========================================================
  */
@@ -393,15 +639,22 @@ async function handleHealth(env) {
 
     return json({
       success: true,
-      database: result?.ok === 1,
-      message: "GmailAccounts API funcionando correctamente."
+      database: Number(result?.ok) === 1,
+      message:
+        "GmailAccounts API funcionando correctamente."
     });
-  } catch {
+  } catch (error) {
+    console.error(
+      "Health error:",
+      error
+    );
+
     return json(
       {
         success: false,
         database: false,
-        error: "No se pudo conectar con la base de datos."
+        error:
+          "No se pudo conectar con la base de datos."
       },
       500
     );
@@ -419,20 +672,30 @@ async function handleRegister(request, env) {
   try {
     const body = await request.json();
 
-    const email = String(body.email || "")
+    const email = String(
+      body.email || ""
+    )
       .trim()
       .toLowerCase();
 
-    const username = String(body.username || "")
-      .trim();
+    const username = String(
+      body.username || ""
+    ).trim();
 
-    const password = String(body.password || "");
+    const password = String(
+      body.password || ""
+    );
 
-    if (!email || !username || !password) {
+    if (
+      !email ||
+      !username ||
+      !password
+    ) {
       return json(
         {
           success: false,
-          error: "Completa todos los campos."
+          error:
+            "Completa todos los campos."
         },
         400
       );
@@ -442,7 +705,8 @@ async function handleRegister(request, env) {
       return json(
         {
           success: false,
-          error: "El correo electrónico no es válido."
+          error:
+            "El correo electrónico no es válido."
         },
         400
       );
@@ -452,13 +716,15 @@ async function handleRegister(request, env) {
       return json(
         {
           success: false,
-          error: "La contraseña debe tener al menos 8 caracteres."
+          error:
+            "La contraseña debe tener al menos 8 caracteres."
         },
         400
       );
     }
 
-    const adminEmail = getAdminEmail(env);
+    const adminEmail =
+      getAdminEmail(env);
 
     if (
       adminEmail &&
@@ -467,36 +733,47 @@ async function handleRegister(request, env) {
       return json(
         {
           success: false,
-          error: "Esta cuenta está reservada para administración."
+          error:
+            "Esta cuenta está reservada para administración."
         },
         403
       );
     }
 
-    const existing = await env.DB1
-      .prepare(`
-        SELECT id
-        FROM users
-        WHERE LOWER(email) = ?1
-           OR LOWER(username) = LOWER(?2)
-        LIMIT 1
-      `)
-      .bind(email, username)
-      .first();
+    const existing =
+      await env.DB1
+        .prepare(`
+          SELECT id
+          FROM users
+          WHERE LOWER(email) = ?1
+             OR LOWER(username) = LOWER(?2)
+          LIMIT 1
+        `)
+        .bind(
+          email,
+          username
+        )
+        .first();
 
     if (existing) {
       return json(
         {
           success: false,
-          error: "El correo o usuario ya está registrado."
+          error:
+            "El correo o usuario ya está registrado."
         },
         409
       );
     }
 
-    const userId = crypto.randomUUID();
-    const referralCode = createReferralCode();
-    const now = Date.now();
+    const userId =
+      crypto.randomUUID();
+
+    const referralCode =
+      createReferralCode();
+
+    const now =
+      Date.now();
 
     const passwordHash =
       await hashPassword(password);
@@ -512,6 +789,7 @@ async function handleRegister(request, env) {
           balance,
           referral_code,
           referred_by,
+          user_status,
           created_at,
           updated_at
         )
@@ -524,6 +802,7 @@ async function handleRegister(request, env) {
           0,
           ?5,
           NULL,
+          1,
           ?6,
           ?6
         )
@@ -539,11 +818,15 @@ async function handleRegister(request, env) {
       .run();
 
     const session =
-      await createSession(userId, env);
+      await createSession(
+        userId,
+        env
+      );
 
     return json({
       success: true,
-      message: "Cuenta creada correctamente.",
+      message:
+        "Cuenta creada correctamente.",
       user: {
         id: userId,
         email,
@@ -551,13 +834,20 @@ async function handleRegister(request, env) {
         role: "user",
         balance: 0
       },
-      session: session.token
+      session:
+        session.token
     });
-  } catch {
+  } catch (error) {
+    console.error(
+      "Register error:",
+      error
+    );
+
     return json(
       {
         success: false,
-        error: "No se pudo crear la cuenta."
+        error:
+          "No se pudo crear la cuenta."
       },
       500
     );
@@ -573,23 +863,30 @@ async function handleRegister(request, env) {
 
 async function handleLogin(request, env) {
   try {
-    const body = await request.json();
+    const body =
+      await request.json();
 
-    const identifier = String(
-      body.identifier || ""
-    )
-      .trim()
-      .toLowerCase();
+    const identifier =
+      String(
+        body.identifier || ""
+      )
+        .trim()
+        .toLowerCase();
 
-    const password = String(
-      body.password || ""
-    );
+    const password =
+      String(
+        body.password || ""
+      );
 
-    if (!identifier || !password) {
+    if (
+      !identifier ||
+      !password
+    ) {
       return json(
         {
           success: false,
-          error: "Completa todos los campos."
+          error:
+            "Completa todos los campos."
         },
         400
       );
@@ -608,7 +905,8 @@ async function handleLogin(request, env) {
     if (
       adminEmail &&
       adminPassword &&
-      identifier === adminEmail.toLowerCase() &&
+      identifier ===
+        adminEmail.toLowerCase() &&
       password === adminPassword
     ) {
       const admin =
@@ -630,11 +928,16 @@ async function handleLogin(request, env) {
         user: {
           id: admin.id,
           email: admin.email,
-          username: admin.username,
+          username:
+            admin.username,
           role: "admin",
-          balance: admin.balance
+          balance:
+            Number(
+              admin.balance || 0
+            )
         },
-        session: session.token
+        session:
+          session.token
       });
     }
 
@@ -697,13 +1000,21 @@ async function handleLogin(request, env) {
         message:
           "Inicio de sesión administrativo correcto.",
         user: {
-          id: secondaryAdmin.id,
-          email: secondaryAdmin.email,
-          username: secondaryAdmin.username,
+          id:
+            secondaryAdmin.id,
+          email:
+            secondaryAdmin.email,
+          username:
+            secondaryAdmin.username,
           role: "admin",
-          balance: secondaryAdmin.balance
+          balance:
+            Number(
+              secondaryAdmin.balance ||
+                0
+            )
         },
-        session: session.token
+        session:
+          session.token
       });
     }
 
@@ -720,7 +1031,8 @@ async function handleLogin(request, env) {
             username,
             password_hash,
             role,
-            balance
+            balance,
+            user_status
           FROM users
           WHERE LOWER(email) = ?1
              OR LOWER(username) = ?1
@@ -737,6 +1049,19 @@ async function handleLogin(request, env) {
             "Usuario o contraseña incorrectos."
         },
         401
+      );
+    }
+
+    if (
+      Number(user.user_status) === 0
+    ) {
+      return json(
+        {
+          success: false,
+          error:
+            "Esta cuenta está desactivada."
+        },
+        403
       );
     }
 
@@ -770,17 +1095,28 @@ async function handleLogin(request, env) {
       user: {
         id: user.id,
         email: user.email,
-        username: user.username,
+        username:
+          user.username,
         role: user.role,
-        balance: Number(user.balance || 0)
+        balance:
+          Number(
+            user.balance || 0
+          )
       },
-      session: session.token
+      session:
+        session.token
     });
-  } catch {
+  } catch (error) {
+    console.error(
+      "Login error:",
+      error
+    );
+
     return json(
       {
         success: false,
-        error: "No se pudo iniciar sesión."
+        error:
+          "No se pudo iniciar sesión."
       },
       500
     );
@@ -790,7 +1126,7 @@ async function handleLogin(request, env) {
 
 /*
  * =========================================================
- * PRIMARY ADMIN IDENTITY
+ * PRIMARY ADMIN
  * =========================================================
  */
 
@@ -811,7 +1147,9 @@ async function getOrCreateAdmin(
         WHERE LOWER(email) = ?1
         LIMIT 1
       `)
-      .bind(adminEmail.toLowerCase())
+      .bind(
+        adminEmail.toLowerCase()
+      )
       .first();
 
   if (admin) {
@@ -841,7 +1179,10 @@ async function getOrCreateAdmin(
   const username =
     adminEmail
       .split("@")[0]
-      .replace(/[^a-zA-Z0-9_]/g, "")
+      .replace(
+        /[^a-zA-Z0-9_]/g,
+        ""
+      )
       .slice(0, 30) ||
     "admin";
 
@@ -867,6 +1208,7 @@ async function getOrCreateAdmin(
         balance,
         referral_code,
         referred_by,
+        user_status,
         created_at,
         updated_at
       )
@@ -879,6 +1221,7 @@ async function getOrCreateAdmin(
         0,
         ?5,
         NULL,
+        1,
         ?6,
         ?6
       )
@@ -895,7 +1238,8 @@ async function getOrCreateAdmin(
 
   return {
     id,
-    email: adminEmail.toLowerCase(),
+    email:
+      adminEmail.toLowerCase(),
     username,
     role: "admin",
     balance: 0
@@ -935,9 +1279,13 @@ async function handleMe(
     user: {
       id: user.id,
       email: user.email,
-      username: user.username,
+      username:
+        user.username,
       role: user.role,
-      balance: Number(user.balance || 0)
+      balance:
+        Number(
+          user.balance || 0
+        )
     }
   });
 }
@@ -979,15 +1327,13 @@ async function handleLogout(
 
 /*
  * =========================================================
- * CREATE ACCOUNT REQUEST
+ * CREATE REQUEST
  * =========================================================
  *
- * IMPORTANT:
- * Only the email of the requested account
- * is accepted and stored.
+ * Only the requested account email is accepted.
  *
- * No password or verification code is
- * collected, transmitted or stored.
+ * No password or external account access code
+ * is collected, stored or transmitted.
  * =========================================================
  */
 
@@ -1029,12 +1375,6 @@ async function handleCreateRequest(
         .trim()
         .toLowerCase();
 
-    /*
-     * Solo se necesita el correo.
-     * No leemos ningún campo de contraseña
-     * ni código de acceso.
-     */
-
     if (!demoEmail) {
       return json(
         {
@@ -1056,11 +1396,6 @@ async function handleCreateRequest(
         400
       );
     }
-
-    /*
-     * Evitamos solicitudes idénticas
-     * pendientes del mismo usuario.
-     */
 
     const duplicate =
       await env.DB1
@@ -1090,7 +1425,9 @@ async function handleCreateRequest(
     }
 
     const reward =
-      await getDefaultReward(env);
+      await getDefaultReward(
+        env
+      );
 
     const id =
       crypto.randomUUID();
@@ -1099,15 +1436,140 @@ async function handleCreateRequest(
       Date.now();
 
     /*
-     * La base de datos actual todavía tiene
-     * la columna legacy demo_password como
-     * NOT NULL. Se mantiene temporalmente
-     * por compatibilidad, pero SIEMPRE se
-     * escribe una cadena vacía.
-     *
-     * Nunca se almacena una contraseña,
-     * código ni secreto de la cuenta solicitada.
+     * IMPORTANT:
+     * We deliberately insert only the safe
+     * request fields.
      */
+
+    await insertRequest(
+      env,
+      {
+        id,
+        userId: user.id,
+        email: demoEmail,
+        reward,
+        createdAt: now
+      }
+    );
+
+    await createNotification(
+      env,
+      user.id,
+      "request_created",
+      "Solicitud enviada",
+      `Tu solicitud fue enviada para revisión. Recompensa prevista: +${formatAmount(reward)} USDT.`
+    );
+
+    await createAdminRequestNotification(
+      env,
+      user,
+      id,
+      demoEmail,
+      now
+    );
+
+    return json({
+      success: true,
+      message:
+        "Solicitud enviada correctamente.",
+      request: {
+        id,
+        status:
+          "pending",
+        reward,
+        created_at:
+          now
+      }
+    });
+  } catch (error) {
+    console.error(
+      "Create request error:",
+      error
+    );
+
+    return json(
+      {
+        success: false,
+        error:
+          "No se pudo crear la solicitud."
+      },
+      500
+    );
+  }
+}
+
+
+/*
+ * =========================================================
+ * INSERT REQUEST
+ * =========================================================
+ */
+
+async function insertRequest(
+  env,
+  data
+) {
+  /*
+   * New schema:
+   */
+
+  try {
+    await env.DB1
+      .prepare(`
+        INSERT INTO requests (
+          id,
+          user_id,
+          demo_email,
+          status,
+          reward,
+          admin_id,
+          admin_note,
+          created_at,
+          reviewed_at
+        )
+        VALUES (
+          ?1,
+          ?2,
+          ?3,
+          'pending',
+          ?4,
+          NULL,
+          NULL,
+          ?5,
+          NULL
+        )
+      `)
+      .bind(
+        data.id,
+        data.userId,
+        data.email,
+        data.reward,
+        data.createdAt
+      )
+      .run();
+
+    return;
+  } catch (error) {
+    /*
+     * Compatibility with the old table that
+     * still contains NOT NULL demo_password.
+     *
+     * An empty compatibility value is used.
+     * It is NOT a password or access code.
+     */
+
+    const message =
+      String(
+        error?.message || ""
+      );
+
+    if (
+      !message
+        .toLowerCase()
+        .includes("demo_password")
+    ) {
+      throw error;
+    }
 
     await env.DB1
       .prepare(`
@@ -1127,74 +1589,23 @@ async function handleCreateRequest(
           ?1,
           ?2,
           ?3,
-          ?4,
+          '',
           'pending',
+          ?4,
+          NULL,
+          NULL,
           ?5,
-          NULL,
-          NULL,
-          ?6,
           NULL
         )
       `)
       .bind(
-        id,
-        user.id,
-        demoEmail,
-        "",
-        reward,
-        now
+        data.id,
+        data.userId,
+        data.email,
+        data.reward,
+        data.createdAt
       )
       .run();
-
-    /*
-     * Notificación para el usuario.
-     */
-
-    await createNotification(
-      env,
-      user.id,
-      "request_created",
-      "Solicitud enviada",
-      `Tu solicitud fue enviada para revisión. Recompensa prevista: +${formatAmount(reward)} USDT.`
-    );
-
-    /*
-     * Notificación para los administradores.
-     */
-
-    await createAdminRequestNotification(
-      env,
-      user,
-      id,
-      demoEmail,
-      now
-    );
-
-    return json({
-      success: true,
-      message:
-        "Solicitud enviada correctamente.",
-      request: {
-        id,
-        status: "pending",
-        reward,
-        created_at: now
-      }
-    });
-  } catch (error) {
-    console.error(
-      "Create request error:",
-      error
-    );
-
-    return json(
-      {
-        success: false,
-        error:
-          "No se pudo crear la solicitud."
-      },
-      500
-    );
   }
 }
 
@@ -1240,7 +1651,8 @@ async function handleUserRequests(
 
   return json({
     success: true,
-    requests: rows.results || []
+    requests:
+      rows.results || []
   });
 }
 
@@ -1439,7 +1851,10 @@ async function handleAdminDashboard(
   return json({
     success: true,
     stats: {
-      users: Number(users?.count || 0),
+      users:
+        Number(
+          users?.count || 0
+        ),
       pending_requests:
         Number(
           pendingRequests?.count || 0
@@ -1482,7 +1897,9 @@ async function handleAdminUsers(
 
   const search =
     String(
-      url.searchParams.get("search") || ""
+      url.searchParams.get(
+        "search"
+      ) || ""
     )
       .trim()
       .toLowerCase();
@@ -1496,6 +1913,7 @@ async function handleAdminUsers(
       balance,
       referral_code,
       referred_by,
+      user_status,
       created_at,
       updated_at
     FROM users
@@ -1512,7 +1930,9 @@ async function handleAdminUsers(
       )
     `;
 
-    params.push(`%${search}%`);
+    params.push(
+      `%${search}%`
+    );
   }
 
   query += `
@@ -1521,11 +1941,15 @@ async function handleAdminUsers(
   `;
 
   const statement =
-    env.DB1.prepare(query);
+    env.DB1.prepare(
+      query
+    );
 
   const rows =
     params.length
-      ? await statement.bind(...params).all()
+      ? await statement
+          .bind(...params)
+          .all()
       : await statement.all();
 
   return json({
@@ -1561,10 +1985,15 @@ async function handleAdminUserStatus(
       await request.json();
 
     const userId =
-      String(body.user_id || "");
+      String(
+        body.user_id || ""
+      );
 
     const action =
-      String(body.action || "")
+      String(
+        body.action || ""
+      )
+        .trim()
         .toLowerCase();
 
     if (!userId) {
@@ -1613,7 +2042,9 @@ async function handleAdminUserStatus(
       );
     }
 
-    if (exists.role === "admin") {
+    if (
+      exists.role === "admin"
+    ) {
       return json(
         {
           success: false,
@@ -1638,8 +2069,6 @@ async function handleAdminUserStatus(
       );
     }
 
-    await ensureUserStatusColumn(env);
-
     const active =
       action === "activate"
         ? 1
@@ -1659,11 +2088,27 @@ async function handleAdminUserStatus(
       )
       .run();
 
+    if (active === 0) {
+      await env.DB1
+        .prepare(`
+          DELETE FROM sessions
+          WHERE user_id = ?1
+        `)
+        .bind(userId)
+        .run();
+    }
+
     return json({
       success: true,
-      active: active === 1
+      active:
+        active === 1
     });
-  } catch {
+  } catch (error) {
+    console.error(
+      "Admin user status error:",
+      error
+    );
+
     return json(
       {
         success: false,
@@ -1701,7 +2146,9 @@ async function handleAdminRequests(
 
   const status =
     String(
-      url.searchParams.get("status") || ""
+      url.searchParams.get(
+        "status"
+      ) || ""
     )
       .trim()
       .toLowerCase();
@@ -1744,11 +2191,15 @@ async function handleAdminRequests(
   `;
 
   const statement =
-    env.DB1.prepare(query);
+    env.DB1.prepare(
+      query
+    );
 
   const rows =
     params.length
-      ? await statement.bind(...params).all()
+      ? await statement
+          .bind(...params)
+          .all()
       : await statement.all();
 
   return json({
@@ -1761,7 +2212,7 @@ async function handleAdminRequests(
 
 /*
  * =========================================================
- * ADMIN PENDING REQUEST COUNT
+ * ADMIN PENDING COUNT
  * =========================================================
  */
 
@@ -1789,7 +2240,9 @@ async function handleAdminPendingRequestCount(
       .first();
 
   const count =
-    Number(result?.count || 0);
+    Number(
+      result?.count || 0
+    );
 
   return json({
     success: true,
@@ -1827,10 +2280,14 @@ async function handleAdminRequestAction(
       await request.json();
 
     const requestId =
-      String(body.request_id || "");
+      String(
+        body.request_id || ""
+      );
 
     const action =
-      String(body.action || "")
+      String(
+        body.action || ""
+      )
         .trim()
         .toLowerCase();
 
@@ -1847,7 +2304,9 @@ async function handleAdminRequestAction(
       body.reward !== ""
     ) {
       reward =
-        Number(body.reward);
+        Number(
+          body.reward
+        );
     }
 
     if (!requestId) {
@@ -1919,11 +2378,15 @@ async function handleAdminRequestAction(
       reward === undefined
     ) {
       reward =
-        Number(target.reward || 0);
+        Number(
+          target.reward || 0
+        );
     }
 
     if (
-      !Number.isFinite(reward) ||
+      !Number.isFinite(
+        reward
+      ) ||
       reward < 0
     ) {
       return json(
@@ -1939,24 +2402,41 @@ async function handleAdminRequestAction(
     const now =
       Date.now();
 
-    if (action === "reject") {
-      await env.DB1
-        .prepare(`
-          UPDATE requests
-          SET status = 'rejected',
-              admin_id = ?1,
-              admin_note = ?2,
-              reviewed_at = ?3
-          WHERE id = ?4
-            AND status = 'pending'
-        `)
-        .bind(
-          admin.id,
-          note || null,
-          now,
-          requestId
-        )
-        .run();
+    /*
+     * =====================================================
+     * REJECT
+     * =====================================================
+     */
+
+    if (
+      action === "reject"
+    ) {
+      const result =
+        await env.DB1
+          .prepare(`
+            UPDATE requests
+            SET status = 'rejected',
+                admin_id = ?1,
+                admin_note = ?2,
+                reviewed_at = ?3
+            WHERE id = ?4
+              AND status = 'pending'
+          `)
+          .bind(
+            admin.id,
+            note || null,
+            now,
+            requestId
+          )
+          .run();
+
+      if (
+        !result.success
+      ) {
+        throw new Error(
+          "No se pudo actualizar la solicitud."
+        );
+      }
 
       await createNotification(
         env,
@@ -1970,15 +2450,15 @@ async function handleAdminRequestAction(
 
       return json({
         success: true,
-        status: "rejected"
+        status:
+          "rejected"
       });
     }
 
     /*
-     * APPROVAL
-     *
-     * The balance and transaction are
-     * updated together with the request.
+     * =====================================================
+     * APPROVE
+     * =====================================================
      */
 
     const user =
@@ -1991,7 +2471,9 @@ async function handleAdminRequestAction(
           WHERE id = ?1
           LIMIT 1
         `)
-        .bind(target.user_id)
+        .bind(
+          target.user_id
+        )
         .first();
 
     if (!user) {
@@ -2006,11 +2488,14 @@ async function handleAdminRequestAction(
     }
 
     const balanceBefore =
-      Number(user.balance || 0);
+      Number(
+        user.balance || 0
+      );
 
     const balanceAfter =
       roundMoney(
-        balanceBefore + reward
+        balanceBefore +
+          reward
       );
 
     const updateRequest =
@@ -2097,9 +2582,11 @@ async function handleAdminRequestAction(
 
     return json({
       success: true,
-      status: "approved",
+      status:
+        "approved",
       reward,
-      balance: balanceAfter
+      balance:
+        balanceAfter
     });
   } catch (error) {
     console.error(
@@ -2295,8 +2782,14 @@ async function handleAdminListAdmins(
           u.email,
           u.username,
           u.role,
-          a.active,
-          a.is_primary,
+          COALESCE(
+            a.active,
+            1
+          ) AS active,
+          COALESCE(
+            a.is_primary,
+            0
+          ) AS is_primary,
           a.created_at,
           a.updated_at
         FROM users u
@@ -2311,7 +2804,9 @@ async function handleAdminListAdmins(
           END,
           u.created_at ASC
       `)
-      .bind(primaryEmail || "")
+      .bind(
+        primaryEmail || ""
+      )
       .all();
 
   return json({
@@ -2347,16 +2842,21 @@ async function handleAdminCreateAdmin(
       await request.json();
 
     const email =
-      String(body.email || "")
+      String(
+        body.email || ""
+      )
         .trim()
         .toLowerCase();
 
     const username =
-      String(body.username || "")
-        .trim();
+      String(
+        body.username || ""
+      ).trim();
 
     const password =
-      String(body.password || "");
+      String(
+        body.password || ""
+      );
 
     if (
       !email ||
@@ -2384,7 +2884,9 @@ async function handleAdminCreateAdmin(
       );
     }
 
-    if (password.length < 8) {
+    if (
+      password.length < 8
+    ) {
       return json(
         {
           success: false,
@@ -2400,7 +2902,8 @@ async function handleAdminCreateAdmin(
 
     if (
       primaryEmail &&
-      email === primaryEmail.toLowerCase()
+      email ===
+        primaryEmail.toLowerCase()
     ) {
       return json(
         {
@@ -2445,7 +2948,9 @@ async function handleAdminCreateAdmin(
       Date.now();
 
     const passwordHash =
-      await hashPassword(password);
+      await hashPassword(
+        password
+      );
 
     const referralCode =
       createReferralCode();
@@ -2461,6 +2966,7 @@ async function handleAdminCreateAdmin(
           balance,
           referral_code,
           referred_by,
+          user_status,
           created_at,
           updated_at
         )
@@ -2473,6 +2979,7 @@ async function handleAdminCreateAdmin(
           0,
           ?5,
           NULL,
+          1,
           ?6,
           ?6
         )
@@ -2526,10 +3033,16 @@ async function handleAdminCreateAdmin(
         username,
         role: "admin",
         active: true,
-        is_primary: false
+        is_primary:
+          false
       }
     });
-  } catch {
+  } catch (error) {
+    console.error(
+      "Create admin error:",
+      error
+    );
+
     return json(
       {
         success: false,
@@ -2567,10 +3080,14 @@ async function handleAdminAdminStatus(
       await request.json();
 
     const userId =
-      String(body.user_id || "");
+      String(
+        body.user_id || ""
+      );
 
     const action =
-      String(body.action || "")
+      String(
+        body.action || ""
+      )
         .trim()
         .toLowerCase();
 
@@ -2639,8 +3156,29 @@ async function handleAdminAdminStatus(
       );
     }
 
+    const primaryEmail =
+      getAdminEmail(env);
+
     if (
-      Number(target.is_primary || 0) === 1
+      primaryEmail &&
+      target.email &&
+      target.email.toLowerCase() ===
+        primaryEmail.toLowerCase()
+    ) {
+      return json(
+        {
+          success: false,
+          error:
+            "El administrador principal está protegido."
+        },
+        403
+      );
+    }
+
+    if (
+      Number(
+        target.is_primary || 0
+      ) === 1
     ) {
       return json(
         {
@@ -2697,9 +3235,15 @@ async function handleAdminAdminStatus(
 
     return json({
       success: true,
-      active: active === 1
+      active:
+        active === 1
     });
-  } catch {
+  } catch (error) {
+    console.error(
+      "Admin status error:",
+      error
+    );
+
     return json(
       {
         success: false,
@@ -2803,19 +3347,33 @@ async function handleAdminStats(
     success: true,
     stats: {
       users:
-        Number(users?.count || 0),
+        Number(
+          users?.count || 0
+        ),
       requests:
-        Number(requests?.count || 0),
+        Number(
+          requests?.count || 0
+        ),
       approved:
-        Number(approved?.count || 0),
+        Number(
+          approved?.count || 0
+        ),
       rejected:
-        Number(rejected?.count || 0),
+        Number(
+          rejected?.count || 0
+        ),
       pending:
-        Number(pending?.count || 0),
+        Number(
+          pending?.count || 0
+        ),
       rewards:
-        Number(rewards?.total || 0),
+        Number(
+          rewards?.total || 0
+        ),
       transactions:
-        Number(transactions?.count || 0)
+        Number(
+          transactions?.count || 0
+        )
     }
   });
 }
@@ -2842,12 +3400,15 @@ async function handleAdminGetConfig(
   }
 
   const reward =
-    await getDefaultReward(env);
+    await getDefaultReward(
+      env
+    );
 
   return json({
     success: true,
     config: {
-      default_reward: reward
+      default_reward:
+        reward
     }
   });
 }
@@ -2877,7 +3438,9 @@ async function handleAdminSetConfig(
       );
 
     if (
-      !Number.isFinite(reward) ||
+      !Number.isFinite(
+        reward
+      ) ||
       reward < 0
     ) {
       return json(
@@ -2889,6 +3452,11 @@ async function handleAdminSetConfig(
         400
       );
     }
+
+    const value =
+      String(
+        roundMoney(reward)
+      );
 
     await env.DB1
       .prepare(`
@@ -2908,7 +3476,7 @@ async function handleAdminSetConfig(
           updated_at = excluded.updated_at
       `)
       .bind(
-        String(roundMoney(reward)),
+        value,
         Date.now()
       )
       .run();
@@ -2917,15 +3485,646 @@ async function handleAdminSetConfig(
       success: true,
       config: {
         default_reward:
-          roundMoney(reward)
+          roundMoney(
+            reward
+          )
       }
     });
-  } catch {
+  } catch (error) {
+    console.error(
+      "Set config error:",
+      error
+    );
+
     return json(
       {
         success: false,
         error:
           "No se pudo guardar la configuración."
+      },
+      500
+    );
+  }
+}
+
+
+/*
+ * =========================================================
+ * CREATE WITHDRAWAL
+ * =========================================================
+ */
+
+async function handleCreateWithdrawal(
+  request,
+  env
+) {
+  const user =
+    await requireUser(
+      request,
+      env
+    );
+
+  if (!user) {
+    return unauthorized();
+  }
+
+  try {
+    const body =
+      await request.json();
+
+    const amount =
+      Number(
+        body.amount
+      );
+
+    const address =
+      String(
+        body.address || ""
+      ).trim();
+
+    if (
+      !Number.isFinite(
+        amount
+      ) ||
+      amount <= 0
+    ) {
+      return json(
+        {
+          success: false,
+          error:
+            "El monto no es válido."
+        },
+        400
+      );
+    }
+
+    if (!address) {
+      return json(
+        {
+          success: false,
+          error:
+            "Introduce una dirección."
+        },
+        400
+      );
+    }
+
+    const current =
+      await env.DB1
+        .prepare(`
+          SELECT balance
+          FROM users
+          WHERE id = ?1
+          LIMIT 1
+        `)
+        .bind(user.id)
+        .first();
+
+    const balance =
+      Number(
+        current?.balance || 0
+      );
+
+    if (amount > balance) {
+      return json(
+        {
+          success: false,
+          error:
+            "Saldo insuficiente."
+        },
+        400
+      );
+    }
+
+    const id =
+      crypto.randomUUID();
+
+    const now =
+      Date.now();
+
+    await env.DB1
+      .prepare(`
+        INSERT INTO withdrawals (
+          id,
+          user_id,
+          amount,
+          address,
+          status,
+          admin_id,
+          admin_note,
+          created_at,
+          reviewed_at
+        )
+        VALUES (
+          ?1,
+          ?2,
+          ?3,
+          ?4,
+          'pending',
+          NULL,
+          NULL,
+          ?5,
+          NULL
+        )
+      `)
+      .bind(
+        id,
+        user.id,
+        roundMoney(amount),
+        address,
+        now
+      )
+      .run();
+
+    await createNotification(
+      env,
+      user.id,
+      "withdrawal_created",
+      "Retiro solicitado",
+      `Tu solicitud de retiro por ${formatAmount(amount)} USDT quedó pendiente de revisión.`
+    );
+
+    return json({
+      success: true,
+      withdrawal: {
+        id,
+        amount:
+          roundMoney(
+            amount
+          ),
+        status:
+          "pending",
+        created_at:
+          now
+      }
+    });
+  } catch (error) {
+    console.error(
+      "Create withdrawal error:",
+      error
+    );
+
+    return json(
+      {
+        success: false,
+        error:
+          "No se pudo crear el retiro."
+      },
+      500
+    );
+  }
+}
+
+
+/*
+ * =========================================================
+ * USER WITHDRAWALS
+ * =========================================================
+ */
+
+async function handleUserWithdrawals(
+  request,
+  env
+) {
+  const user =
+    await requireUser(
+      request,
+      env
+    );
+
+  if (!user) {
+    return unauthorized();
+  }
+
+  const rows =
+    await env.DB1
+      .prepare(`
+        SELECT
+          id,
+          amount,
+          address,
+          status,
+          admin_note,
+          created_at,
+          reviewed_at
+        FROM withdrawals
+        WHERE user_id = ?1
+        ORDER BY created_at DESC
+        LIMIT 100
+      `)
+      .bind(user.id)
+      .all();
+
+  return json({
+    success: true,
+    withdrawals:
+      rows.results || []
+  });
+}
+
+
+/*
+ * =========================================================
+ * ADMIN WITHDRAWALS
+ * =========================================================
+ */
+
+async function handleAdminWithdrawals(
+  request,
+  env
+) {
+  const admin =
+    await requireAdmin(
+      request,
+      env
+    );
+
+  if (!admin) {
+    return unauthorized();
+  }
+
+  const url =
+    new URL(request.url);
+
+  const status =
+    String(
+      url.searchParams.get(
+        "status"
+      ) || ""
+    )
+      .trim()
+      .toLowerCase();
+
+  let query = `
+    SELECT
+      w.id,
+      w.user_id,
+      w.amount,
+      w.address,
+      w.status,
+      w.admin_id,
+      w.admin_note,
+      w.created_at,
+      w.reviewed_at,
+      u.email AS user_email,
+      u.username
+    FROM withdrawals w
+    INNER JOIN users u
+      ON u.id = w.user_id
+  `;
+
+  const params = [];
+
+  if (
+    status === "pending" ||
+    status === "approved" ||
+    status === "rejected"
+  ) {
+    query += `
+      WHERE w.status = ?1
+    `;
+
+    params.push(status);
+  }
+
+  query += `
+    ORDER BY w.created_at DESC
+    LIMIT 300
+  `;
+
+  const statement =
+    env.DB1.prepare(
+      query
+    );
+
+  const rows =
+    params.length
+      ? await statement
+          .bind(...params)
+          .all()
+      : await statement.all();
+
+  return json({
+    success: true,
+    withdrawals:
+      rows.results || []
+  });
+}
+
+
+/*
+ * =========================================================
+ * ADMIN WITHDRAWAL ACTION
+ * =========================================================
+ */
+
+async function handleAdminWithdrawalAction(
+  request,
+  env
+) {
+  const admin =
+    await requireAdmin(
+      request,
+      env
+    );
+
+  if (!admin) {
+    return unauthorized();
+  }
+
+  try {
+    const body =
+      await request.json();
+
+    const withdrawalId =
+      String(
+        body.withdrawal_id || ""
+      );
+
+    const action =
+      String(
+        body.action || ""
+      )
+        .trim()
+        .toLowerCase();
+
+    const note =
+      String(
+        body.note || ""
+      ).trim();
+
+    if (!withdrawalId) {
+      return json(
+        {
+          success: false,
+          error:
+            "Falta el retiro."
+        },
+        400
+      );
+    }
+
+    if (
+      action !== "approve" &&
+      action !== "reject"
+    ) {
+      return json(
+        {
+          success: false,
+          error:
+            "Acción no válida."
+        },
+        400
+      );
+    }
+
+    const target =
+      await env.DB1
+        .prepare(`
+          SELECT
+            id,
+            user_id,
+            amount,
+            status
+          FROM withdrawals
+          WHERE id = ?1
+          LIMIT 1
+        `)
+        .bind(
+          withdrawalId
+        )
+        .first();
+
+    if (!target) {
+      return json(
+        {
+          success: false,
+          error:
+            "Retiro no encontrado."
+        },
+        404
+      );
+    }
+
+    if (
+      target.status !== "pending"
+    ) {
+      return json(
+        {
+          success: false,
+          error:
+            "Este retiro ya fue procesado."
+        },
+        409
+      );
+    }
+
+    const now =
+      Date.now();
+
+    /*
+     * REJECT
+     */
+
+    if (
+      action === "reject"
+    ) {
+      await env.DB1
+        .prepare(`
+          UPDATE withdrawals
+          SET status = 'rejected',
+              admin_id = ?1,
+              admin_note = ?2,
+              reviewed_at = ?3
+          WHERE id = ?4
+            AND status = 'pending'
+        `)
+        .bind(
+          admin.id,
+          note || null,
+          now,
+          withdrawalId
+        )
+        .run();
+
+      await createNotification(
+        env,
+        target.user_id,
+        "withdrawal_rejected",
+        "Retiro rechazado",
+        note
+          ? `Tu retiro fue rechazado. Motivo: ${note}`
+          : "Tu retiro fue rechazado durante la revisión."
+      );
+
+      return json({
+        success: true,
+        status:
+          "rejected"
+      });
+    }
+
+    /*
+     * APPROVE
+     */
+
+    const user =
+      await env.DB1
+        .prepare(`
+          SELECT
+            id,
+            balance
+          FROM users
+          WHERE id = ?1
+          LIMIT 1
+        `)
+        .bind(
+          target.user_id
+        )
+        .first();
+
+    if (!user) {
+      return json(
+        {
+          success: false,
+          error:
+            "Usuario no encontrado."
+        },
+        404
+      );
+    }
+
+    const balanceBefore =
+      Number(
+        user.balance || 0
+      );
+
+    const amount =
+      Number(
+        target.amount || 0
+      );
+
+    if (
+      amount <= 0
+    ) {
+      return json(
+        {
+          success: false,
+          error:
+            "El monto del retiro no es válido."
+        },
+        400
+      );
+    }
+
+    if (
+      balanceBefore < amount
+    ) {
+      return json(
+        {
+          success: false,
+          error:
+            "El usuario ya no tiene saldo suficiente."
+        },
+        400
+      );
+    }
+
+    const balanceAfter =
+      roundMoney(
+        balanceBefore -
+          amount
+      );
+
+    await env.DB1.batch([
+      env.DB1.prepare(`
+        UPDATE withdrawals
+        SET status = 'approved',
+            admin_id = ?1,
+            admin_note = ?2,
+            reviewed_at = ?3
+        WHERE id = ?4
+          AND status = 'pending'
+      `).bind(
+        admin.id,
+        note || null,
+        now,
+        withdrawalId
+      ),
+
+      env.DB1.prepare(`
+        UPDATE users
+        SET balance = ?1,
+            updated_at = ?2
+        WHERE id = ?3
+      `).bind(
+        balanceAfter,
+        now,
+        target.user_id
+      ),
+
+      env.DB1.prepare(`
+        INSERT INTO transactions (
+          id,
+          user_id,
+          type,
+          amount,
+          balance_before,
+          balance_after,
+          reference_id,
+          description,
+          created_at
+        )
+        VALUES (
+          ?1,
+          ?2,
+          'withdrawal',
+          ?3,
+          ?4,
+          ?5,
+          ?6,
+          ?7,
+          ?8
+        )
+      `).bind(
+        crypto.randomUUID(),
+        target.user_id,
+        -amount,
+        balanceBefore,
+        balanceAfter,
+        withdrawalId,
+        "Retiro aprobado",
+        now
+      )
+    ]);
+
+    await createNotification(
+      env,
+      target.user_id,
+      "withdrawal_approved",
+      "Retiro aprobado",
+      `Tu retiro por ${formatAmount(amount)} USDT fue aprobado.`
+    );
+
+    return json({
+      success: true,
+      status:
+        "approved",
+      amount,
+      balance:
+        balanceAfter
+    });
+  } catch (error) {
+    console.error(
+      "Withdrawal action error:",
+      error
+    );
+
+    return json(
+      {
+        success: false,
+        error:
+          "No se pudo procesar el retiro."
       },
       500
     );
@@ -2964,7 +4163,9 @@ async function requireAdmin(
     return null;
   }
 
-  if (user.role !== "admin") {
+  if (
+    user.role !== "admin"
+  ) {
     return null;
   }
 
@@ -2973,6 +4174,7 @@ async function requireAdmin(
 
   if (
     primaryEmail &&
+    user.email &&
     user.email.toLowerCase() ===
       primaryEmail.toLowerCase()
   ) {
@@ -2992,7 +4194,9 @@ async function requireAdmin(
 
   if (
     !adminAccount ||
-    Number(adminAccount.active) !== 1
+    Number(
+      adminAccount.active
+    ) !== 1
   ) {
     return null;
   }
@@ -3006,7 +4210,9 @@ async function getAuthenticatedUser(
   env
 ) {
   const token =
-    getSessionToken(request);
+    getSessionToken(
+      request
+    );
 
   if (!token) {
     return null;
@@ -3029,7 +4235,8 @@ async function getAuthenticatedUser(
           users.email,
           users.username,
           users.role,
-          users.balance
+          users.balance,
+          users.user_status
         FROM sessions
         INNER JOIN users
           ON users.id = sessions.user_id
@@ -3047,38 +4254,670 @@ async function getAuthenticatedUser(
     return null;
   }
 
-  if (session.role === "user") {
-    try {
-      await ensureUserStatusColumn(env);
-
-      const status =
-        await env.DB1
-          .prepare(`
-            SELECT user_status
-            FROM users
-            WHERE id = ?1
-            LIMIT 1
-          `)
-          .bind(session.user_id)
-          .first();
-
-      if (
-        status &&
-        Number(status.user_status) === 0
-      ) {
-        return null;
-      }
-    } catch {
-      /*
-       * Preserve compatibility if
-       * the existing users table cannot
-       * be altered in the current database.
-       */
-    }
+  if (
+    session.role === "user" &&
+    Number(
+      session.user_status
+    ) === 0
+  ) {
+    return null;
   }
 
   return session;
 }
 
 
-function
+/*
+ * =========================================================
+ * SESSION CREATION
+ * =========================================================
+ */
+
+async function createSession(
+  userId,
+  env
+) {
+  const token =
+    createToken();
+
+  const tokenHash =
+    await hashToken(token);
+
+  const id =
+    crypto.randomUUID();
+
+  const now =
+    Date.now();
+
+  const expiresAt =
+    now + SESSION_DURATION;
+
+  await env.DB1
+    .prepare(`
+      INSERT INTO sessions (
+        id,
+        user_id,
+        token_hash,
+        expires_at,
+        created_at
+      )
+      VALUES (
+        ?1,
+        ?2,
+        ?3,
+        ?4,
+        ?5
+      )
+    `)
+    .bind(
+      id,
+      userId,
+      tokenHash,
+      expiresAt,
+      now
+    )
+    .run();
+
+  return {
+    id,
+    token,
+    expiresAt
+  };
+}
+
+
+/*
+ * =========================================================
+ * SESSION TOKEN
+ * =========================================================
+ */
+
+function getSessionToken(
+  request
+) {
+  const authorization =
+    request.headers.get(
+      "Authorization"
+    );
+
+  if (
+    authorization &&
+    authorization
+      .toLowerCase()
+      .startsWith("bearer ")
+  ) {
+    return authorization
+      .slice(7)
+      .trim();
+  }
+
+  const cookie =
+    request.headers.get(
+      "Cookie"
+    );
+
+  if (cookie) {
+    const match =
+      cookie.match(
+        /(?:^|;\s*)session=([^;]+)/
+      );
+
+    if (match) {
+      return decodeURIComponent(
+        match[1]
+      );
+    }
+  }
+
+  return null;
+}
+
+
+/*
+ * =========================================================
+ * PASSWORD HASH
+ * =========================================================
+ */
+
+async function hashPassword(
+  password
+) {
+  const salt =
+    crypto.getRandomValues(
+      new Uint8Array(16)
+    );
+
+  const key =
+    await crypto.subtle.importKey(
+      "raw",
+      new TextEncoder().encode(
+        password
+      ),
+      {
+        name:
+          "PBKDF2"
+      },
+      false,
+      [
+        "deriveBits"
+      ]
+    );
+
+  const bits =
+    await crypto.subtle.deriveBits(
+      {
+        name:
+          "PBKDF2",
+        salt,
+        iterations:
+          100000,
+        hash:
+          "SHA-256"
+      },
+      key,
+      256
+    );
+
+  return [
+    "pbkdf2",
+    "sha256",
+    "100000",
+    bytesToBase64(salt),
+    bytesToBase64(
+      new Uint8Array(bits)
+    )
+  ].join("$");
+}
+
+
+/*
+ * =========================================================
+ * PASSWORD VERIFY
+ * =========================================================
+ */
+
+async function verifyPassword(
+  password,
+  stored
+) {
+  try {
+    const parts =
+      String(
+        stored || ""
+      ).split("$");
+
+    if (
+      parts.length !== 5 ||
+      parts[0] !== "pbkdf2"
+    ) {
+      return false;
+    }
+
+    const iterations =
+      Number(parts[2]);
+
+    const salt =
+      base64ToBytes(
+        parts[3]
+      );
+
+    const expected =
+      base64ToBytes(
+        parts[4]
+      );
+
+    const key =
+      await crypto.subtle.importKey(
+        "raw",
+        new TextEncoder().encode(
+          password
+        ),
+        {
+          name:
+            "PBKDF2"
+        },
+        false,
+        [
+          "deriveBits"
+        ]
+      );
+
+    const bits =
+      await crypto.subtle.deriveBits(
+        {
+          name:
+            "PBKDF2",
+          salt,
+          iterations,
+          hash:
+            "SHA-256"
+        },
+        key,
+        expected.length * 8
+      );
+
+    return constantTimeEqual(
+      new Uint8Array(bits),
+      expected
+    );
+  } catch {
+    return false;
+  }
+}
+
+
+/*
+ * =========================================================
+ * TOKEN HASH
+ * =========================================================
+ */
+
+async function hashToken(
+  token
+) {
+  const data =
+    new TextEncoder().encode(
+      token
+    );
+
+  const digest =
+    await crypto.subtle.digest(
+      "SHA-256",
+      data
+    );
+
+  return bytesToHex(
+    new Uint8Array(digest)
+  );
+}
+
+
+/*
+ * =========================================================
+ * TOKEN
+ * =========================================================
+ */
+
+function createToken() {
+  const bytes =
+    crypto.getRandomValues(
+      new Uint8Array(32)
+    );
+
+  return bytesToBase64Url(
+    bytes
+  );
+}
+
+
+/*
+ * =========================================================
+ * REFERRAL CODE
+ * =========================================================
+ */
+
+function createReferralCode() {
+  const bytes =
+    crypto.getRandomValues(
+      new Uint8Array(6)
+    );
+
+  return bytesToHex(
+    bytes
+  ).toUpperCase();
+}
+
+
+/*
+ * =========================================================
+ * ADMIN CONFIG
+ * =========================================================
+ */
+
+function getAdminEmail(env) {
+  return String(
+    env.ADMIN_EMAIL ||
+    ""
+  ).trim();
+}
+
+
+function getAdminPassword(env) {
+  return String(
+    env.ADMIN_PASSWORD ||
+    ""
+  );
+}
+
+
+/*
+ * =========================================================
+ * DEFAULT REWARD
+ * =========================================================
+ */
+
+async function getDefaultReward(
+  env
+) {
+  const row =
+    await env.DB1
+      .prepare(`
+        SELECT value
+        FROM app_config
+        WHERE key = 'default_reward'
+        LIMIT 1
+      `)
+      .first();
+
+  const value =
+    Number(
+      row?.value
+    );
+
+  if (
+    !Number.isFinite(
+      value
+    ) ||
+    value < 0
+  ) {
+    return 0.20;
+  }
+
+  return roundMoney(
+    value
+  );
+}
+
+
+/*
+ * =========================================================
+ * NOTIFICATION
+ * =========================================================
+ */
+
+async function createNotification(
+  env,
+  userId,
+  type,
+  title,
+  message
+) {
+  await env.DB1
+    .prepare(`
+      INSERT INTO notifications (
+        id,
+        user_id,
+        type,
+        title,
+        message,
+        read,
+        created_at
+      )
+      VALUES (
+        ?1,
+        ?2,
+        ?3,
+        ?4,
+        ?5,
+        0,
+        ?6
+      )
+    `)
+    .bind(
+      crypto.randomUUID(),
+      userId,
+      type,
+      title,
+      message,
+      Date.now()
+    )
+    .run();
+}
+
+
+/*
+ * =========================================================
+ * ADMIN REQUEST NOTIFICATION
+ * =========================================================
+ */
+
+async function createAdminRequestNotification(
+  env,
+  user,
+  requestId,
+  email,
+  createdAt
+) {
+  const admins =
+    await env.DB1
+      .prepare(`
+        SELECT
+          u.id
+        FROM users u
+        LEFT JOIN admin_accounts a
+          ON a.user_id = u.id
+        WHERE u.role = 'admin'
+          AND (
+            LOWER(u.email) = LOWER(?1)
+            OR COALESCE(
+              a.active,
+              1
+            ) = 1
+          )
+      `)
+      .bind(
+        getAdminEmail(env)
+      )
+      .all();
+
+  const results =
+    admins.results || [];
+
+  for (
+    const admin of results
+  ) {
+    await createNotification(
+      env,
+      admin.id,
+      "admin_request_created",
+      "Nueva solicitud",
+      `El usuario ${user.username} envió una nueva solicitud para ${email}. ID: ${requestId}.`
+    );
+  }
+}
+
+
+/*
+ * =========================================================
+ * VALID EMAIL
+ * =========================================================
+ */
+
+function isValidEmail(
+  email
+) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    .test(email);
+}
+
+
+/*
+ * =========================================================
+ * MONEY
+ * =========================================================
+ */
+
+function roundMoney(
+  value
+) {
+  return Math.round(
+    Number(value) *
+      100
+  ) / 100;
+}
+
+
+function formatAmount(
+  value
+) {
+  return roundMoney(
+    value
+  ).toFixed(2);
+}
+
+
+/*
+ * =========================================================
+ * BYTE HELPERS
+ * =========================================================
+ */
+
+function bytesToBase64(
+  bytes
+) {
+  let binary = "";
+
+  for (
+    const byte of bytes
+  ) {
+    binary += String.fromCharCode(
+      byte
+    );
+  }
+
+  return btoa(binary);
+}
+
+
+function base64ToBytes(
+  value
+) {
+  const binary =
+    atob(value);
+
+  const bytes =
+    new Uint8Array(
+      binary.length
+    );
+
+  for (
+    let i = 0;
+    i < binary.length;
+    i++
+  ) {
+    bytes[i] =
+      binary.charCodeAt(i);
+  }
+
+  return bytes;
+}
+
+
+function bytesToBase64Url(
+  bytes
+) {
+  return bytesToBase64(
+    bytes
+  )
+    .replace(
+      /\+/g,
+      "-"
+    )
+    .replace(
+      /\//g,
+      "_"
+    )
+    .replace(
+      /=+$/,
+      ""
+    );
+}
+
+
+function bytesToHex(
+  bytes
+) {
+  let output = "";
+
+  for (
+    const byte of bytes
+  ) {
+    output +=
+      byte
+        .toString(16)
+        .padStart(2, "0");
+  }
+
+  return output;
+}
+
+
+function constantTimeEqual(
+  a,
+  b
+) {
+  if (
+    a.length !==
+    b.length
+  ) {
+    return false;
+  }
+
+  let result = 0;
+
+  for (
+    let i = 0;
+    i < a.length;
+    i++
+  ) {
+    result |=
+      a[i] ^ b[i];
+  }
+
+  return result === 0;
+}
+
+
+/*
+ * =========================================================
+ * JSON RESPONSE
+ * =========================================================
+ */
+
+function json(
+  data,
+  status = 200
+) {
+  return new Response(
+    JSON.stringify(
+      data
+    ),
+    {
+      status,
+      headers: {
+        "Content-Type":
+          "application/json; charset=utf-8",
+        "Cache-Control":
+          "no-store"
+      }
+    }
+  );
+}
+
+
+/*
+ * =========================================================
+ * UNAUTHORIZED
+ * =========================================================
+ */
+
+function unauthorized() {
+  return json(
+    {
+      success: false,
+      error:
+        "No autorizado."
+    },
+    401
+  );
+                                       }
